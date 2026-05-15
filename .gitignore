@@ -1,0 +1,45 @@
+# Built outputs
+*.iml
+.gradle/
+/local.properties
+/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+app/build/
+
+# Android Studio — machine-specific files (never commit these)
+/.idea/caches/
+/.idea/libraries/
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/.gitignore
+
+# Keep these .idea files (shared project settings)
+!/.idea/AndroidProjectSystem.xml
+!/.idea/compiler.xml
+!/.idea/gradle.xml
+!/.idea/misc.xml
+!/.idea/migrations.xml
+!/.idea/runConfigurations.xml
+
+# Secrets — NEVER commit
+local.properties
+google-services.json
+*.keystore
+keystore.properties
+
+# macOS
+.DS_Store
+
+# Linux
+*~
+
+# Windows
+Thumbs.db
+
+# Kotlin symbol processing
+.kotlin/

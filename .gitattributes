@@ -1,0 +1,17 @@
+# Normalize line endings to LF on commit, checkout as-is on Windows
+* text=auto eol=lf
+
+# Windows batch script must stay CRLF
+*.bat text eol=crlf
+
+# Binary files — no line-ending conversion
+*.jar binary
+*.webp binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.aab binary
+*.apk binary
+*.keystore binary

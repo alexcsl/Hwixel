@@ -1,3 +1,31 @@
 <resources>
     <string name="app_name">HWiXeL</string>
+    <string name="phase_zero_placeholder">Hwixel foundation is ready.</string>
+    <string name="login_title">Welcome back</string>
+    <string name="login_subtitle">Sign in to manage your group projects.</string>
+    <string name="email_label">Email</string>
+    <string name="password_label">Password</string>
+    <string name="login_button">Log in</string>
+    <string name="register_link">Create an account</string>
+    <string name="register_title">Create your account</string>
+    <string name="register_subtitle">Set up your student profile for Hwixel.</string>
+    <string name="name_label">Name</string>
+    <string name="student_id_label">Student ID</string>
+    <string name="confirm_password_label">Confirm password</string>
+    <string name="register_button">Register</string>
+    <string name="login_link">Already have an account? Log in</string>
+    <string name="error_invalid_email">Enter a valid email address.</string>
+    <string name="error_empty_password">Enter your password.</string>
+    <string name="error_weak_password">Password must be at least 8 characters with one uppercase letter and one special character.</string>
+    <string name="error_empty_name">Enter your name.</string>
+    <string name="error_empty_student_id">Enter your student ID.</string>
+    <string name="error_password_mismatch">Passwords do not match.</string>
+    <string name="error_auth_invalid_credentials">Email or password is incorrect.</string>
+    <string name="error_auth_user_not_found">No account exists for this email.</string>
+    <string name="error_auth_email_exists">This email is already registered.</string>
+    <string name="error_auth_network">Network error. Check your connection and try again.</string>
+    <string name="error_auth_default">Authentication failed. Try again.</string>
+    <string name="login_success">Logged in successfully.</string>
+    <string name="register_success">Registration successful.</string>
+    <string name="dashboard_placeholder">Dashboard will be built in Phase 3.</string>
 </resources>

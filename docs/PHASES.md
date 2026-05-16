@@ -37,9 +37,9 @@ This file is the **sequenced execution roadmap**. It does not redefine product o
 
 | # | Phase | Status |
 |---|---|---|
-| 0 | Project Foundation & Tooling | `[ ]` |
-| 1 | Data Layer Foundation | `[ ]` |
-| 2 | Authentication | `[ ]` |
+| 0 | Project Foundation & Tooling | `[x]` |
+| 1 | Data Layer Foundation | `[x]` |
+| 2 | Authentication | `[x]` |
 | 3 | Dashboard & Main Navigation | `[ ]` |
 | 4 | Project Hub & Project Members | `[ ]` |
 | 5 | Task Board, Task Detail, Create/Edit Task | `[ ]` |

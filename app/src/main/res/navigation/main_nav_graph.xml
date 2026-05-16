@@ -30,9 +30,44 @@
     <fragment
         android:id="@+id/projectHubFragment"
         android:name="edu.bluejack252.hwixel.ui.project.hub.ProjectHubFragment"
-        android:label="@string/project_hub_placeholder">
+        android:label="@string/project_hub_title">
         <argument
             android:name="projectId"
             app:argType="string" />
+        <action
+            android:id="@+id/action_projectHubFragment_to_taskDetailFragment"
+            app:destination="@id/taskDetailFragment" />
+        <action
+            android:id="@+id/action_projectHubFragment_to_createEditTaskFragment"
+            app:destination="@id/createEditTaskFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/taskDetailFragment"
+        android:name="edu.bluejack252.hwixel.ui.project.taskdetail.TaskDetailFragment"
+        android:label="@string/task_detail_title">
+        <argument
+            android:name="projectId"
+            app:argType="string" />
+        <argument
+            android:name="taskId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_taskDetailFragment_to_createEditTaskFragment"
+            app:destination="@id/createEditTaskFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createEditTaskFragment"
+        android:name="edu.bluejack252.hwixel.ui.project.taskedit.CreateEditTaskFragment"
+        android:label="@string/create_task_title">
+        <argument
+            android:name="projectId"
+            app:argType="string" />
+        <argument
+            android:name="taskId"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
 </navigation>

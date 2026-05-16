@@ -12,12 +12,15 @@ interface UserRepository {
     fun observeUsers(): LiveData<List<User>>
     fun observeUser(userId: String): LiveData<User?>
     suspend fun upsertUser(user: User): Result<Unit>
+    suspend fun findUserByEmail(email: String): Result<User?>
+    suspend fun writeNotification(userId: String, notifId: String, payload: Map<String, Any>): Result<Unit>
 }
 
 class UserRepositoryImpl(
     private val firebaseSource: UserRemoteSource,
     private val localDao: UserDao
 ) : UserRepository {
+
     override fun observeUsers(): LiveData<List<User>> {
         return localDao.observeAll().map { entities -> entities.map { it.toDomain() } }
     }
@@ -29,5 +32,17 @@ class UserRepositoryImpl(
     override suspend fun upsertUser(user: User): Result<Unit> = runCatching {
         firebaseSource.upsertUser(user)
         localDao.upsert(user.toEntity())
+    }
+
+    override suspend fun findUserByEmail(email: String): Result<User?> = runCatching {
+        firebaseSource.findByEmail(email)
+    }
+
+    override suspend fun writeNotification(
+        userId: String,
+        notifId: String,
+        payload: Map<String, Any>
+    ): Result<Unit> = runCatching {
+        firebaseSource.writeNotification(userId, notifId, payload)
     }
 }

@@ -15,6 +15,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE projectId = :projectId")
     fun observeByProject(projectId: String): LiveData<List<TaskEntity>>
 
+    @Query("SELECT * FROM tasks WHERE id = :taskId LIMIT 1")
+    suspend fun getById(taskId: String): TaskEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(task: TaskEntity)
 

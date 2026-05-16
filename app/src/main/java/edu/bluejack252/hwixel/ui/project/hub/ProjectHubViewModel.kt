@@ -8,9 +8,11 @@ import androidx.lifecycle.viewModelScope
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
 import edu.bluejack252.hwixel.data.model.Task
+import edu.bluejack252.hwixel.data.model.User
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
 import edu.bluejack252.hwixel.data.repository.TaskRepository
 import edu.bluejack252.hwixel.data.repository.UserRepository
+import edu.bluejack252.hwixel.util.constants.Constants
 import kotlinx.coroutines.launch
 
 class ProjectHubViewModel(
@@ -28,6 +30,7 @@ class ProjectHubViewModel(
 
     private var currentProject: Project? = null
     private var tasks: List<Task> = emptyList()
+    private var users: List<User> = emptyList()
 
     init {
         _uiState.value = ProjectHubUiState(isLoading = true)
@@ -37,6 +40,10 @@ class ProjectHubViewModel(
         }
         _uiState.addSource(taskRepository.observeTasks(projectId)) { taskList ->
             tasks = taskList
+            publishState()
+        }
+        _uiState.addSource(userRepository.observeUsers()) { userList ->
+            users = userList
             publishState()
         }
     }
@@ -51,7 +58,7 @@ class ProjectHubViewModel(
             project = currentProject,
             recentActivity = history.map { entry ->
                 ActivityUi(
-                    actorName = entry.actorId,
+                    actorName = users.firstOrNull { it.id == entry.actorId }?.name ?: entry.actorId,
                     action = entry.action,
                     timestamp = entry.timestamp
                 )
@@ -77,8 +84,8 @@ class ProjectHubViewModel(
                 createdBy = creatorId,
                 members = mapOf(creatorId to ProjectMember(
                     userId = creatorId,
-                    role = "Team Lead",
-                    status = "active"
+                    role = Constants.ROLE_TEAM_LEAD,
+                    status = Constants.MEMBER_STATUS_ACTIVE
                 ))
             )
             _createProjectResult.value = projectRepository.createProject(project)

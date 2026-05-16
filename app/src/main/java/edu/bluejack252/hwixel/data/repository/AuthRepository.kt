@@ -38,6 +38,7 @@ class AuthRepositoryImpl(
             name = name,
             studentId = studentId,
             email = email,
+            phone = "",
             avatarUrl = "",
             badges = emptyList()
         )

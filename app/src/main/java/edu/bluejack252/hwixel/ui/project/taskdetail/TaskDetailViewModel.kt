@@ -34,6 +34,8 @@ class TaskDetailViewModel(
             if (task != null) {
                 _uiState.value = TaskDetailUiState(
                     task = task,
+                    attachments = task.attachments,
+                    subtasks = task.subtasks.values.sortedBy { it.id },
                     comments = task.comments.values.sortedBy { it.timestamp },
                     history = task.history.values.sortedByDescending { it.timestamp },
                     isLoading = false
@@ -58,6 +60,12 @@ class TaskDetailViewModel(
         val task = currentTask ?: return
         viewModelScope.launch {
             _deleteResult.value = taskRepository.deleteTask(task)
+        }
+    }
+
+    fun toggleSubtask(subtaskId: String, isDone: Boolean) {
+        viewModelScope.launch {
+            taskRepository.updateSubtask(projectId, taskId, subtaskId, isDone)
         }
     }
 

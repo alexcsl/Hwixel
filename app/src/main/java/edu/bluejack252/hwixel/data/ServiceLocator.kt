@@ -46,7 +46,8 @@ object ServiceLocator {
     fun getTaskRepository(context: Context): TaskRepository {
         return taskRepository ?: TaskRepositoryImpl(
             firebaseSource = TaskFirebaseSource(),
-            localDao = HwixelDatabase.getInstance(context).taskDao()
+            localDao = HwixelDatabase.getInstance(context).taskDao(),
+            projectSource = ProjectFirebaseSource()
         ).also { taskRepository = it }
     }
 }

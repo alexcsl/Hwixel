@@ -3,6 +3,7 @@ package edu.bluejack252.hwixel.data.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import edu.bluejack252.hwixel.data.model.Project
+import edu.bluejack252.hwixel.data.model.ProjectMember
 import edu.bluejack252.hwixel.data.source.local.ProjectDao
 import edu.bluejack252.hwixel.data.source.local.ProjectEntity
 import edu.bluejack252.hwixel.data.source.remote.ProjectRemoteSource
@@ -41,8 +42,10 @@ class ProjectRepositoryTest {
     private class FakeProjectRemoteSource : ProjectRemoteSource {
         var createdProject: Project? = null
         var updatedProject: Project? = null
+        var updatedScore: Float? = null
 
         override fun observeProjects(): LiveData<List<Project>> = MutableLiveData(emptyList())
+        override fun observeProject(projectId: String): LiveData<Project?> = MutableLiveData(null)
 
         override suspend fun createProject(project: Project) {
             createdProject = project
@@ -50,6 +53,13 @@ class ProjectRepositoryTest {
 
         override suspend fun updateProject(project: Project) {
             updatedProject = project
+        }
+
+        override suspend fun updateCompletionPercentage(projectId: String, percentage: Float) = Unit
+        override suspend fun addMember(projectId: String, userId: String, member: ProjectMember) = Unit
+        override suspend fun updateMember(projectId: String, userId: String, member: ProjectMember) = Unit
+        override suspend fun updateMemberScore(projectId: String, userId: String, score: Float) {
+            updatedScore = score
         }
     }
 

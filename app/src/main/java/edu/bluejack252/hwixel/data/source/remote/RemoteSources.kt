@@ -23,6 +23,7 @@ interface ProjectRemoteSource {
     suspend fun updateCompletionPercentage(projectId: String, percentage: Float)
     suspend fun addMember(projectId: String, userId: String, member: ProjectMember)
     suspend fun updateMember(projectId: String, userId: String, member: ProjectMember)
+    suspend fun updateMemberScore(projectId: String, userId: String, score: Float)
 }
 
 interface TaskRemoteSource {

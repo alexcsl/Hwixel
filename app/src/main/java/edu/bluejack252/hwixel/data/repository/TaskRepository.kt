@@ -94,14 +94,7 @@ class TaskRepositoryImpl(
                 it.status == Constants.STATUS_DONE && it.priority == Constants.PRIORITY_HIGH
             }
             val score = ScoreCalculator.calculate(actorCompleted, actorTasks.size, actorHighPri)
-            projectSource.updateMember(
-                projectId,
-                actorId,
-                edu.bluejack252.hwixel.data.model.ProjectMember(
-                    userId = actorId,
-                    contributionScore = score
-                )
-            )
+            projectSource.updateMemberScore(projectId, actorId, score)
         }
     }
 

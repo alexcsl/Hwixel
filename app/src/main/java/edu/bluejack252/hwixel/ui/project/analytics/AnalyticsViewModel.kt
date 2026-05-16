@@ -10,8 +10,8 @@ import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.data.model.User
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
 import edu.bluejack252.hwixel.data.repository.TaskRepository
+import edu.bluejack252.hwixel.data.repository.TeamHealthRepository
 import edu.bluejack252.hwixel.data.repository.UserRepository
-import edu.bluejack252.hwixel.data.source.remote.TeamHealthSource
 import edu.bluejack252.hwixel.util.constants.Constants
 import kotlinx.coroutines.launch
 
@@ -20,7 +20,7 @@ class AnalyticsViewModel(
     private val projectRepository: ProjectRepository,
     private val taskRepository: TaskRepository,
     private val userRepository: UserRepository,
-    private val teamHealthSource: TeamHealthSource
+    private val teamHealthRepository: TeamHealthRepository
 ) : ViewModel() {
 
     private val _uiState = MediatorLiveData<AnalyticsUiState>()
@@ -31,18 +31,25 @@ class AnalyticsViewModel(
     private var users: List<User> = emptyList()
     private var startDate: Long? = null
     private var endDate: Long? = null
+    private var projectLoaded = false
+    private var tasksLoaded = false
+    private var usersLoaded = false
+    private var lastHealthFingerprint: HealthFingerprint? = null
 
     init {
         _uiState.value = AnalyticsUiState(isLoading = true)
         _uiState.addSource(projectRepository.observeProject(projectId)) {
+            projectLoaded = true
             project = it
             publishState(analyzeHealth = true)
         }
         _uiState.addSource(taskRepository.observeTasks(projectId)) {
+            tasksLoaded = true
             tasks = it
             publishState(analyzeHealth = true)
         }
         _uiState.addSource(userRepository.observeUsers()) {
+            usersLoaded = true
             users = it
             publishState(analyzeHealth = true)
         }
@@ -75,9 +82,21 @@ class AnalyticsViewModel(
             }
         )
 
-        if (analyzeHealth && (forceHealthRefresh || current.members != members)) {
+        val fingerprint = members.toHealthFingerprint()
+        if (analyzeHealth && shouldAnalyzeHealth(members, fingerprint, forceHealthRefresh)) {
+            lastHealthFingerprint = fingerprint
             analyzeTeamHealth(members)
         }
+    }
+
+    private fun shouldAnalyzeHealth(
+        members: List<MemberAnalyticsUi>,
+        fingerprint: HealthFingerprint,
+        forceHealthRefresh: Boolean
+    ): Boolean {
+        if (members.isEmpty()) return false
+        if (!projectLoaded || !tasksLoaded || !usersLoaded) return false
+        return forceHealthRefresh || lastHealthFingerprint != fingerprint
     }
 
     private fun buildMemberStats(): List<MemberAnalyticsUi> {
@@ -129,7 +148,7 @@ class AnalyticsViewModel(
         if (members.isEmpty()) return
         _uiState.value = _uiState.value?.copy(teamHealthLoading = true, teamHealthError = null)
         viewModelScope.launch {
-            val result = teamHealthSource.analyze(buildPrompt(members))
+            val result = teamHealthRepository.analyze(buildPrompt(members))
             _uiState.value = _uiState.value?.copy(
                 teamHealth = result.getOrNull() ?: _uiState.value?.teamHealth,
                 teamHealthLoading = false,
@@ -151,14 +170,40 @@ class AnalyticsViewModel(
             $dataLines
         """.trimIndent()
     }
+
+    private fun List<MemberAnalyticsUi>.toHealthFingerprint(): HealthFingerprint {
+        return HealthFingerprint(
+            map { member ->
+                HealthMemberFingerprint(
+                    userId = member.userId,
+                    name = member.name,
+                    assignedCount = member.assignedCount,
+                    completedCount = member.completedCount,
+                    overdueCount = member.overdueCount
+                )
+            }
+        )
+    }
 }
+
+private data class HealthFingerprint(
+    val members: List<HealthMemberFingerprint>
+)
+
+private data class HealthMemberFingerprint(
+    val userId: String,
+    val name: String,
+    val assignedCount: Int,
+    val completedCount: Int,
+    val overdueCount: Int
+)
 
 class AnalyticsViewModelFactory(
     private val projectId: String,
     private val projectRepository: ProjectRepository,
     private val taskRepository: TaskRepository,
     private val userRepository: UserRepository,
-    private val teamHealthSource: TeamHealthSource
+    private val teamHealthRepository: TeamHealthRepository
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -167,7 +212,7 @@ class AnalyticsViewModelFactory(
             projectRepository,
             taskRepository,
             userRepository,
-            teamHealthSource
+            teamHealthRepository
         ) as T
     }
 }

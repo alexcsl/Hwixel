@@ -73,10 +73,10 @@ class TaskBoardFragment : Fragment() {
             columnBinding.columnTitleTextView.text = title
             columnBinding.columnRecyclerView.adapter = adapter
         }
-        bindColumn(LayoutKanbanColumnBinding.bind(binding.columnTodo), getString(R.string.task_column_todo), todoAdapter)
-        bindColumn(LayoutKanbanColumnBinding.bind(binding.columnInProgress), getString(R.string.task_column_in_progress), inProgressAdapter)
-        bindColumn(LayoutKanbanColumnBinding.bind(binding.columnReview), getString(R.string.task_column_review), reviewAdapter)
-        bindColumn(LayoutKanbanColumnBinding.bind(binding.columnDone), getString(R.string.task_column_done), doneAdapter)
+        bindColumn(binding.columnTodo, getString(R.string.task_column_todo), todoAdapter)
+        bindColumn(binding.columnInProgress, getString(R.string.task_column_in_progress), inProgressAdapter)
+        bindColumn(binding.columnReview, getString(R.string.task_column_review), reviewAdapter)
+        bindColumn(binding.columnDone, getString(R.string.task_column_done), doneAdapter)
     }
 
     private fun setupToggle() {

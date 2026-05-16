@@ -2,6 +2,8 @@ package edu.bluejack252.hwixel.data.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import edu.bluejack252.hwixel.data.model.Comment
+import edu.bluejack252.hwixel.data.model.HistoryEntry
 import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.data.source.local.TaskDao
 import edu.bluejack252.hwixel.data.source.local.TaskEntity
@@ -45,6 +47,8 @@ class TaskRepositoryTest {
         override fun observeAllTasks(): LiveData<List<Task>> = MutableLiveData(emptyList())
 
         override fun observeTasks(projectId: String): LiveData<List<Task>> = MutableLiveData(emptyList())
+        override fun observeTask(projectId: String, taskId: String): LiveData<Task?> = MutableLiveData(null)
+        override suspend fun fetchTasksOnce(projectId: String): List<Task> = emptyList()
 
         override suspend fun createTask(task: Task) {
             createdTask = task
@@ -53,6 +57,12 @@ class TaskRepositoryTest {
         override suspend fun updateTask(task: Task) {
             updatedTask = task
         }
+
+        override suspend fun updateTaskStatus(projectId: String, taskId: String, status: String) = Unit
+        override suspend fun addHistoryEntry(projectId: String, taskId: String, entry: HistoryEntry) = Unit
+        override suspend fun addComment(projectId: String, taskId: String, comment: Comment) = Unit
+        override suspend fun updateSubtask(projectId: String, taskId: String, subtaskId: String, isDone: Boolean) = Unit
+        override suspend fun deleteTask(projectId: String, taskId: String) = Unit
     }
 
     private class FakeTaskDao : TaskDao {
@@ -65,6 +75,8 @@ class TaskRepositoryTest {
         override fun observeByProject(projectId: String): LiveData<List<TaskEntity>> {
             return MutableLiveData(emptyList())
         }
+
+        override suspend fun getById(taskId: String): TaskEntity? = null
 
         override suspend fun upsert(task: TaskEntity) {
             upsertedTask = task

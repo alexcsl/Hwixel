@@ -7,4 +7,15 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="analytics_healthy">#FF2E7D32</color>
+    <color name="analytics_mild">#FFF9A825</color>
+    <color name="analytics_severe">#FFC62828</color>
+    <color name="analytics_neutral">#FF607D8B</color>
+    <color name="analytics_selected_stroke">#FF1565C0</color>
+    <color name="analytics_card_stroke">#FFE0E0E0</color>
+    <color name="analytics_chart_a">#FF1565C0</color>
+    <color name="analytics_chart_b">#FF00897B</color>
+    <color name="analytics_chart_c">#FFF57C00</color>
+    <color name="analytics_chart_d">#FF6A1B9A</color>
+    <color name="analytics_chart_e">#FFC2185B</color>
 </resources>

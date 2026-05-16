@@ -27,7 +27,10 @@ abstract class HwixelDatabase : RoomDatabase() {
                     context.applicationContext,
                     HwixelDatabase::class.java,
                     "hwixel.db"
-                ).build().also { instance = it }
+                )
+                    .fallbackToDestructiveMigration(dropAllTables = true)
+                    .build()
+                    .also { instance = it }
             }
         }
     }

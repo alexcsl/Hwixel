@@ -1,0 +1,170 @@
+package edu.bluejack252.hwixel.ui.project.tasks
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import com.google.firebase.auth.FirebaseAuth
+import edu.bluejack252.hwixel.R
+import edu.bluejack252.hwixel.data.ServiceLocator
+import edu.bluejack252.hwixel.data.model.Task
+import edu.bluejack252.hwixel.databinding.FragmentTaskBoardBinding
+import edu.bluejack252.hwixel.databinding.LayoutKanbanColumnBinding
+import edu.bluejack252.hwixel.ui.project.hub.ProjectHubFragmentDirections
+import edu.bluejack252.hwixel.ui.project.hub.ProjectPagerAdapter
+import edu.bluejack252.hwixel.util.constants.Constants
+
+class TaskBoardFragment : Fragment() {
+
+    private var _binding: FragmentTaskBoardBinding? = null
+    private val binding get() = _binding!!
+
+    private val projectId: String by lazy {
+        arguments?.getString(ProjectPagerAdapter.ARG_PROJECT_ID).orEmpty()
+    }
+    private val currentUserId: String by lazy {
+        FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+    }
+
+    private val listAdapter = TaskCardAdapter(
+        onTaskClick = ::navigateToDetail,
+        onStatusChange = ::showStatusDialog
+    )
+
+    private val todoAdapter = TaskCardAdapter(::navigateToDetail, ::showStatusDialog)
+    private val inProgressAdapter = TaskCardAdapter(::navigateToDetail, ::showStatusDialog)
+    private val reviewAdapter = TaskCardAdapter(::navigateToDetail, ::showStatusDialog)
+    private val doneAdapter = TaskCardAdapter(::navigateToDetail, ::showStatusDialog)
+
+    private val viewModel: TaskBoardViewModel by viewModels {
+        TaskBoardViewModelFactory(
+            projectId = projectId,
+            taskRepository = ServiceLocator.getTaskRepository(requireContext())
+        )
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentTaskBoardBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        setupListView()
+        setupKanbanView()
+        setupToggle()
+        setupFab()
+        setupFilter()
+        viewModel.uiState.observe(viewLifecycleOwner, ::render)
+    }
+
+    private fun setupListView() {
+        binding.listRecyclerView.adapter = listAdapter
+    }
+
+    private fun setupKanbanView() {
+        fun bindColumn(columnBinding: LayoutKanbanColumnBinding, title: String, adapter: TaskCardAdapter) {
+            columnBinding.columnTitleTextView.text = title
+            columnBinding.columnRecyclerView.adapter = adapter
+        }
+        bindColumn(LayoutKanbanColumnBinding.bind(binding.columnTodo), getString(R.string.task_column_todo), todoAdapter)
+        bindColumn(LayoutKanbanColumnBinding.bind(binding.columnInProgress), getString(R.string.task_column_in_progress), inProgressAdapter)
+        bindColumn(LayoutKanbanColumnBinding.bind(binding.columnReview), getString(R.string.task_column_review), reviewAdapter)
+        bindColumn(LayoutKanbanColumnBinding.bind(binding.columnDone), getString(R.string.task_column_done), doneAdapter)
+    }
+
+    private fun setupToggle() {
+        binding.btnListView.isChecked = true
+        binding.viewToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            when (checkedId) {
+                binding.btnListView.id -> viewModel.setViewMode(ViewMode.LIST)
+                binding.btnKanbanView.id -> viewModel.setViewMode(ViewMode.KANBAN)
+            }
+        }
+    }
+
+    private fun setupFab() {
+        binding.addTaskFab.setOnClickListener {
+            requireParentFragment().findNavController().navigate(
+                ProjectHubFragmentDirections.actionProjectHubFragmentToCreateEditTaskFragment(
+                    projectId = projectId,
+                    taskId = ""
+                )
+            )
+        }
+    }
+
+    private fun setupFilter() {
+        binding.filterButton.setOnClickListener {
+            val state = viewModel.uiState.value ?: return@setOnClickListener
+            val allMembers = state.tasks
+                .flatMap { it.assignees }
+                .distinct()
+                .associateWith { it }
+
+            val sheet = FilterBottomSheet()
+            sheet.setMembers(allMembers)
+            sheet.setCurrentFilter(state.filter)
+            sheet.onFilterApplied = { filter -> viewModel.setFilter(filter) }
+            sheet.onFilterReset = { viewModel.resetFilter() }
+            sheet.show(childFragmentManager, FilterBottomSheet.TAG)
+        }
+    }
+
+    private fun render(state: TaskBoardUiState) {
+        val isKanban = state.viewMode == ViewMode.KANBAN
+        binding.listRecyclerView.isVisible = !isKanban
+        binding.kanbanScrollView.isVisible = isKanban
+
+        if (isKanban) {
+            todoAdapter.submitList(state.filteredTasks.filter { it.status == Constants.STATUS_TODO })
+            inProgressAdapter.submitList(state.filteredTasks.filter { it.status == Constants.STATUS_IN_PROGRESS })
+            reviewAdapter.submitList(state.filteredTasks.filter { it.status == Constants.STATUS_REVIEW })
+            doneAdapter.submitList(state.filteredTasks.filter { it.status == Constants.STATUS_DONE })
+        } else {
+            listAdapter.submitList(state.filteredTasks)
+        }
+    }
+
+    private fun navigateToDetail(task: Task) {
+        requireParentFragment().findNavController().navigate(
+            ProjectHubFragmentDirections.actionProjectHubFragmentToTaskDetailFragment(
+                projectId = projectId,
+                taskId = task.id
+            )
+        )
+    }
+
+    private fun showStatusDialog(task: Task) {
+        val statuses = arrayOf(
+            getString(R.string.task_column_todo),
+            getString(R.string.task_column_in_progress),
+            getString(R.string.task_column_review),
+            getString(R.string.task_column_done)
+        )
+        val statusValues = arrayOf(
+            Constants.STATUS_TODO,
+            Constants.STATUS_IN_PROGRESS,
+            Constants.STATUS_REVIEW,
+            Constants.STATUS_DONE
+        )
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.task_change_status)
+            .setItems(statuses) { _, which ->
+                viewModel.updateTaskStatus(task.id, statusValues[which], currentUserId)
+            }
+            .show()
+    }
+
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
+    }
+}

@@ -6,7 +6,12 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import edu.bluejack252.hwixel.data.model.Comment
+import edu.bluejack252.hwixel.data.model.HistoryEntry
 import edu.bluejack252.hwixel.data.model.Task
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 open class TaskFirebaseSource(
     database: FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -54,6 +59,42 @@ open class TaskFirebaseSource(
         return liveData
     }
 
+    override fun observeTask(projectId: String, taskId: String): LiveData<Task?> {
+        val liveData = MutableLiveData<Task?>()
+        tasksRef.child(projectId).child(taskId).addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                liveData.value = snapshot.getValue(Task::class.java)?.copy(
+                    id = snapshot.key.orEmpty(),
+                    projectId = projectId
+                )
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                liveData.value = null
+            }
+        })
+        return liveData
+    }
+
+    override suspend fun fetchTasksOnce(projectId: String): List<Task> =
+        suspendCoroutine { continuation ->
+            tasksRef.child(projectId).addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val tasks = snapshot.children.mapNotNull { child ->
+                        child.getValue(Task::class.java)?.copy(
+                            id = child.key.orEmpty(),
+                            projectId = projectId
+                        )
+                    }
+                    continuation.resume(tasks)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    continuation.resumeWithException(error.toException())
+                }
+            })
+        }
+
     override suspend fun createTask(task: Task) {
         val projectTasksRef = tasksRef.child(task.projectId)
         val key = task.id.ifBlank { projectTasksRef.push().key.orEmpty() }
@@ -62,5 +103,35 @@ open class TaskFirebaseSource(
 
     override suspend fun updateTask(task: Task) {
         tasksRef.child(task.projectId).child(task.id).setValue(task).awaitResult()
+    }
+
+    override suspend fun updateTaskStatus(projectId: String, taskId: String, status: String) {
+        tasksRef.child(projectId).child(taskId).child("status").setValue(status).awaitResult()
+    }
+
+    override suspend fun addHistoryEntry(projectId: String, taskId: String, entry: HistoryEntry) {
+        val historyRef = tasksRef.child(projectId).child(taskId).child("history")
+        val key = historyRef.push().key.orEmpty()
+        historyRef.child(key).setValue(entry.copy(id = key)).awaitResult()
+    }
+
+    override suspend fun addComment(projectId: String, taskId: String, comment: Comment) {
+        val commentsRef = tasksRef.child(projectId).child(taskId).child("comments")
+        val key = commentsRef.push().key.orEmpty()
+        commentsRef.child(key).setValue(comment.copy(id = key)).awaitResult()
+    }
+
+    override suspend fun updateSubtask(
+        projectId: String,
+        taskId: String,
+        subtaskId: String,
+        isDone: Boolean
+    ) {
+        tasksRef.child(projectId).child(taskId).child("subtasks")
+            .child(subtaskId).child("isDone").setValue(isDone).awaitResult()
+    }
+
+    override suspend fun deleteTask(projectId: String, taskId: String) {
+        tasksRef.child(projectId).child(taskId).removeValue().awaitResult()
     }
 }

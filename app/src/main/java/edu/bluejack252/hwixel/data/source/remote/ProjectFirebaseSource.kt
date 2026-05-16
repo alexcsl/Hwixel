@@ -44,9 +44,12 @@ open class ProjectFirebaseSource(
         return liveData
     }
 
-    override suspend fun createProject(project: Project) {
+    override suspend fun createProject(project: Project): Project {
         val key = project.id.ifBlank { projectsRef.push().key.orEmpty() }
-        projectsRef.child(key).setValue(project.copy(id = key)).awaitResult()
+        require(key.isNotBlank()) { "Failed to allocate project id." }
+        val projectWithId = project.copy(id = key)
+        projectsRef.child(key).setValue(projectWithId).awaitResult()
+        return projectWithId
     }
 
     override suspend fun updateProject(project: Project) {

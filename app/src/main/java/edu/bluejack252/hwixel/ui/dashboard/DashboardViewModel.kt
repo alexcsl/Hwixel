@@ -136,6 +136,10 @@ class DashboardViewModel(
         creatorId: String
     ) {
         if (name.isBlank()) return
+        if (creatorId.isBlank()) {
+            _createProjectResult.value = Result.failure(IllegalStateException("You must be logged in to create a project."))
+            return
+        }
         viewModelScope.launch {
             val project = Project(
                 name = name,

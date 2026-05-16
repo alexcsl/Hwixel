@@ -1,0 +1,40 @@
+{
+  "rules": {
+    "users": {
+      "$userId": {
+        ".read": "$userId === auth.uid",
+        ".write": "$userId === auth.uid"
+      }
+    },
+    "projects": {
+      "$projectId": {
+        ".read": "auth != null && data.child('members').child(auth.uid).exists()",
+        ".write": "auth != null && (data.child('members').child(auth.uid).exists() || (!data.exists() && newData.child('members').child(auth.uid).exists()))"
+      }
+    },
+    "tasks": {
+      "$projectId": {
+        ".read": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()",
+        ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()"
+      }
+    },
+    "attendance": {
+      "$projectId": {
+        ".read": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()",
+        ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).child('role').val() === 'Team Lead'"
+      }
+    },
+    "evaluations": {
+      "$projectId": {
+        ".read": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()",
+        ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()"
+      }
+    },
+    "notifications": {
+      "$userId": {
+        ".read": "$userId === auth.uid",
+        ".write": "$userId === auth.uid"
+      }
+    }
+  }
+}

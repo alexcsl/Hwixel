@@ -34,8 +34,8 @@ class ProjectRepositoryImpl(
     }
 
     override suspend fun createProject(project: Project): Result<Unit> = runCatching {
-        firebaseSource.createProject(project)
-        localDao.upsert(project.toEntity())
+        val createdProject = firebaseSource.createProject(project)
+        localDao.upsert(createdProject.toEntity())
     }
 
     override suspend fun updateProject(project: Project): Result<Unit> = runCatching {

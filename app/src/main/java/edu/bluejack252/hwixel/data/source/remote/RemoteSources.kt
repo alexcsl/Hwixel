@@ -18,7 +18,7 @@ interface AuthRemoteSource {
 interface ProjectRemoteSource {
     fun observeProjects(): LiveData<List<Project>>
     fun observeProject(projectId: String): LiveData<Project?>
-    suspend fun createProject(project: Project)
+    suspend fun createProject(project: Project): Project
     suspend fun updateProject(project: Project)
     suspend fun updateCompletionPercentage(projectId: String, percentage: Float)
     suspend fun addMember(projectId: String, userId: String, member: ProjectMember)

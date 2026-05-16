@@ -13,8 +13,8 @@ import edu.bluejack252.hwixel.data.model.TeamHealthResult
 import edu.bluejack252.hwixel.data.model.User
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
 import edu.bluejack252.hwixel.data.repository.TaskRepository
+import edu.bluejack252.hwixel.data.repository.TeamHealthRepository
 import edu.bluejack252.hwixel.data.repository.UserRepository
-import edu.bluejack252.hwixel.data.source.remote.TeamHealthSource
 import edu.bluejack252.hwixel.util.constants.Constants
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -30,7 +30,7 @@ class AnalyticsViewModelTest {
     private val projectLiveData = MutableLiveData<Project?>()
     private val tasksLiveData = MutableLiveData<List<Task>>()
     private val usersLiveData = MutableLiveData<List<User>>()
-    private val healthSource = FakeTeamHealthSource()
+    private val healthRepository = FakeTeamHealthRepository()
     private lateinit var viewModel: AnalyticsViewModel
 
     @Before
@@ -40,14 +40,14 @@ class AnalyticsViewModelTest {
             projectRepository = FakeProjectRepository(projectLiveData),
             taskRepository = FakeTaskRepository(tasksLiveData),
             userRepository = FakeUserRepository(usersLiveData),
-            teamHealthSource = healthSource
+            teamHealthRepository = healthRepository
         )
         viewModel.uiState.observeForever { }
     }
 
     @Test
     fun buildsMemberStatsAndSuccessHealthState() {
-        healthSource.result = Result.success(
+        healthRepository.result = Result.success(
             TeamHealthResult("Healthy", "Balanced work.", listOf("Keep rotating tasks"))
         )
         projectLiveData.value = Project(
@@ -70,7 +70,7 @@ class AnalyticsViewModelTest {
         assertEquals(2, state.members.first { it.userId == "u1" }.assignedCount)
         assertEquals(1, state.members.first { it.userId == "u1" }.completedCount)
         assertEquals("Healthy", state.teamHealth?.status)
-        assertTrue(healthSource.lastPrompt.contains("- Alice: assigned=2, completed=1, overdue=0"))
+        assertTrue(healthRepository.lastPrompt.contains("- Alice: assigned=2, completed=1, overdue=0"))
     }
 
     @Test
@@ -106,7 +106,7 @@ class AnalyticsViewModelTest {
 
     @Test
     fun healthFailureShowsNonCrashingErrorState() {
-        healthSource.result = Result.failure(IllegalStateException("network down"))
+        healthRepository.result = Result.failure(IllegalStateException("network down"))
         projectLiveData.value = Project(
             id = "p1",
             members = mapOf("u1" to ProjectMember(userId = "u1"))
@@ -120,13 +120,39 @@ class AnalyticsViewModelTest {
         assertEquals("network down", state.teamHealthError)
     }
 
-    private class FakeTeamHealthSource : TeamHealthSource {
+    @Test
+    fun unchangedAnalyticsFingerprintDoesNotRefireHealthCall() {
+        projectLiveData.value = Project(
+            id = "p1",
+            members = mapOf("u1" to ProjectMember(userId = "u1"))
+        )
+        usersLiveData.value = listOf(User(id = "u1", name = "Alice"))
+        tasksLiveData.value = listOf(
+            Task(id = "t1", assignees = listOf("u1"), status = Constants.STATUS_TODO)
+        )
+        val firstCallCount = healthRepository.callCount
+
+        tasksLiveData.value = listOf(
+            Task(
+                id = "t1",
+                assignees = listOf("u1"),
+                status = Constants.STATUS_TODO,
+                comments = mapOf("c1" to Comment(id = "c1", content = "No stat change"))
+            )
+        )
+
+        assertEquals(firstCallCount, healthRepository.callCount)
+    }
+
+    private class FakeTeamHealthRepository : TeamHealthRepository {
         var result: Result<TeamHealthResult> = Result.success(
             TeamHealthResult("Healthy", "OK", emptyList())
         )
         var lastPrompt: String = ""
+        var callCount: Int = 0
 
         override suspend fun analyze(prompt: String): Result<TeamHealthResult> {
+            callCount++
             lastPrompt = prompt
             return result
         }

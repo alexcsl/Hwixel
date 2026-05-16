@@ -39,7 +39,7 @@ class AnalyticsFragment : Fragment() {
             projectRepository = ServiceLocator.getProjectRepository(requireContext()),
             taskRepository = ServiceLocator.getTaskRepository(requireContext()),
             userRepository = ServiceLocator.getUserRepository(requireContext()),
-            teamHealthSource = ServiceLocator.getTeamHealthSource()
+            teamHealthRepository = ServiceLocator.getTeamHealthRepository()
         )
     }
 

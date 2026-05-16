@@ -2,11 +2,14 @@ package edu.bluejack252.hwixel.data.source.remote
 
 import edu.bluejack252.hwixel.BuildConfig
 import edu.bluejack252.hwixel.data.model.TeamHealthResult
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 
@@ -23,25 +26,27 @@ class GptApiSource(
 
     override suspend fun analyze(prompt: String): Result<TeamHealthResult> = runCatching {
         require(apiKey.isNotBlank()) { "GPT API key is missing." }
-        val body = JSONObject()
-            .put("model", model)
-            .put("input", prompt)
-            .put("max_output_tokens", 300)
-            .toString()
-            .toRequestBody(JSON)
+        withContext(Dispatchers.IO) {
+            val body = JSONObject()
+                .put("model", model)
+                .put("input", prompt)
+                .put("max_output_tokens", 300)
+                .toString()
+                .toRequestBody(JSON)
 
-        val request = Request.Builder()
-            .url("${baseUrl.trimEnd('/')}/responses")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .addHeader("Content-Type", "application/json")
-            .post(body)
-            .build()
+            val request = Request.Builder()
+                .url("${baseUrl.trimEnd('/')}/responses")
+                .addHeader("Authorization", "Bearer $apiKey")
+                .addHeader("Content-Type", "application/json")
+                .post(body)
+                .build()
 
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) {
-                throw IOException("GPT request failed with HTTP ${response.code}.")
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    throw IOException("GPT request failed with HTTP ${response.code}.")
+                }
+                parseResponse(response.body?.string().orEmpty())
             }
-            parseResponse(response.body?.string().orEmpty())
         }
     }
 
@@ -64,9 +69,12 @@ class GptApiSource(
                 summary = parsed.getString("summary"),
                 recommendations = recommendations
             )
+        } catch (exception: JSONException) {
+            throw exception
         } catch (exception: RuntimeException) {
             // Local JVM tests use Android's stubbed org.json classes; keep production
             // parsing above and use a narrow fallback only when those stubs throw.
+            if (!exception.isAndroidJsonStub()) throw exception
             parseResponseFallback(body)
         }
     }
@@ -103,6 +111,12 @@ class GptApiSource(
         return replace("\\\"", "\"")
             .replace("\\\\", "\\")
             .replace("\\n", "\n")
+    }
+
+    private fun RuntimeException.isAndroidJsonStub(): Boolean {
+        val message = message.orEmpty()
+        return message.contains("not mocked", ignoreCase = true) ||
+            message.contains("Stub!", ignoreCase = true)
     }
 
     private companion object {

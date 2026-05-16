@@ -42,9 +42,9 @@ class ProjectRepositoryTest {
     private class FakeProjectRemoteSource : ProjectRemoteSource {
         var createdProject: Project? = null
         var updatedProject: Project? = null
+        var updatedScore: Float? = null
 
         override fun observeProjects(): LiveData<List<Project>> = MutableLiveData(emptyList())
-
         override fun observeProject(projectId: String): LiveData<Project?> = MutableLiveData(null)
 
         override suspend fun createProject(project: Project) {
@@ -61,7 +61,9 @@ class ProjectRepositoryTest {
 
         override suspend fun updateMember(projectId: String, userId: String, member: ProjectMember) = Unit
 
-        override suspend fun updateMemberScore(projectId: String, userId: String, score: Float) = Unit
+        override suspend fun updateMemberScore(projectId: String, userId: String, score: Float) {
+            updatedScore = score
+        }
     }
 
     private class FakeProjectDao : ProjectDao {

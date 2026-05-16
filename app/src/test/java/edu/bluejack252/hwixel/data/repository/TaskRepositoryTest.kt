@@ -2,9 +2,9 @@ package edu.bluejack252.hwixel.data.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.model.HistoryEntry
+import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.data.source.local.TaskDao
 import edu.bluejack252.hwixel.data.source.local.TaskEntity
 import edu.bluejack252.hwixel.data.source.remote.TaskRemoteSource

@@ -30,6 +30,12 @@ data class ProjectMember(
     val contributionScore: Float = 0f
 )
 
+data class TeamHealthResult(
+    val status: String = "",
+    val summary: String = "",
+    val recommendations: List<String> = emptyList()
+)
+
 data class Task(
     val id: String = "",
     val projectId: String = "",

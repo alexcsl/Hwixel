@@ -11,8 +11,10 @@ import edu.bluejack252.hwixel.data.repository.UserRepository
 import edu.bluejack252.hwixel.data.repository.UserRepositoryImpl
 import edu.bluejack252.hwixel.data.source.local.HwixelDatabase
 import edu.bluejack252.hwixel.data.source.remote.AuthFirebaseSource
+import edu.bluejack252.hwixel.data.source.remote.GptApiSource
 import edu.bluejack252.hwixel.data.source.remote.ProjectFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.TaskFirebaseSource
+import edu.bluejack252.hwixel.data.source.remote.TeamHealthSource
 import edu.bluejack252.hwixel.data.source.remote.UserFirebaseSource
 
 object ServiceLocator {
@@ -20,6 +22,7 @@ object ServiceLocator {
     private var userRepository: UserRepository? = null
     private var projectRepository: ProjectRepository? = null
     private var taskRepository: TaskRepository? = null
+    private var teamHealthSource: TeamHealthSource? = null
 
     fun getAuthRepository(context: Context): AuthRepository {
         return authRepository ?: AuthRepositoryImpl(
@@ -49,5 +52,9 @@ object ServiceLocator {
             localDao = HwixelDatabase.getInstance(context).taskDao(),
             projectSource = ProjectFirebaseSource()
         ).also { taskRepository = it }
+    }
+
+    fun getTeamHealthSource(): TeamHealthSource {
+        return teamHealthSource ?: GptApiSource().also { teamHealthSource = it }
     }
 }

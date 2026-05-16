@@ -53,7 +53,6 @@ class AuthRepositoryTest {
         var upsertedUser: User? = null
 
         override fun observeUsers(): LiveData<List<User>> = MutableLiveData(emptyList())
-
         override fun observeUser(userId: String): LiveData<User?> = MutableLiveData(null)
 
         override suspend fun upsertUser(user: User) {

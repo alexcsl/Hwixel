@@ -143,7 +143,7 @@ All 14 screens are grouped below. Each screen lists its features, the weight of 
 |---|---|---|
 | Pie chart work distribution per member | 1.00 | MPAndroidChart `PieChart`. Each slice = one member. Value = number of completed tasks. Tapping a slice highlights member details below the chart. |
 | Tasks assigned vs. completed breakdown | 1.00 | Grouped bar chart or a list of cards per member, each showing assigned count vs. completed count. |
-| AI-driven Team Health status | 1.25 | Calls Groq API (free tier, `llama-3.3-70b-versatile` model) via OkHttp with current member stats. Returns status badge (Healthy / Mild Imbalance / Severe Imbalance), a one-sentence summary, and up to 3 action recommendations. Displayed as a color-coded card. |
+| AI-driven Team Health status | 1.25 | Calls Jatevo GPT-5.5 API (model `gpt-5.5`, OpenAI Responses API at `https://lb.jatevo.ai/v1/responses`) via OkHttp with current member stats. Returns status badge (Healthy / Mild Imbalance / Severe Imbalance), a one-sentence summary, and up to 3 action recommendations. Displayed as a color-coded card. |
 | Per-member contribution score display | 0.50 | Read `contributionScore` from `projects/{projectId}/members/{userId}`. Shown as a numbered list with color-coded badges. |
 | Date range filter for analytics | 0.25 | Start and end date pickers that filter which completed tasks are counted in the calculations. |
 
@@ -153,7 +153,7 @@ contributionScore = (completedTasks / totalAssignedTasks) x 100 x weightFactor
 weightFactor = 1 + (highPriorityCompleted x 0.2)
 ```
 
-**AI Prompt sent to Groq:**
+**AI Prompt sent to GPT-5.5 (as the `input` field of the Responses API request):**
 ```
 Analyze this student group project workload and return ONLY a JSON object with:
 status (Healthy, Mild Imbalance, or Severe Imbalance),
@@ -165,7 +165,7 @@ Data:
 ...
 ```
 
-**Dependencies:** Task Board (task data), Project Members (member list), Groq API  
+**Dependencies:** Task Board (task data), Project Members (member list), Jatevo GPT-5.5 API  
 **Connects to:** Project Hub (via tab), Project Members (member tap)
 
 ---

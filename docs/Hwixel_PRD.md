@@ -69,8 +69,8 @@ Group project management in academic settings is fragmented. Students use separa
 | UI | XML Layouts + Material Design 3 |
 | Charts | MPAndroidChart (pie and bar charts) |
 | Image Loading | Glide |
-| AI Feature | Groq API — free tier, open-source models (Llama 3.3, Gemma 2) |
-| HTTP Client | OkHttp (for Groq API call) |
+| AI Feature | Jatevo GPT-5.5 (OpenAI Responses API at `https://lb.jatevo.ai/v1`, model `gpt-5.5`) |
+| HTTP Client | OkHttp (for GPT-5.5 API call) |
 | Push Notifications | Firebase Cloud Messaging (FCM) |
 | Scheduled Notifications | WorkManager |
 | Localization | Android `strings.xml` with locale support (EN + ID) |
@@ -158,7 +158,7 @@ Group project management in academic settings is fragmented. Students use separa
 
 - Display a pie chart showing work distribution per member.
 - Show a breakdown of tasks assigned versus tasks completed per member.
-- Display an AI-driven "Team Health" status using the Groq API (free tier, Llama 3.3 model). Sends member task stats and receives a health verdict (Healthy / Mild Imbalance / Severe Imbalance), a summary sentence, and up to 3 recommendations.
+- Display an AI-driven "Team Health" status using the Jatevo GPT-5.5 API (model `gpt-5.5`, OpenAI Responses API). Sends member task stats and receives a health verdict (Healthy / Mild Imbalance / Severe Imbalance), a summary sentence, and up to 3 recommendations.
 - Display the per-member contribution score.
 - Provide a date range filter to narrow the analytics view.
 

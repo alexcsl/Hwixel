@@ -29,8 +29,18 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField(
             "String",
-            "GROQ_API_KEY",
-            "\"${localProperties.getProperty("groq.api.key", "")}\""
+            "GPT_API_KEY",
+            "\"${localProperties.getProperty("gpt.api.key", "")}\""
+        )
+        buildConfigField(
+            "String",
+            "GPT_BASE_URL",
+            "\"https://lb.jatevo.ai/v1\""
+        )
+        buildConfigField(
+            "String",
+            "GPT_MODEL",
+            "\"gpt-5.5\""
         )
     }
 

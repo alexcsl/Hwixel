@@ -16,10 +16,12 @@ Keep local secrets in:
 local.properties
 ```
 
-Expected Groq key entry:
+Expected AI key entry (Jatevo GPT-5.5):
 
 ```properties
-groq.api.key=your_groq_api_key
+gpt.api.key=your_jatevo_api_key
 ```
+
+The base URL (`https://lb.jatevo.ai/v1`) and model (`gpt-5.5`) are baked into `BuildConfig` from `app/build.gradle.kts`.
 
 Do not commit `local.properties`, `google-services.json`, keystores, or `keystore.properties`.

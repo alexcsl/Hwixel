@@ -43,7 +43,7 @@ This file is the **sequenced execution roadmap**. It does not redefine product o
 | 3 | Dashboard & Main Navigation | `[x]` |
 | 4 | Project Hub & Project Members | `[ ]` |
 | 5 | Task Board, Task Detail, Create/Edit Task | `[ ]` |
-| 6 | Contribution Analytics + Groq AI | `[ ]` |
+| 6 | Contribution Analytics + GPT-5.5 AI | `[ ]` |
 | 7 | Attendance | `[ ]` |
 | 8 | Peer Evaluation | `[ ]` |
 | 9 | File Repository | `[ ]` |
@@ -106,7 +106,7 @@ Phases 5–9 may be parallelized across agents once Phase 4 lands. Phase 10 depe
 
 **Tasks:**
 - Configure `app/build.gradle.kts`: `compileSdk = 35`, `minSdk = 35`, `targetSdk = 35`, Kotlin, View Binding, Safe Args plugin, KSP for Room.
-- Read `groq.api.key` from `local.properties` and expose as `BuildConfig.GROQ_API_KEY` (Tech §10.1).
+- Read `gpt.api.key` from `local.properties` and expose as `BuildConfig.GPT_API_KEY`. Also expose `BuildConfig.GPT_BASE_URL = "https://lb.jatevo.ai/v1"` and `BuildConfig.GPT_MODEL = "gpt-5.5"` (Tech §10.1).
 - Add dependencies (Tech §3): Firebase BoM + Auth + RTDB + Messaging, Room (`runtime`, `ktx`, `compiler` via ksp), Coroutines (`core`, `android`), Lifecycle (`viewmodel-ktx`, `livedata-ktx`), Navigation (`fragment-ktx`, `ui-ktx`), Material 3, MPAndroidChart, Glide, OkHttp, WorkManager, Browser (Chrome Custom Tabs). Test deps: JUnit4, Mockito-Kotlin, `kotlinx-coroutines-test`, AndroidX Test, Espresso.
 - `AndroidManifest.xml`: package `edu.bluejack252.hwixel`, `INTERNET` and `POST_NOTIFICATIONS` permissions only. Single `MainActivity`. Do **not** add `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`, `SEND_SMS`, `RECEIVE_SMS`, or `BILLING` (PRD §5, Tech §15).
 - Document `google-services.json` placement in README; ensure `.gitignore` excludes `local.properties`, `google-services.json`, `*.keystore`.
@@ -114,7 +114,7 @@ Phases 5–9 may be parallelized across agents once Phase 4 lands. Phase 10 depe
 
 **Spec refs:** PRD §5, §6 · Tech §2, §3, §15.
 
-**Acceptance:** `./gradlew assembleDebug` succeeds. App launches an empty `MainActivity` on Android 15 emulator. `BuildConfig.GROQ_API_KEY` resolves.
+**Acceptance:** `./gradlew assembleDebug` succeeds. App launches an empty `MainActivity` on Android 15 emulator. `BuildConfig.GPT_API_KEY`, `BuildConfig.GPT_BASE_URL`, and `BuildConfig.GPT_MODEL` resolve.
 
 **Tests:** N/A (no logic yet).
 
@@ -256,7 +256,7 @@ Phases 5–9 may be parallelized across agents once Phase 4 lands. Phase 10 depe
 
 ---
 
-### Phase 6 — Contribution Analytics + Groq AI
+### Phase 6 — Contribution Analytics + GPT-5.5 AI
 
 **Team:** HW · **Screen:** Contribution Analytics · **Page Weight:** 4.0 (highest)
 
@@ -266,7 +266,7 @@ Phases 5–9 may be parallelized across agents once Phase 4 lands. Phase 10 depe
   - Grouped bar chart (or per-member cards) of `assigned` vs. `completed`.
   - Per-member contribution score list (color-coded badges).
   - Date range filter (start + end pickers) that re-filters the underlying task set.
-- `data/source/remote/GroqApiSource` (OkHttp): `POST https://api.groq.com/openai/v1/chat/completions`, model `llama-3.3-70b-versatile`, Bearer `BuildConfig.GROQ_API_KEY`. Use the exact prompt template from Feature §5.1. Parse `choices[0].message.content` with `org.json.JSONObject`.
+- `data/source/remote/GptApiSource` (OkHttp): `POST ${BuildConfig.GPT_BASE_URL}/responses` (resolves to `https://lb.jatevo.ai/v1/responses`), model `BuildConfig.GPT_MODEL` (`gpt-5.5`), Bearer `BuildConfig.GPT_API_KEY`. Use the OpenAI **Responses API** request shape: `{ "model": "...", "input": "<prompt>", "max_output_tokens": 300 }`. Use the exact prompt template from Feature §5.1. Parse the response body with `org.json.JSONObject` — extract assistant text at `output[0].content[0].text`.
 - `data/model/TeamHealthResult(status, summary, recommendations)` where `status ∈ {Healthy, Mild Imbalance, Severe Imbalance}`.
 - Render Team Health as a color-coded card (green/yellow/red).
 - `util/ScoreCalculator`:
@@ -277,9 +277,9 @@ Phases 5–9 may be parallelized across agents once Phase 4 lands. Phase 10 depe
 
 **Spec refs:** PRD §7.7 · Feature §5.1 · Tech §10.
 
-**Acceptance:** Charts render with correct data; Groq call returns parsed result; network failure shows a non-crashing error state.
+**Acceptance:** Charts render with correct data; GPT-5.5 call returns parsed result; network failure shows a non-crashing error state.
 
-**Tests:** `ScoreCalculatorTest` for several distributions; `GroqApiSourceTest` parses canned JSON (success + malformed); `AnalyticsViewModelTest` for loading/error/success states.
+**Tests:** `ScoreCalculatorTest` for several distributions; `GptApiSourceTest` parses canned JSON (success + malformed); `AnalyticsViewModelTest` for loading/error/success states.
 
 ---
 
@@ -412,7 +412,7 @@ Phases 5–9 may be parallelized across agents once Phase 4 lands. Phase 10 depe
 - Confirm every `ViewModel` and every `Repository` has at least one unit test (Tech §13 patterns).
 - Add Espresso instrumented tests for: (a) login flow, (b) create task flow.
 - Architectural pass: no business logic in any `Fragment` / `Activity`; no `Context` references in `ViewModel`s; only `Repository` classes import `FirebaseDatabase` or Room DAOs.
-- Run a secret scan on the repo — confirm `local.properties`, `google-services.json`, keystores, and `BuildConfig.GROQ_API_KEY` never appear in git history.
+- Run a secret scan on the repo — confirm `local.properties`, `google-services.json`, keystores, and `BuildConfig.GPT_API_KEY` never appear in git history.
 
 **Spec refs:** PRD §8 · Tech §13, §14.
 
@@ -495,7 +495,7 @@ No direct commits to `main` or `develop`. PRs only. Feature branches deleted aft
 | **RTDB** | Firebase Realtime Database. The source of truth for all remote data (Tech §5.2). |
 | **Room** | Local SQLite cache, read-immediately, sync-from-RTDB-after (Tech §6). |
 | **ServiceLocator** | Manual DI singleton — replaces Hilt (Tech §4). |
-| **Groq** | Free AI inference provider running `llama-3.3-70b-versatile` for Team Health (Tech §10). |
+| **GPT-5.5 (Jatevo)** | AI inference provider (`https://lb.jatevo.ai/v1`) running model `gpt-5.5` via the OpenAI Responses API. Used for Team Health (Tech §10). |
 | **Team Lead** | Per-project role with write permissions to attendance, member roles, and active/inactive status (Tech §5.3). |
 
 ### Screen → Fragment → Phase

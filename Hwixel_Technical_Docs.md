@@ -100,8 +100,8 @@ edu.bluejack252.hwixel/
 | Material Design 3 | UI components and theming |
 | MPAndroidChart | Pie and bar charts on the Analytics page |
 | Glide | Image loading for user avatars |
-| OkHttp | HTTP client for the Groq AI API call |
-| Groq API | Free AI inference running open-source models (Llama 3.3, Gemma 2) |
+| OkHttp | HTTP client for the GPT-5.5 AI API call |
+| Jatevo GPT-5.5 API | AI inference at `https://lb.jatevo.ai/v1` (OpenAI Responses API shape, model `gpt-5.5`) |
 | WorkManager | Scheduled local deadline reminder notifications |
 | FCM | Firebase Cloud Messaging for push notifications |
 | JUnit4 | Unit test runner |
@@ -404,31 +404,33 @@ Single `MainActivity` hosts a `NavHostFragment`. Two nav graphs: `auth_nav_graph
 
 ---
 
-## 10. AI Integration — Team Health (Groq API)
+## 10. AI Integration — Team Health (Jatevo GPT-5.5)
 
-The Team Health feature on the Contribution Analytics page uses the **Groq API**. It is free (no billing required for the free tier) and runs open-source models including Llama 3.3 and Gemma 2.
+The Team Health feature on the Contribution Analytics page uses the **Jatevo GPT-5.5 API**, which exposes the OpenAI **Responses API** shape at `https://lb.jatevo.ai/v1`. The provider is paid; the API key is provisioned per developer and stored in `local.properties`.
 
-**Model:** `llama-3.3-70b-versatile`  
-**Endpoint:** `POST https://api.groq.com/openai/v1/chat/completions`  
-**Format:** OpenAI-compatible JSON  
+**Model:** `gpt-5.5`  
+**Endpoint:** `POST https://lb.jatevo.ai/v1/responses`  
+**Format:** OpenAI **Responses API** JSON (note: this is *not* the older Chat Completions shape — the request uses an `input` field and `max_output_tokens`, and the response surfaces text under `output[*].content[*].text`).  
 **Library:** OkHttp (already in the project)
 
 ### 10.1 API Key Storage
 
 ```
 # local.properties (never committed to git)
-groq.api.key=gsk_xxxxxxxxxxxxxxxxxxxx
+gpt.api.key=sk-clb-xxxxxxxxxxxxxxxxxxxx
 ```
 
-```groovy
-// build.gradle (app module)
-buildConfigField("String", "GROQ_API_KEY", "\"${localProperties['groq.api.key']}\"")
+```kotlin
+// app/build.gradle.kts (app module)
+buildConfigField("String", "GPT_API_KEY",  "\"${localProperties.getProperty("gpt.api.key", "")}\"")
+buildConfigField("String", "GPT_BASE_URL", "\"https://lb.jatevo.ai/v1\"")
+buildConfigField("String", "GPT_MODEL",    "\"gpt-5.5\"")
 ```
 
 ### 10.2 HTTP Call
 
 ```kotlin
-class GroqApiSource {
+class GptApiSource {
 
     private val client = OkHttpClient()
 
@@ -440,18 +442,15 @@ class GroqApiSource {
             "status (Healthy, Mild Imbalance, or Severe Imbalance), summary (one sentence), " +
             "recommendations (array of up to 3 short strings). Data:\n$stats"
 
-        val body = """
-            {
-              "model": "llama-3.3-70b-versatile",
-              "messages": [{ "role": "user", "content": "${prompt.replace("\"", "\\\"")}" }],
-              "max_tokens": 300,
-              "temperature": 0.3
-            }
-        """.trimIndent()
+        val body = JSONObject().apply {
+            put("model", BuildConfig.GPT_MODEL)
+            put("input", prompt)
+            put("max_output_tokens", 300)
+        }.toString()
 
         val request = Request.Builder()
-            .url("https://api.groq.com/openai/v1/chat/completions")
-            .addHeader("Authorization", "Bearer ${BuildConfig.GROQ_API_KEY}")
+            .url("${BuildConfig.GPT_BASE_URL}/responses")
+            .addHeader("Authorization", "Bearer ${BuildConfig.GPT_API_KEY}")
             .addHeader("Content-Type", "application/json")
             .post(body.toRequestBody("application/json".toMediaType()))
             .build()
@@ -462,9 +461,48 @@ class GroqApiSource {
 }
 ```
 
+Building the body with `JSONObject` (rather than a hand-escaped string template) avoids breakage when the prompt contains quotes or newlines.
+
 ### 10.3 Response Parsing
 
-Extract `choices[0].message.content` from the response JSON, then parse it as a JSON object using `org.json.JSONObject` (part of the Android SDK, no extra dependency needed).
+The Responses API returns a JSON document of the form:
+
+```json
+{
+  "id": "resp_...",
+  "object": "response",
+  "output": [
+    {
+      "type": "message",
+      "role": "assistant",
+      "content": [
+        { "type": "output_text", "text": "<the model's reply text>" }
+      ]
+    }
+  ]
+}
+```
+
+Extract the assistant text via `output[0].content[0].text`, then parse that text as a JSON object (it should match the `status / summary / recommendations` schema from the prompt). Use `org.json.JSONObject` (part of the Android SDK, no extra dependency needed):
+
+```kotlin
+private fun parseResponse(body: String): TeamHealthResult {
+    val root = JSONObject(body)
+    val assistantText = root
+        .getJSONArray("output").getJSONObject(0)
+        .getJSONArray("content").getJSONObject(0)
+        .getString("text")
+    val payload = JSONObject(assistantText)
+    val recs = payload.optJSONArray("recommendations")
+    return TeamHealthResult(
+        status = payload.getString("status"),
+        summary = payload.getString("summary"),
+        recommendations = (0 until (recs?.length() ?: 0)).map { recs!!.getString(it) }
+    )
+}
+```
+
+If the assistant wraps the JSON in code fences (` ```json … ``` `), strip those before the inner `JSONObject(assistantText)` call.
 
 ---
 

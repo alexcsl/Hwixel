@@ -54,9 +54,15 @@ class AuthRepositoryTest {
 
         override fun observeUsers(): LiveData<List<User>> = MutableLiveData(emptyList())
 
+        override fun observeUser(userId: String): LiveData<User?> = MutableLiveData(null)
+
         override suspend fun upsertUser(user: User) {
             upsertedUser = user
         }
+
+        override suspend fun findByEmail(email: String): User? = null
+
+        override suspend fun writeNotification(userId: String, notifId: String, payload: Map<String, Any>) = Unit
     }
 
     private class FakeUserDao : UserDao {

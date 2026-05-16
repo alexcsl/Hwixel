@@ -64,4 +64,11 @@ open class ProjectFirebaseSource(
     override suspend fun updateMember(projectId: String, userId: String, member: ProjectMember) {
         projectsRef.child(projectId).child("members").child(userId).setValue(member).awaitResult()
     }
+
+    override suspend fun updateMemberScore(projectId: String, userId: String, score: Float) {
+        projectsRef.child(projectId).child("members").child(userId)
+            .child("contributionScore")
+            .setValue(score)
+            .awaitResult()
+    }
 }

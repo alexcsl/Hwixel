@@ -12,6 +12,7 @@ import edu.bluejack252.hwixel.data.repository.TaskRepository
 import edu.bluejack252.hwixel.data.repository.UserRepository
 import edu.bluejack252.hwixel.util.constants.Constants
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class CreateEditTaskViewModel(
     private val projectId: String,
@@ -26,6 +27,7 @@ class CreateEditTaskViewModel(
 
     private var existingTask: Task? = null
     private var memberOptions: List<MemberOption> = emptyList()
+    private var usersLoaded = false
 
     init {
         _uiState.value = CreateEditTaskUiState.Loading
@@ -37,6 +39,7 @@ class CreateEditTaskViewModel(
             publishLoaded()
         }
         _uiState.addSource(userRepository.observeUsers()) { users ->
+            usersLoaded = true
             memberOptions = memberOptions.map { option ->
                 val user = users.firstOrNull { it.id == option.userId }
                 option.copy(name = user?.name ?: option.userId)
@@ -52,6 +55,7 @@ class CreateEditTaskViewModel(
     }
 
     private fun publishLoaded() {
+        if (memberOptions.isNotEmpty() && !usersLoaded) return
         val options = memberOptions.map { option ->
             option.copy(isSelected = existingTask?.assignees?.contains(option.userId) == true)
         }
@@ -67,15 +71,19 @@ class CreateEditTaskViewModel(
         deadline: Long,
         assigneeIds: List<String>,
         priority: String,
-        subtaskTitles: List<String>
+        subtasksInput: List<Subtask>,
+        actorId: String
     ) {
         if (title.isBlank()) {
             _uiState.value = CreateEditTaskUiState.Error("Title is required")
             return
         }
-        val subtasks = subtaskTitles
-            .filter { it.isNotBlank() }
-            .mapIndexed { i, t -> "s$i" to Subtask(id = "s$i", title = t) }
+        val subtasks = subtasksInput
+            .filter { it.title.isNotBlank() }
+            .map { subtask ->
+                val id = subtask.id.ifBlank { "s-${UUID.randomUUID()}" }
+                id to subtask.copy(id = id)
+            }
             .toMap()
 
         viewModelScope.launch {
@@ -101,7 +109,7 @@ class CreateEditTaskViewModel(
                 )
             }
             val result = if (existingTask != null) {
-                taskRepository.updateTask(task)
+                taskRepository.updateTask(task, actorId)
             } else {
                 taskRepository.createTask(task)
             }

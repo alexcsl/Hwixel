@@ -26,11 +26,6 @@ class ProjectRepositoryImpl(
 ) : ProjectRepository {
 
     override fun observeProjects(): LiveData<List<Project>> {
-        firebaseSource.observeProjects().observeForever { list ->
-            list.forEach { project ->
-                kotlinx.coroutines.GlobalScope.let { /* sync from RTDB to Room */ }
-            }
-        }
         return localDao.observeAll().map { entities -> entities.map { it.toDomain() } }
     }
 
@@ -76,7 +71,6 @@ class ProjectRepositoryImpl(
         userId: String,
         score: Float
     ): Result<Unit> = runCatching {
-        val currentMember = ProjectMember(userId = userId, contributionScore = score)
-        firebaseSource.updateMember(projectId, userId, currentMember)
+        firebaseSource.updateMemberScore(projectId, userId, score)
     }
 }

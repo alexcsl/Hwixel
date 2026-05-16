@@ -54,7 +54,8 @@ class MembersViewModel(
                 avatarUrl = user?.avatarUrl.orEmpty(),
                 role = member.role,
                 status = member.status,
-                contributionScore = member.contributionScore
+                contributionScore = member.contributionScore,
+                phone = user?.phone.orEmpty()
             )
         }
         _uiState.value = MembersUiState(

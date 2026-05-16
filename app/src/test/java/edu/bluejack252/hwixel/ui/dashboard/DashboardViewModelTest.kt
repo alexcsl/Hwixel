@@ -3,10 +3,10 @@ package edu.bluejack252.hwixel.ui.dashboard
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
 import edu.bluejack252.hwixel.data.model.Task
-import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
 import edu.bluejack252.hwixel.data.repository.TaskRepository
 import edu.bluejack252.hwixel.util.constants.Constants
@@ -85,7 +85,6 @@ class DashboardViewModelTest {
 
     private class FakeProjectRepository : ProjectRepository {
         override fun observeProjects(): LiveData<List<Project>> = MutableLiveData(emptyList())
-
         override fun observeProject(projectId: String): LiveData<Project?> = MutableLiveData(null)
 
         override suspend fun createProject(project: Project): Result<Unit> = Result.success(Unit)

@@ -9,6 +9,7 @@ import edu.bluejack252.hwixel.data.source.local.TaskDao
 import edu.bluejack252.hwixel.data.source.remote.TaskRemoteSource
 
 interface TaskRepository {
+    fun observeAllTasks(): LiveData<List<Task>>
     fun observeTasks(projectId: String): LiveData<List<Task>>
     suspend fun createTask(task: Task): Result<Unit>
     suspend fun updateTask(task: Task): Result<Unit>
@@ -18,6 +19,10 @@ class TaskRepositoryImpl(
     private val firebaseSource: TaskRemoteSource,
     private val localDao: TaskDao
 ) : TaskRepository {
+    override fun observeAllTasks(): LiveData<List<Task>> {
+        return localDao.observeAll().map { entities -> entities.map { it.toDomain() } }
+    }
+
     override fun observeTasks(projectId: String): LiveData<List<Task>> {
         return localDao.observeByProject(projectId).map { entities -> entities.map { it.toDomain() } }
     }

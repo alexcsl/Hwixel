@@ -19,6 +19,7 @@ interface ProjectRemoteSource {
 }
 
 interface TaskRemoteSource {
+    fun observeAllTasks(): LiveData<List<Task>>
     fun observeTasks(projectId: String): LiveData<List<Task>>
     suspend fun createTask(task: Task)
     suspend fun updateTask(task: Task)

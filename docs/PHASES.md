@@ -40,7 +40,7 @@ This file is the **sequenced execution roadmap**. It does not redefine product o
 | 0 | Project Foundation & Tooling | `[x]` |
 | 1 | Data Layer Foundation | `[x]` |
 | 2 | Authentication | `[x]` |
-| 3 | Dashboard & Main Navigation | `[ ]` |
+| 3 | Dashboard & Main Navigation | `[x]` |
 | 4 | Project Hub & Project Members | `[ ]` |
 | 5 | Task Board, Task Detail, Create/Edit Task | `[ ]` |
 | 6 | Contribution Analytics + Groq AI | `[ ]` |

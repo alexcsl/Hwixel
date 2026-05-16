@@ -13,6 +13,28 @@ open class TaskFirebaseSource(
 ) : TaskRemoteSource {
     private val tasksRef = database.reference.child("tasks")
 
+    override fun observeAllTasks(): LiveData<List<Task>> {
+        val liveData = MutableLiveData<List<Task>>()
+        tasksRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                liveData.value = snapshot.children.flatMap { projectSnapshot ->
+                    val projectId = projectSnapshot.key.orEmpty()
+                    projectSnapshot.children.mapNotNull { taskSnapshot ->
+                        taskSnapshot.getValue(Task::class.java)?.copy(
+                            id = taskSnapshot.key.orEmpty(),
+                            projectId = projectId
+                        )
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                liveData.value = emptyList()
+            }
+        })
+        return liveData
+    }
+
     override fun observeTasks(projectId: String): LiveData<List<Task>> {
         val liveData = MutableLiveData<List<Task>>()
         tasksRef.child(projectId).addValueEventListener(object : ValueEventListener {

@@ -27,5 +27,21 @@
     <string name="error_auth_default">Authentication failed. Try again.</string>
     <string name="login_success">Logged in successfully.</string>
     <string name="register_success">Registration successful.</string>
-    <string name="dashboard_placeholder">Dashboard will be built in Phase 3.</string>
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_empty_projects">No active projects yet.</string>
+    <string name="dashboard_projects_title">Active projects</string>
+    <string name="dashboard_deadlines_title">Upcoming deadlines</string>
+    <string name="dashboard_empty_deadlines">No upcoming deadlines.</string>
+    <string name="dashboard_pending_tasks_format">%1$d pending tasks</string>
+    <string name="dashboard_project_role_format">Role: %1$s</string>
+    <string name="dashboard_project_completion_format">%1$.0f%% complete</string>
+    <string name="dashboard_unknown_role">Member</string>
+    <string name="dashboard_countdown_due_now">Due now</string>
+    <string name="dashboard_countdown_format">%1$dd %2$dh %3$dm %4$ds</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_notifications">Notifications</string>
+    <string name="nav_profile">Profile</string>
+    <string name="notifications_placeholder">Notifications will be built in Phase 10.</string>
+    <string name="profile_placeholder">Profile and settings will be built in Phase 11.</string>
+    <string name="project_hub_placeholder">Project Hub will be built in Phase 4.</string>
 </resources>

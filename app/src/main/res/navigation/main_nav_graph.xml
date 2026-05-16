@@ -7,5 +7,32 @@
     <fragment
         android:id="@+id/dashboardFragment"
         android:name="edu.bluejack252.hwixel.ui.dashboard.DashboardFragment"
-        android:label="@string/dashboard_placeholder" />
+        android:label="@string/dashboard_title">
+        <action
+            android:id="@+id/action_dashboardFragment_to_projectHubFragment"
+            app:destination="@id/projectHubFragment">
+            <argument
+                android:name="projectId"
+                app:argType="string" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/notificationsFragment"
+        android:name="edu.bluejack252.hwixel.ui.notifications.NotificationsFragment"
+        android:label="@string/nav_notifications" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="edu.bluejack252.hwixel.ui.profile.ProfileFragment"
+        android:label="@string/nav_profile" />
+
+    <fragment
+        android:id="@+id/projectHubFragment"
+        android:name="edu.bluejack252.hwixel.ui.project.hub.ProjectHubFragment"
+        android:label="@string/project_hub_placeholder">
+        <argument
+            android:name="projectId"
+            app:argType="string" />
+    </fragment>
 </navigation>

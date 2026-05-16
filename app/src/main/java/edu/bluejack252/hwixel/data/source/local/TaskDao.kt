@@ -9,6 +9,9 @@ import androidx.room.Query
 
 @Dao
 interface TaskDao {
+    @Query("SELECT * FROM tasks")
+    fun observeAll(): LiveData<List<TaskEntity>>
+
     @Query("SELECT * FROM tasks WHERE projectId = :projectId")
     fun observeByProject(projectId: String): LiveData<List<TaskEntity>>
 

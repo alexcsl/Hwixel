@@ -12,6 +12,7 @@ data class ProjectEntity(
     val dueDate: Long,
     val createdBy: String,
     val completionPercentage: Float,
+    val membersJson: String,
     val lastSynced: Long
 )
 

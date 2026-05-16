@@ -42,6 +42,8 @@ class TaskRepositoryTest {
         var createdTask: Task? = null
         var updatedTask: Task? = null
 
+        override fun observeAllTasks(): LiveData<List<Task>> = MutableLiveData(emptyList())
+
         override fun observeTasks(projectId: String): LiveData<List<Task>> = MutableLiveData(emptyList())
 
         override suspend fun createTask(task: Task) {
@@ -55,6 +57,10 @@ class TaskRepositoryTest {
 
     private class FakeTaskDao : TaskDao {
         var upsertedTask: TaskEntity? = null
+
+        override fun observeAll(): LiveData<List<TaskEntity>> {
+            return MutableLiveData(emptyList())
+        }
 
         override fun observeByProject(projectId: String): LiveData<List<TaskEntity>> {
             return MutableLiveData(emptyList())

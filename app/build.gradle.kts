@@ -83,6 +83,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.browser)
+    implementation(libs.androidx.recyclerview)
     ksp(libs.room.compiler)
 
     testImplementation(libs.junit)

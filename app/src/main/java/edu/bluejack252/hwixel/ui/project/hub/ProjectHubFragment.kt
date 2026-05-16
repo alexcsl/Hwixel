@@ -33,6 +33,7 @@ class ProjectHubFragment : Fragment() {
     private val args: ProjectHubFragmentArgs by navArgs()
     private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
     private var selectedDueDate: Long = 0L
+    private val activityFeedAdapter = ActivityFeedAdapter()
 
     private val viewModel: ProjectHubViewModel by viewModels {
         ProjectHubViewModelFactory(
@@ -55,6 +56,7 @@ class ProjectHubFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupToolbar()
         setupViewPager()
+        binding.activityRecyclerView.adapter = activityFeedAdapter
         viewModel.uiState.observe(viewLifecycleOwner, ::render)
         viewModel.createProjectResult.observe(viewLifecycleOwner) { result ->
             result ?: return@observe
@@ -88,6 +90,8 @@ class ProjectHubFragment : Fragment() {
     private fun render(state: ProjectHubUiState) {
         val project = state.project ?: return
         renderHeader(project)
+        activityFeedAdapter.submitList(state.recentActivity)
+        binding.emptyActivityTextView.isVisible = state.recentActivity.isEmpty()
     }
 
     private fun renderHeader(project: Project) {

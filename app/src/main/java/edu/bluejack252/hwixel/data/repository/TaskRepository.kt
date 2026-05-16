@@ -18,7 +18,7 @@ interface TaskRepository {
     fun observeTasks(projectId: String): LiveData<List<Task>>
     fun observeTask(projectId: String, taskId: String): LiveData<Task?>
     suspend fun createTask(task: Task): Result<Unit>
-    suspend fun updateTask(task: Task): Result<Unit>
+    suspend fun updateTask(task: Task, actorId: String = ""): Result<Unit>
     suspend fun updateTaskStatus(
         projectId: String,
         taskId: String,
@@ -58,8 +58,19 @@ class TaskRepositoryImpl(
         localDao.upsert(task.toEntity())
     }
 
-    override suspend fun updateTask(task: Task): Result<Unit> = runCatching {
+    override suspend fun updateTask(task: Task, actorId: String): Result<Unit> = runCatching {
         firebaseSource.updateTask(task)
+        if (actorId.isNotBlank()) {
+            firebaseSource.addHistoryEntry(
+                task.projectId,
+                task.id,
+                HistoryEntry(
+                    actorId = actorId,
+                    action = "updated task",
+                    timestamp = System.currentTimeMillis()
+                )
+            )
+        }
         localDao.upsert(task.toEntity())
     }
 
@@ -94,14 +105,7 @@ class TaskRepositoryImpl(
                 it.status == Constants.STATUS_DONE && it.priority == Constants.PRIORITY_HIGH
             }
             val score = ScoreCalculator.calculate(actorCompleted, actorTasks.size, actorHighPri)
-            projectSource.updateMember(
-                projectId,
-                actorId,
-                edu.bluejack252.hwixel.data.model.ProjectMember(
-                    userId = actorId,
-                    contributionScore = score
-                )
-            )
+            projectSource.updateMemberScore(projectId, actorId, score)
         }
     }
 

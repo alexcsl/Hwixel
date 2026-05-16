@@ -82,6 +82,7 @@
     <string name="error_empty_project_name">Enter a project name.</string>
     <string name="project_created">Project created.</string>
     <string name="project_create_failed">Failed to create project.</string>
+    <string name="project_create_failed_format">Failed to create project: %1$s</string>
 
     <!-- Members -->
     <string name="members_title">Members</string>

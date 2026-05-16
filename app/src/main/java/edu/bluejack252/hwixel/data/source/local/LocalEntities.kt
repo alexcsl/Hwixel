@@ -35,6 +35,7 @@ data class UserEntity(
     val name: String,
     val studentId: String,
     val email: String,
+    val phone: String,
     val avatarUrl: String,
     val totalProjectsCompleted: Int,
     val averagePeerRating: Float,

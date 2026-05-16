@@ -12,10 +12,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
+import edu.bluejack252.hwixel.data.model.Subtask
 import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.databinding.FragmentCreateEditTaskBinding
 import edu.bluejack252.hwixel.databinding.ItemSubtaskRowBinding
@@ -107,7 +107,9 @@ class CreateEditTaskFragment : Fragment() {
 
         task.subtasks.values.forEach { subtask ->
             val rowBinding = ItemSubtaskRowBinding.inflate(layoutInflater, binding.subtasksContainer, true)
+            rowBinding.root.tag = subtask.id
             rowBinding.subtaskEditText.setText(subtask.title)
+            rowBinding.subtaskDoneCheckBox.isChecked = subtask.isDone
             rowBinding.removeSubtaskButton.setOnClickListener {
                 binding.subtasksContainer.removeView(rowBinding.root)
                 subtaskViews.remove(rowBinding)
@@ -159,6 +161,7 @@ class CreateEditTaskFragment : Fragment() {
 
     private fun addSubtaskRow() {
         val rowBinding = ItemSubtaskRowBinding.inflate(layoutInflater, binding.subtasksContainer, true)
+        rowBinding.root.tag = ""
         rowBinding.removeSubtaskButton.setOnClickListener {
             binding.subtasksContainer.removeView(rowBinding.root)
             subtaskViews.remove(rowBinding)
@@ -180,8 +183,14 @@ class CreateEditTaskFragment : Fragment() {
             binding.btnPriorityHigh.id -> Constants.PRIORITY_HIGH
             else -> Constants.PRIORITY_MEDIUM
         }
-        val subtaskTitles = subtaskViews.mapNotNull {
-            it.subtaskEditText.text?.toString()?.trim()?.takeIf { t -> t.isNotBlank() }
+        val subtasks = subtaskViews.mapNotNull {
+            val title = it.subtaskEditText.text?.toString()?.trim().orEmpty()
+            if (title.isBlank()) return@mapNotNull null
+            Subtask(
+                id = it.root.tag as? String ?: "",
+                title = title,
+                isDone = it.subtaskDoneCheckBox.isChecked
+            )
         }
 
         viewModel.saveTask(
@@ -190,7 +199,8 @@ class CreateEditTaskFragment : Fragment() {
             deadline = selectedDeadline,
             assigneeIds = selectedAssigneeIds.toList(),
             priority = priority,
-            subtaskTitles = subtaskTitles
+            subtasksInput = subtasks,
+            actorId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
         )
     }
 

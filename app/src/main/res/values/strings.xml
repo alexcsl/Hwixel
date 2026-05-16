@@ -56,6 +56,9 @@
     <!-- Project Hub -->
     <string name="project_hub_title">Project Hub</string>
     <string name="project_hub_placeholder">Project Hub will be built in Phase 4.</string>
+    <string name="hub_no_recent_activity">No recent activity yet.</string>
+    <string name="task_detail_subtasks_label">Subtasks</string>
+    <string name="task_detail_no_subtasks">No subtasks.</string>
     <string name="hub_tab_tasks">Tasks</string>
     <string name="hub_tab_analytics">Analytics</string>
     <string name="hub_tab_members">Members</string>

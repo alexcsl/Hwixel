@@ -6,6 +6,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
 import edu.bluejack252.hwixel.data.model.Task
+import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
 import edu.bluejack252.hwixel.data.repository.TaskRepository
 import edu.bluejack252.hwixel.util.constants.Constants
@@ -85,9 +86,19 @@ class DashboardViewModelTest {
     private class FakeProjectRepository : ProjectRepository {
         override fun observeProjects(): LiveData<List<Project>> = MutableLiveData(emptyList())
 
+        override fun observeProject(projectId: String): LiveData<Project?> = MutableLiveData(null)
+
         override suspend fun createProject(project: Project): Result<Unit> = Result.success(Unit)
 
         override suspend fun updateProject(project: Project): Result<Unit> = Result.success(Unit)
+
+        override suspend fun updateCompletionPercentage(projectId: String, percentage: Float): Result<Unit> = Result.success(Unit)
+
+        override suspend fun addMember(projectId: String, userId: String, member: ProjectMember): Result<Unit> = Result.success(Unit)
+
+        override suspend fun updateMember(projectId: String, userId: String, member: ProjectMember): Result<Unit> = Result.success(Unit)
+
+        override suspend fun updateMemberScore(projectId: String, userId: String, score: Float): Result<Unit> = Result.success(Unit)
     }
 
     private class FakeTaskRepository : TaskRepository {
@@ -95,8 +106,18 @@ class DashboardViewModelTest {
 
         override fun observeTasks(projectId: String): LiveData<List<Task>> = MutableLiveData(emptyList())
 
+        override fun observeTask(projectId: String, taskId: String): LiveData<Task?> = MutableLiveData(null)
+
         override suspend fun createTask(task: Task): Result<Unit> = Result.success(Unit)
 
-        override suspend fun updateTask(task: Task): Result<Unit> = Result.success(Unit)
+        override suspend fun updateTask(task: Task, actorId: String): Result<Unit> = Result.success(Unit)
+
+        override suspend fun updateTaskStatus(projectId: String, taskId: String, newStatus: String, actorId: String): Result<Unit> = Result.success(Unit)
+
+        override suspend fun addComment(projectId: String, taskId: String, comment: Comment): Result<Unit> = Result.success(Unit)
+
+        override suspend fun updateSubtask(projectId: String, taskId: String, subtaskId: String, isDone: Boolean): Result<Unit> = Result.success(Unit)
+
+        override suspend fun deleteTask(task: Task): Result<Unit> = Result.success(Unit)
     }
 }

@@ -34,6 +34,10 @@ class TaskDetailFragment : Fragment() {
 
     private val commentsAdapter = CommentsAdapter()
     private val historyAdapter = HistoryAdapter()
+    private val attachmentAdapter = AttachmentAdapter()
+    private val subtaskAdapter = SubtaskToggleAdapter { subtask, isDone ->
+        viewModel.toggleSubtask(subtask.id, isDone)
+    }
 
     private val viewModel: TaskDetailViewModel by viewModels {
         TaskDetailViewModelFactory(
@@ -55,6 +59,8 @@ class TaskDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
         binding.toolbar.setOnMenuItemClickListener(::onMenuItemClick)
+        binding.attachmentsRecyclerView.adapter = attachmentAdapter
+        binding.subtasksRecyclerView.adapter = subtaskAdapter
         binding.commentsRecyclerView.adapter = commentsAdapter
         binding.historyRecyclerView.adapter = historyAdapter
 
@@ -109,8 +115,12 @@ class TaskDetailFragment : Fragment() {
     private fun render(state: TaskDetailUiState) {
         val task = state.task ?: return
         renderTask(task)
+        attachmentAdapter.submitList(state.attachments)
+        subtaskAdapter.submitList(state.subtasks)
         commentsAdapter.submitList(state.comments)
         historyAdapter.submitList(state.history)
+        binding.emptyAttachmentsTextView.isVisible = state.attachments.isEmpty()
+        binding.emptySubtasksTextView.isVisible = state.subtasks.isEmpty()
         binding.emptyCommentsTextView.isVisible = state.comments.isEmpty()
         binding.emptyHistoryTextView.isVisible = state.history.isEmpty()
     }
@@ -139,6 +149,7 @@ class TaskDetailFragment : Fragment() {
         }
 
         if (task.assignees.isNotEmpty()) {
+            binding.assigneesTextView.isVisible = true
             binding.assigneesTextView.text = getString(
                 R.string.task_detail_assignees_label,
                 task.assignees.joinToString(", ")

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "bbbf680cf55692b62105d1698da96401",
+    "identityHash": "6ef0e61e976972f5d4a12d657b8bdc3a",
     "entities": [
       {
         "tableName": "projects",
@@ -138,7 +138,7 @@
       },
       {
         "tableName": "users",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `studentId` TEXT NOT NULL, `email` TEXT NOT NULL, `avatarUrl` TEXT NOT NULL, `totalProjectsCompleted` INTEGER NOT NULL, `averagePeerRating` REAL NOT NULL, `badgesJson` TEXT NOT NULL, `lastSynced` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `studentId` TEXT NOT NULL, `email` TEXT NOT NULL, `phone` TEXT NOT NULL, `avatarUrl` TEXT NOT NULL, `totalProjectsCompleted` INTEGER NOT NULL, `averagePeerRating` REAL NOT NULL, `badgesJson` TEXT NOT NULL, `lastSynced` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -161,6 +161,12 @@
           {
             "fieldPath": "email",
             "columnName": "email",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phone",
+            "columnName": "phone",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -205,7 +211,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bbbf680cf55692b62105d1698da96401')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6ef0e61e976972f5d4a12d657b8bdc3a')"
     ]
   }
 }

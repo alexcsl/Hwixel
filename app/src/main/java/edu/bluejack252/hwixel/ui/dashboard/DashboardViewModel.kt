@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.bluejack252.hwixel.data.model.Project
+import edu.bluejack252.hwixel.data.model.ProjectMember
 import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
 import edu.bluejack252.hwixel.data.repository.TaskRepository
@@ -22,6 +23,9 @@ class DashboardViewModel(
 ) : ViewModel() {
     private val _uiState = MediatorLiveData<DashboardUiState>()
     val uiState: LiveData<DashboardUiState> = _uiState
+
+    private val _createProjectResult = MutableLiveData<Result<Unit>?>()
+    val createProjectResult: LiveData<Result<Unit>?> = _createProjectResult
 
     private val _tick = MutableLiveData(System.currentTimeMillis())
     private var projects: List<Project> = emptyList()
@@ -122,5 +126,36 @@ class DashboardViewModel(
             minutes = (totalSeconds % 3_600L) / 60L,
             seconds = totalSeconds % 60L
         )
+    }
+
+    fun createProject(
+        name: String,
+        description: String,
+        goals: String,
+        dueDate: Long,
+        creatorId: String
+    ) {
+        if (name.isBlank()) return
+        viewModelScope.launch {
+            val project = Project(
+                name = name,
+                description = description,
+                goals = goals,
+                dueDate = dueDate,
+                createdBy = creatorId,
+                members = mapOf(
+                    creatorId to ProjectMember(
+                        userId = creatorId,
+                        role = Constants.ROLE_TEAM_LEAD,
+                        status = Constants.MEMBER_STATUS_ACTIVE
+                    )
+                )
+            )
+            _createProjectResult.value = projectRepository.createProject(project)
+        }
+    }
+
+    fun consumeCreateResult() {
+        _createProjectResult.value = null
     }
 }

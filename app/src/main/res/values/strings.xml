@@ -32,7 +32,10 @@
     <string name="dashboard_projects_title">Active projects</string>
     <string name="dashboard_deadlines_title">Upcoming deadlines</string>
     <string name="dashboard_empty_deadlines">No upcoming deadlines.</string>
-    <string name="dashboard_pending_tasks_format">%1$d pending tasks</string>
+    <plurals name="dashboard_pending_tasks">
+        <item quantity="one">%1$d pending task</item>
+        <item quantity="other">%1$d pending tasks</item>
+    </plurals>
     <string name="dashboard_project_role_format">Role: %1$s</string>
     <string name="dashboard_project_completion_format">%1$.0f%% complete</string>
     <string name="dashboard_unknown_role">Member</string>

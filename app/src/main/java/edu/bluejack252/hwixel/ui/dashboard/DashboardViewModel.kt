@@ -28,6 +28,7 @@ class DashboardViewModel(
     private var tasks: List<Task> = emptyList()
     private var currentUserId: String = ""
     private var tickerJob: Job? = null
+    private var hasLoaded = false
 
     init {
         _uiState.value = DashboardUiState()
@@ -35,6 +36,8 @@ class DashboardViewModel(
     }
 
     fun loadDashboard(userId: String) {
+        if (hasLoaded && currentUserId == userId) return
+        hasLoaded = true
         currentUserId = userId
         _uiState.addSource(projectRepository.observeProjects()) { value ->
             projects = value

@@ -55,8 +55,9 @@ class DashboardFragment : Fragment() {
     private fun render(state: DashboardUiState) {
         projectAdapter.submitList(state.projects)
         deadlineAdapter.submitList(state.deadlines)
-        binding.pendingTasksTextView.text = getString(
-            R.string.dashboard_pending_tasks_format,
+        binding.pendingTasksTextView.text = resources.getQuantityString(
+            R.plurals.dashboard_pending_tasks,
+            state.pendingTaskCount,
             state.pendingTaskCount
         )
         binding.emptyProjectsTextView.isVisible = state.projects.isEmpty()

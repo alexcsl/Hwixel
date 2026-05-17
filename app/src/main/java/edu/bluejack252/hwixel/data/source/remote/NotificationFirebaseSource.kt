@@ -1,7 +1,6 @@
 package edu.bluejack252.hwixel.data.source.remote
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -14,33 +13,43 @@ class NotificationFirebaseSource {
     private val db = FirebaseDatabase.getInstance().reference
 
     fun observeNotifications(userId: String): LiveData<List<Notification>> {
-        val liveData = MutableLiveData<List<Notification>>()
-        db.child("notifications").child(userId)
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val list = snapshot.children.mapNotNull { child ->
-                        val type = child.child("type").getValue(String::class.java) ?: return@mapNotNull null
-                        val message = child.child("message").getValue(String::class.java) ?: ""
-                        val timestamp = child.child("timestamp").getValue(Long::class.java) ?: 0L
-                        val isRead = child.child("isRead").getValue(Boolean::class.java) ?: false
-                        val referenceId = child.child("referenceId").getValue(String::class.java) ?: ""
-                        Notification(
-                            id = child.key ?: "",
-                            type = type,
-                            message = message,
-                            timestamp = timestamp,
-                            isRead = isRead,
-                            referenceId = referenceId
-                        )
-                    }.sortedByDescending { it.timestamp }
-                    liveData.postValue(list)
-                }
+        return object : LiveData<List<Notification>>() {
+            private val ref = db.child("notifications").child(userId)
+            private var listener: ValueEventListener? = null
 
-                override fun onCancelled(error: DatabaseError) {
-                    liveData.postValue(emptyList())
-                }
-            })
-        return liveData
+            override fun onActive() {
+                if (listener != null) return
+                listener = object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val list = snapshot.children.mapNotNull { child ->
+                            val type = child.child("type").getValue(String::class.java) ?: return@mapNotNull null
+                            val message = child.child("message").getValue(String::class.java) ?: ""
+                            val timestamp = child.child("timestamp").getValue(Long::class.java) ?: 0L
+                            val isRead = child.child("isRead").getValue(Boolean::class.java) ?: false
+                            val referenceId = child.child("referenceId").getValue(String::class.java) ?: ""
+                            Notification(
+                                id = child.key ?: "",
+                                type = type,
+                                message = message,
+                                timestamp = timestamp,
+                                isRead = isRead,
+                                referenceId = referenceId
+                            )
+                        }.sortedByDescending { it.timestamp }
+                        postValue(list)
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        postValue(emptyList())
+                    }
+                }.also { ref.addValueEventListener(it) }
+            }
+
+            override fun onInactive() {
+                listener?.let(ref::removeEventListener)
+                listener = null
+            }
+        }
     }
 
     suspend fun writeNotification(
@@ -68,7 +77,8 @@ class NotificationFirebaseSource {
         val snapshot = db.child("notifications").child(userId).get().await()
         val updates = mutableMapOf<String, Any>()
         snapshot.children.forEach { child ->
-            updates["${child.key}/isRead"] = true
+            val key = child.key ?: return@forEach
+            updates["$key/isRead"] = true
         }
         if (updates.isNotEmpty()) {
             db.child("notifications").child(userId).updateChildren(updates).await()

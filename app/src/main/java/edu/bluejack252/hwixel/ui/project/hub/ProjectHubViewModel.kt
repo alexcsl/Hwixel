@@ -58,7 +58,8 @@ class ProjectHubViewModel(
             project = currentProject,
             recentActivity = history.map { entry ->
                 ActivityUi(
-                    actorName = users.firstOrNull { it.id == entry.actorId }?.name ?: entry.actorId,
+                    actorName = users.firstOrNull { it.id == entry.actorId }?.name?.takeIf { it.isNotBlank() }
+                        ?: UNKNOWN_MEMBER_NAME,
                     action = entry.action,
                     timestamp = entry.timestamp
                 )
@@ -98,5 +99,9 @@ class ProjectHubViewModel(
 
     fun consumeCreateResult() {
         _createProjectResult.value = null
+    }
+
+    private companion object {
+        const val UNKNOWN_MEMBER_NAME = "Unknown member"
     }
 }

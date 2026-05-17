@@ -7,7 +7,9 @@ import edu.bluejack252.hwixel.MainDispatcherRule
 import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.model.Subtask
 import edu.bluejack252.hwixel.data.model.Task
+import edu.bluejack252.hwixel.data.model.User
 import edu.bluejack252.hwixel.data.repository.TaskRepository
+import edu.bluejack252.hwixel.data.repository.UserRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -20,11 +22,12 @@ class TaskDetailViewModelTest {
 
     private val taskLiveData = MutableLiveData<Task?>()
     private val repository = FakeTaskRepository(taskLiveData)
+    private val usersLiveData = MutableLiveData<List<User>>()
     private lateinit var viewModel: TaskDetailViewModel
 
     @Before
     fun setUp() {
-        viewModel = TaskDetailViewModel("p1", "t1", repository)
+        viewModel = TaskDetailViewModel("p1", "t1", repository, FakeUserRepository(usersLiveData))
         viewModel.uiState.observeForever { }
     }
 
@@ -65,5 +68,15 @@ class TaskDetailViewModelTest {
             return Result.success(Unit)
         }
         override suspend fun deleteTask(task: Task): Result<Unit> = Result.success(Unit)
+    }
+
+    private class FakeUserRepository(
+        private val usersLiveData: LiveData<List<User>>
+    ) : UserRepository {
+        override fun observeUsers(): LiveData<List<User>> = usersLiveData
+        override fun observeUser(userId: String): LiveData<User?> = MutableLiveData(null)
+        override suspend fun upsertUser(user: User): Result<Unit> = Result.success(Unit)
+        override suspend fun findUserByEmail(email: String): Result<User?> = Result.success(null)
+        override suspend fun writeNotification(userId: String, notifId: String, payload: Map<String, Any>): Result<Unit> = Result.success(Unit)
     }
 }

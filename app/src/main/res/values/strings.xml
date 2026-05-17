@@ -199,7 +199,10 @@
     <string name="task_save_failed">Failed to save task.</string>
     <string name="select_members_title">Select Members</string>
     <string name="selected_members_format">%1$d member(s) selected</string>
+    <string name="selected_members_names_format">Selected: %1$s</string>
     <string name="no_members_available">No members available.</string>
+    <string name="unknown_member">Unknown member</string>
+    <string name="task_pick_deadline_with_time">Pick deadline date and time</string>
 
     <!-- General -->
     <string name="error_generic">Something went wrong. Please try again.</string>

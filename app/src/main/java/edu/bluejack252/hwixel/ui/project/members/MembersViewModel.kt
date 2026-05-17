@@ -49,7 +49,7 @@ class MembersViewModel(
             val user = allUsers.firstOrNull { it.id == userId }
             MemberUi(
                 userId = userId,
-                name = user?.name ?: userId,
+                name = user?.name?.takeIf { it.isNotBlank() } ?: UNKNOWN_MEMBER_NAME,
                 email = user?.email.orEmpty(),
                 avatarUrl = user?.avatarUrl.orEmpty(),
                 role = member.role,
@@ -135,5 +135,9 @@ class MembersViewModel(
 
     fun consumeActionResult() {
         _actionResult.value = null
+    }
+
+    private companion object {
+        const val UNKNOWN_MEMBER_NAME = "Unknown member"
     }
 }

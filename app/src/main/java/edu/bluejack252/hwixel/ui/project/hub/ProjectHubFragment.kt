@@ -18,7 +18,6 @@ import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.databinding.DialogCreateProjectBinding
 import edu.bluejack252.hwixel.databinding.FragmentProjectHubBinding
-import edu.bluejack252.hwixel.ui.project.hub.ProjectHubFragmentDirections
 import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -57,7 +56,6 @@ class ProjectHubFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupToolbar()
         setupViewPager()
-        binding.activityRecyclerView.adapter = activityFeedAdapter
         viewModel.uiState.observe(viewLifecycleOwner, ::render)
         viewModel.createProjectResult.observe(viewLifecycleOwner) { result ->
             result ?: return@observe
@@ -68,7 +66,6 @@ class ProjectHubFragment : Fragment() {
             }
             viewModel.consumeCreateResult()
         }
-        binding.addProjectFab.setOnClickListener { showCreateProjectDialog() }
     }
 
     private fun setupToolbar() {
@@ -117,7 +114,6 @@ class ProjectHubFragment : Fragment() {
         val project = state.project ?: return
         renderHeader(project)
         activityFeedAdapter.submitList(state.recentActivity)
-        binding.emptyActivityTextView.isVisible = state.recentActivity.isEmpty()
     }
 
     private fun renderHeader(project: Project) {
@@ -150,14 +146,14 @@ class ProjectHubFragment : Fragment() {
     private fun showCreateProjectDialog() {
         val dialogView = DialogCreateProjectBinding.inflate(layoutInflater)
         selectedDueDate = 0L
-        dialogView.pickDueDateButton.setOnClickListener {
+        dialogView.projectDeadlineButton.setOnClickListener {
             val cal = Calendar.getInstance()
             DatePickerDialog(
                 requireContext(),
                 { _, year, month, day ->
                     cal.set(year, month, day, 0, 0, 0)
                     selectedDueDate = cal.timeInMillis
-                    dialogView.pickDueDateButton.text = dateFormat.format(cal.time)
+                    dialogView.projectDeadlineButton.text = dateFormat.format(cal.time)
                 },
                 cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)
             ).show()
@@ -167,13 +163,13 @@ class ProjectHubFragment : Fragment() {
             .setTitle(R.string.create_project_title)
             .setView(dialogView.root)
             .setPositiveButton(R.string.btn_create) { _, _ ->
-                val name = dialogView.projectNameEditText.text?.toString().orEmpty().trim()
+                val name = dialogView.projectNameInput.editText?.text?.toString().orEmpty().trim()
                 if (name.isBlank()) {
                     Snackbar.make(binding.root, R.string.error_empty_project_name, Snackbar.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
-                val description = dialogView.projectDescriptionEditText.text?.toString().orEmpty().trim()
-                val goals = dialogView.projectGoalsEditText.text?.toString().orEmpty().trim()
+                val description = dialogView.projectDescriptionInput.editText?.text?.toString().orEmpty().trim()
+                val goals = dialogView.projectGoalsInput.editText?.text?.toString().orEmpty().trim()
                 val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
                 viewModel.createProject(name, description, goals, selectedDueDate, uid)
             }

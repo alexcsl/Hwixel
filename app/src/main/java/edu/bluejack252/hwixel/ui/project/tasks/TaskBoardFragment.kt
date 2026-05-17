@@ -64,7 +64,7 @@ class TaskBoardFragment : Fragment() {
     }
 
     private fun setupListView() {
-        binding.listRecyclerView.adapter = listAdapter
+        binding.tasksListRecyclerView.adapter = listAdapter
     }
 
     private fun setupKanbanView() {
@@ -79,12 +79,12 @@ class TaskBoardFragment : Fragment() {
     }
 
     private fun setupToggle() {
-        binding.btnListView.isChecked = true
+        binding.viewToggleGroup.check(binding.listButton.id)
         binding.viewToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (!isChecked) return@addOnButtonCheckedListener
             when (checkedId) {
-                binding.btnListView.id -> viewModel.setViewMode(ViewMode.LIST)
-                binding.btnKanbanView.id -> viewModel.setViewMode(ViewMode.KANBAN)
+                binding.listButton.id -> viewModel.setViewMode(ViewMode.LIST)
+                binding.kanbanButton.id -> viewModel.setViewMode(ViewMode.KANBAN)
             }
         }
     }
@@ -119,7 +119,7 @@ class TaskBoardFragment : Fragment() {
 
     private fun render(state: TaskBoardUiState) {
         val isKanban = state.viewMode == ViewMode.KANBAN
-        binding.listRecyclerView.isVisible = !isKanban
+        binding.tasksListRecyclerView.isVisible = !isKanban
         binding.kanbanScrollView.isVisible = isKanban
 
         if (isKanban) {

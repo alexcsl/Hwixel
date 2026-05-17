@@ -44,23 +44,18 @@ class AnalyticsMemberAdapter(
                 rank,
                 item.name
             )
-            binding.memberBreakdownTextView.text = ctx.getString(
+            binding.taskRatioTextView.text = ctx.getString(
                 R.string.analytics_member_breakdown_format,
                 item.assignedCount,
                 item.completedCount,
                 item.overdueCount
             )
-            binding.memberScoreTextView.text = ctx.getString(
+            binding.contributionScoreTextView.text = ctx.getString(
                 R.string.analytics_score_format,
                 item.contributionScore
             )
-            binding.memberProgressIndicator.progress = (item.completionRatio * 100).toInt()
-            binding.memberScoreTextView.setChipBackgroundColorResource(scoreColor(item.contributionScore))
-            binding.root.strokeWidth = if (selected) 4 else 1
-            binding.root.strokeColor = ContextCompat.getColor(
-                ctx,
-                if (selected) R.color.analytics_selected_stroke else R.color.analytics_card_stroke
-            )
+            binding.scoreProgressBar.progress = (item.completionRatio * 100).toInt()
+            binding.root.alpha = if (selected) 1f else 0.82f
             binding.root.setOnClickListener { onMemberClick(item) }
         }
 

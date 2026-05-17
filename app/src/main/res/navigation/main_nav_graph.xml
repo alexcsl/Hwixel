@@ -46,6 +46,9 @@
         <action
             android:id="@+id/action_projectHubFragment_to_peerEvalFragment"
             app:destination="@id/peerEvalFragment" />
+        <action
+            android:id="@+id/action_projectHubFragment_to_fileRepoFragment"
+            app:destination="@id/fileRepoFragment" />
     </fragment>
 
     <fragment
@@ -77,6 +80,15 @@
         <argument
             android:name="memberRoles"
             app:argType="string[]" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fileRepoFragment"
+        android:name="edu.bluejack252.hwixel.ui.project.files.FileRepoFragment"
+        android:label="@string/file_repo_title">
+        <argument
+            android:name="projectId"
+            app:argType="string" />
     </fragment>
 
     <fragment

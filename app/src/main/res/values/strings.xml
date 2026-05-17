@@ -320,6 +320,29 @@
     <string name="eval_error_feedback">Please provide written feedback.</string>
     <string name="eval_period_closed_error">The evaluation period is currently closed.</string>
 
+    <!-- File Repository -->
+    <string name="file_repo_title">Files</string>
+    <string name="file_repo_subtitle">Shared links and version milestones for this project</string>
+    <string name="file_shared_links_label">Shared Links</string>
+    <string name="file_version_history_label">Version History</string>
+    <string name="file_empty_links">No shared links yet.\nTap + to add your first link.</string>
+    <string name="file_empty_history">No version notes added yet.</string>
+    <string name="file_add_title">Add Link</string>
+    <string name="file_label_hint">Label (e.g. "Final Report")</string>
+    <string name="file_url_hint">URL</string>
+    <string name="file_type_label">Type</string>
+    <string name="file_type_drive">Drive</string>
+    <string name="file_type_github">GitHub</string>
+    <string name="file_type_other">Other</string>
+    <string name="file_version_notes_hint">Version notes (optional)</string>
+    <string name="file_save_button">Save</string>
+    <string name="file_add_success">Link added.</string>
+    <string name="file_delete_success">Link removed.</string>
+    <string name="file_error_empty_fields">Label and URL are required.</string>
+    <string name="file_add_fab_desc">Add shared link</string>
+    <string name="file_type_icon_desc">File type</string>
+    <string name="file_delete_desc">Delete link</string>
+
     <!-- General -->
     <string name="error_generic">Something went wrong. Please try again.</string>
     <string name="loading">Loading...</string>

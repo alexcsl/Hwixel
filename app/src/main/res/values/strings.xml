@@ -253,6 +253,50 @@
     <string name="dialog_invite_title">Invite Member</string>
     <string name="comment_hint">Add a comment…</string>
 
+    <!-- Peer Evaluation -->
+    <string name="eval_title">Peer Evaluation</string>
+    <string name="eval_tab_submit">Submit</string>
+    <string name="eval_tab_received">Received</string>
+    <string name="eval_period_open">Evaluation period is open</string>
+    <string name="eval_period_closed">Evaluation period is closed</string>
+    <string name="eval_open_period">Open Period</string>
+    <string name="eval_close_period">Close Period</string>
+    <string name="eval_period_updated">Evaluation period updated.</string>
+    <string name="eval_period_created">Evaluation period created.</string>
+    <string name="eval_create_period">Create Evaluation Period</string>
+    <string name="eval_no_period_title">No evaluation period yet</string>
+    <string name="eval_no_period_subtitle">Create an evaluation period to let team members review each other.</string>
+    <string name="eval_evaluating_label">Evaluating</string>
+    <string name="eval_select_member_hint">Select a team member…</string>
+    <string name="eval_criteria_label">Evaluation Criteria</string>
+    <string name="eval_communication">Communication</string>
+    <string name="eval_communication_desc">How clearly did they communicate with the team?</string>
+    <string name="eval_communication_short">Comm.</string>
+    <string name="eval_quality">Quality</string>
+    <string name="eval_quality_desc">How well was the work executed?</string>
+    <string name="eval_quality_short">Quality</string>
+    <string name="eval_reliability">Reliability</string>
+    <string name="eval_reliability_desc">Did they meet deadlines and commitments?</string>
+    <string name="eval_reliability_short">Reliability</string>
+    <string name="eval_effort">Effort</string>
+    <string name="eval_effort_desc">How much effort did they put in?</string>
+    <string name="eval_effort_short">Effort</string>
+    <string name="eval_feedback_label">Written Feedback</string>
+    <string name="eval_feedback_hint">Share constructive feedback…</string>
+    <string name="eval_submit_button">Submit Evaluation</string>
+    <string name="eval_submit_success">Evaluation submitted.</string>
+    <string name="eval_my_avg_label">Your average score</string>
+    <string name="eval_my_avg_format">Your avg: %1$.1f / 5.0</string>
+    <string name="eval_avg_format">%1$.1f</string>
+    <string name="eval_no_received">No evaluations received yet.</string>
+    <string name="eval_from_anonymous">Anonymous</string>
+    <string name="eval_no_feedback">No written feedback provided.</string>
+    <string name="eval_score_format">%1$.1f</string>
+    <string name="eval_error_select_member">Select a team member to evaluate.</string>
+    <string name="eval_error_self">You cannot evaluate yourself.</string>
+    <string name="eval_error_feedback">Please provide written feedback.</string>
+    <string name="eval_period_closed_error">The evaluation period is currently closed.</string>
+
     <!-- General -->
     <string name="error_generic">Something went wrong. Please try again.</string>
     <string name="loading">Loading…</string>

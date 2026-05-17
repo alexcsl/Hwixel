@@ -18,6 +18,7 @@ import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.databinding.DialogCreateProjectBinding
 import edu.bluejack252.hwixel.databinding.FragmentProjectHubBinding
+import edu.bluejack252.hwixel.ui.project.hub.ProjectHubFragmentDirections
 import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -71,7 +72,27 @@ class ProjectHubFragment : Fragment() {
     }
 
     private fun setupToolbar() {
-        binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+        binding.backButton.setOnClickListener { findNavController().navigateUp() }
+        binding.attendanceButton.setOnClickListener {
+            val project = viewModel.uiState.value?.project ?: return@setOnClickListener
+            val action = ProjectHubFragmentDirections
+                .actionProjectHubFragmentToAttendanceFragment(
+                    projectId = args.projectId,
+                    projectName = project.name
+                )
+            findNavController().navigate(action)
+        }
+        binding.peerEvalButton.setOnClickListener {
+            val (ids, names, roles) = viewModel.getMembersForNav()
+            val action = ProjectHubFragmentDirections
+                .actionProjectHubFragmentToPeerEvalFragment(
+                    projectId = args.projectId,
+                    memberIds = ids,
+                    memberNames = names,
+                    memberRoles = roles
+                )
+            findNavController().navigate(action)
+        }
     }
 
     private fun setupViewPager() {
@@ -101,23 +122,23 @@ class ProjectHubFragment : Fragment() {
         binding.projectDescriptionTextView.text = project.description
         binding.projectDescriptionTextView.isVisible = project.description.isNotBlank()
         binding.completionProgressBar.progress = project.completionPercentage.roundToInt().coerceIn(0, 100)
-        binding.completionTextView.text = getString(R.string.hub_completion_format, project.completionPercentage)
+        binding.completionPercentageTextView.text = getString(R.string.hub_completion_format, project.completionPercentage)
 
         val now = System.currentTimeMillis()
         if (project.dueDate > 0L) {
             val dateStr = dateFormat.format(Date(project.dueDate))
-            binding.projectDueDateTextView.text = getString(R.string.hub_due_date_format, dateStr)
+            binding.dueDateTextView.text = getString(R.string.hub_due_date_format, dateStr)
             if (project.dueDate < now) {
-                binding.projectDueDateTextView.setTextColor(
+                binding.dueDateTextView.setTextColor(
                     requireContext().getColor(android.R.color.holo_red_light)
                 )
             } else {
-                binding.projectDueDateTextView.setTextColor(
+                binding.dueDateTextView.setTextColor(
                     requireContext().getColor(android.R.color.darker_gray)
                 )
             }
         } else {
-            binding.projectDueDateTextView.isVisible = false
+            binding.dueDateTextView.isVisible = false
         }
     }
 

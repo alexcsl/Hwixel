@@ -43,6 +43,9 @@
         <action
             android:id="@+id/action_projectHubFragment_to_attendanceFragment"
             app:destination="@id/attendanceFragment" />
+        <action
+            android:id="@+id/action_projectHubFragment_to_peerEvalFragment"
+            app:destination="@id/peerEvalFragment" />
     </fragment>
 
     <fragment
@@ -56,6 +59,24 @@
             android:name="projectName"
             app:argType="string"
             android:defaultValue="" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/peerEvalFragment"
+        android:name="edu.bluejack252.hwixel.ui.project.evaluation.PeerEvalFragment"
+        android:label="@string/eval_title">
+        <argument
+            android:name="projectId"
+            app:argType="string" />
+        <argument
+            android:name="memberIds"
+            app:argType="string[]" />
+        <argument
+            android:name="memberNames"
+            app:argType="string[]" />
+        <argument
+            android:name="memberRoles"
+            app:argType="string[]" />
     </fragment>
 
     <fragment

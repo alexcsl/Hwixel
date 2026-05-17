@@ -16,6 +16,7 @@ import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.databinding.FragmentTaskBoardBinding
 import edu.bluejack252.hwixel.ui.project.hub.ProjectHubFragmentDirections
 import edu.bluejack252.hwixel.ui.project.hub.ProjectPagerAdapter
+import edu.bluejack252.hwixel.ui.project.hub.fillViewPagerPage
 import edu.bluejack252.hwixel.util.constants.Constants
 
 class TaskBoardFragment : Fragment() {
@@ -51,7 +52,7 @@ class TaskBoardFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTaskBoardBinding.inflate(inflater, container, false)
-        return binding.root
+        return binding.root.fillViewPagerPage()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

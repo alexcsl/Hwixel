@@ -19,6 +19,7 @@ import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.databinding.FragmentAnalyticsBinding
 import edu.bluejack252.hwixel.ui.project.hub.ProjectPagerAdapter
+import edu.bluejack252.hwixel.ui.project.hub.fillViewPagerPage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -49,7 +50,7 @@ class AnalyticsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentAnalyticsBinding.inflate(inflater, container, false)
-        return binding.root
+        return binding.root.fillViewPagerPage()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
-        android:background="?attr/colorSurfaceVariant" />
+        android:background="@color/kanban_column_header_background" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/columnRecyclerView"

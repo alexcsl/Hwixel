@@ -15,6 +15,7 @@ import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.databinding.DialogInviteMemberBinding
 import edu.bluejack252.hwixel.databinding.FragmentMembersBinding
 import edu.bluejack252.hwixel.ui.project.hub.ProjectPagerAdapter
+import edu.bluejack252.hwixel.ui.project.hub.fillViewPagerPage
 import edu.bluejack252.hwixel.util.constants.Constants
 
 class MembersFragment : Fragment() {
@@ -49,7 +50,7 @@ class MembersFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMembersBinding.inflate(inflater, container, false)
-        return binding.root
+        return binding.root.fillViewPagerPage()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

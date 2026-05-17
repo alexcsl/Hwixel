@@ -1,10 +1,11 @@
 package edu.bluejack252.hwixel.data.source.remote
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.EvaluationSubmission
 import kotlinx.coroutines.tasks.await
@@ -15,17 +16,9 @@ class EvalFirebaseSource {
 
     /** Observe whether the given period is open. */
     fun observePeriodOpen(projectId: String, periodId: String): LiveData<Boolean> {
-        val liveData = MutableLiveData<Boolean>(false)
-        db.child("evaluations").child(projectId).child(periodId).child("isOpen")
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    liveData.postValue(snapshot.getValue(Boolean::class.java) ?: false)
-                }
-                override fun onCancelled(error: DatabaseError) {
-                    liveData.postValue(false)
-                }
-            })
-        return liveData
+        return FirebaseValueLiveData(db.child("evaluations").child(projectId).child(periodId).child("isOpen")) {
+            it.getValue(Boolean::class.java) ?: false
+        }
     }
 
     /** Observe all submissions made by evaluatorId for this period. */
@@ -34,23 +27,16 @@ class EvalFirebaseSource {
         periodId: String,
         evaluatorId: String
     ): LiveData<Map<String, EvaluationSubmission>> {
-        val liveData = MutableLiveData<Map<String, EvaluationSubmission>>(emptyMap())
-        db.child("evaluations").child(projectId).child(periodId)
-            .child("submissions").child(evaluatorId)
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val map = snapshot.children.mapNotNull { child ->
-                        val evaluateeId = child.key ?: return@mapNotNull null
-                        val sub = parseSubmission(child, projectId, periodId, evaluatorId, evaluateeId)
-                        evaluateeId to sub
-                    }.toMap()
-                    liveData.postValue(map)
-                }
-                override fun onCancelled(error: DatabaseError) {
-                    liveData.postValue(emptyMap())
-                }
-            })
-        return liveData
+        return FirebaseValueLiveData(
+            db.child("evaluations").child(projectId).child(periodId)
+                .child("submissions").child(evaluatorId)
+        ) { snapshot ->
+            snapshot.children.mapNotNull { child ->
+                val evaluateeId = child.key ?: return@mapNotNull null
+                val sub = parseSubmission(child, projectId, periodId, evaluatorId, evaluateeId)
+                evaluateeId to sub
+            }.toMap()
+        }
     }
 
     /** Observe evaluations received by evaluateeId for this period. */
@@ -59,25 +45,18 @@ class EvalFirebaseSource {
         periodId: String,
         evaluateeId: String
     ): LiveData<List<EvaluationSubmission>> {
-        val liveData = MutableLiveData<List<EvaluationSubmission>>(emptyList())
-        db.child("evaluations").child(projectId).child(periodId)
-            .child("submissions")
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val list = mutableListOf<EvaluationSubmission>()
-                    snapshot.children.forEach { evaluatorSnap ->
-                        val evaluatorId = evaluatorSnap.key ?: return@forEach
-                        evaluatorSnap.child(evaluateeId).takeIf { it.exists() }?.let { child ->
-                            list.add(parseSubmission(child, projectId, periodId, evaluatorId, evaluateeId))
-                        }
-                    }
-                    liveData.postValue(list)
+        return FirebaseValueLiveData(
+            db.child("evaluations").child(projectId).child(periodId).child("submissions")
+        ) { snapshot ->
+            val list = mutableListOf<EvaluationSubmission>()
+            snapshot.children.forEach { evaluatorSnap ->
+                val evaluatorId = evaluatorSnap.key ?: return@forEach
+                evaluatorSnap.child(evaluateeId).takeIf { it.exists() }?.let { child ->
+                    list.add(parseSubmission(child, projectId, periodId, evaluatorId, evaluateeId))
                 }
-                override fun onCancelled(error: DatabaseError) {
-                    liveData.postValue(emptyList())
-                }
-            })
-        return liveData
+            }
+            list
+        }
     }
 
     suspend fun submitEvaluation(submission: EvaluationSubmission): Result<Unit> = runCatching {
@@ -104,9 +83,21 @@ class EvalFirebaseSource {
     }
 
     suspend fun createPeriod(projectId: String): Result<String> = runCatching {
-        val ref = db.child("evaluations").child(projectId).push()
+        val periodsRef = db.child("evaluations").child(projectId)
+        val existing = periodsRef.get().await().children.firstOrNull {
+            it.child("isOpen").getValue(Boolean::class.java) == true
+        }
+        if (existing != null) return@runCatching existing.key
+            ?: throw IllegalStateException("Failed to read period ID")
+
+        val ref = periodsRef.push()
         val periodId = ref.key ?: throw IllegalStateException("Failed to generate period ID")
-        ref.child("isOpen").setValue(true).await()
+        ref.updateChildren(
+            mapOf(
+                "isOpen" to true,
+                "createdAt" to ServerValue.TIMESTAMP
+            )
+        ).await()
         periodId
     }
 
@@ -128,17 +119,13 @@ class EvalFirebaseSource {
 
     /** Observe the list of available period IDs for this project. */
     fun observePeriods(projectId: String): LiveData<List<String>> {
-        val liveData = MutableLiveData<List<String>>(emptyList())
-        db.child("evaluations").child(projectId)
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    liveData.postValue(snapshot.children.mapNotNull { it.key })
-                }
-                override fun onCancelled(error: DatabaseError) {
-                    liveData.postValue(emptyList())
-                }
-            })
-        return liveData
+        return FirebaseValueLiveData(db.child("evaluations").child(projectId)) { snapshot ->
+            snapshot.children
+                .sortedWith(compareBy<DataSnapshot> {
+                    it.child("createdAt").getValue(Long::class.java) ?: Long.MIN_VALUE
+                }.thenBy { it.key.orEmpty() })
+                .mapNotNull { it.key }
+        }
     }
 
     private fun parseSubmission(
@@ -159,4 +146,27 @@ class EvalFirebaseSource {
         effort = snap.child("effort").getValue(Int::class.java) ?: 0,
         feedback = snap.child("feedback").getValue(String::class.java) ?: ""
     )
+
+    private class FirebaseValueLiveData<T>(
+        private val ref: DatabaseReference,
+        private val mapper: (DataSnapshot) -> T
+    ) : LiveData<T>() {
+        private var listener: ValueEventListener? = null
+
+        override fun onActive() {
+            if (listener != null) return
+            listener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    postValue(mapper(snapshot))
+                }
+
+                override fun onCancelled(error: DatabaseError) = Unit
+            }.also { ref.addValueEventListener(it) }
+        }
+
+        override fun onInactive() {
+            listener?.let(ref::removeEventListener)
+            listener = null
+        }
+    }
 }

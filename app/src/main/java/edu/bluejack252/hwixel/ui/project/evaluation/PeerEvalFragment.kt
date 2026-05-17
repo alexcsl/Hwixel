@@ -24,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.data.model.ProjectMember
+import edu.bluejack252.hwixel.util.constants.Constants
 
 class PeerEvalFragment : Fragment() {
 
@@ -150,7 +151,7 @@ class PeerEvalFragment : Fragment() {
         val noReceivedText = view.findViewById<TextView>(R.id.noReceivedEvalsText)
         val receivedList = view.findViewById<RecyclerView>(R.id.receivedEvalsRecyclerView)
 
-        val isLead = viewModel.currentUserRole == "Team Lead"
+        val isLead = viewModel.currentUserRole == Constants.ROLE_TEAM_LEAD
         toggleButton.isVisible = isLead
         createButton.isVisible = isLead
 

@@ -339,6 +339,7 @@
     <string name="file_add_success">Link added.</string>
     <string name="file_delete_success">Link removed.</string>
     <string name="file_error_empty_fields">Label and URL are required.</string>
+    <string name="file_error_invalid_url">Enter a valid HTTP or HTTPS link.</string>
     <string name="file_add_fab_desc">Add shared link</string>
     <string name="file_type_icon_desc">File type</string>
     <string name="file_delete_desc">Delete link</string>

@@ -51,11 +51,15 @@ class AttendanceMemberAdapter(
         holder.absentButton.setBackgroundColor(absentBg)
 
         if (item.isEditable) {
+            holder.presentButton.isEnabled = true
+            holder.absentButton.isEnabled = true
             holder.presentButton.setOnClickListener { onToggle(item.userId, true) }
             holder.absentButton.setOnClickListener { onToggle(item.userId, false) }
         } else {
             holder.presentButton.isEnabled = false
             holder.absentButton.isEnabled = false
+            holder.presentButton.setOnClickListener(null)
+            holder.absentButton.setOnClickListener(null)
         }
     }
 

@@ -50,6 +50,7 @@
 
             <!-- Toggle group: Kanban | List -->
             <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/viewToggleGroup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"

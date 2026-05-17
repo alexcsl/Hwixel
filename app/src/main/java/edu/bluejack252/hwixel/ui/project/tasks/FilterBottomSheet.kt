@@ -49,10 +49,10 @@ class FilterBottomSheet : BottomSheetDialogFragment() {
         }
 
         when (currentFilter.priority) {
-            Constants.PRIORITY_LOW -> binding.priorityLow.isChecked = true
-            Constants.PRIORITY_MEDIUM -> binding.priorityMedium.isChecked = true
-            Constants.PRIORITY_HIGH -> binding.priorityHigh.isChecked = true
-            else -> binding.priorityAll.isChecked = true
+            Constants.PRIORITY_LOW -> binding.priorityToggleGroup.check(binding.filterPriorityLowButton.id)
+            Constants.PRIORITY_MEDIUM -> binding.priorityToggleGroup.check(binding.filterPriorityMediumButton.id)
+            Constants.PRIORITY_HIGH -> binding.priorityToggleGroup.check(binding.filterPriorityHighButton.id)
+            else -> binding.priorityToggleGroup.check(binding.filterPriorityAllButton.id)
         }
 
         binding.applyFilterButton.setOnClickListener {
@@ -63,10 +63,10 @@ class FilterBottomSheet : BottomSheetDialogFragment() {
                     selectedAssignees.add(chip.tag as String)
                 }
             }
-            val priority = when (binding.priorityRadioGroup.checkedRadioButtonId) {
-                binding.priorityLow.id -> Constants.PRIORITY_LOW
-                binding.priorityMedium.id -> Constants.PRIORITY_MEDIUM
-                binding.priorityHigh.id -> Constants.PRIORITY_HIGH
+            val priority = when (binding.priorityToggleGroup.checkedButtonId) {
+                binding.filterPriorityLowButton.id -> Constants.PRIORITY_LOW
+                binding.filterPriorityMediumButton.id -> Constants.PRIORITY_MEDIUM
+                binding.filterPriorityHighButton.id -> Constants.PRIORITY_HIGH
                 else -> null
             }
             onFilterApplied?.invoke(TaskFilter(assigneeIds = selectedAssignees, priority = priority))

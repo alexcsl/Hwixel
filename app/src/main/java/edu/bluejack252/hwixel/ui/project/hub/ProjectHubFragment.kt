@@ -73,7 +73,7 @@ class ProjectHubFragment : Fragment() {
             }
             viewModel.consumeCreateResult()
         }
-        binding.addProjectFab.setOnClickListener { showCreateProjectDialog() }
+        binding.addProjectFab.isVisible = false
     }
 
     private fun setupToolbar() {

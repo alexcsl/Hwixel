@@ -1,6 +1,7 @@
 package edu.bluejack252.hwixel.ui.project.taskedit
 
 import android.os.Bundle
+import android.app.TimePickerDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +24,7 @@ import edu.bluejack252.hwixel.util.constants.Constants
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.Calendar
 
 class CreateEditTaskFragment : Fragment() {
 
@@ -30,7 +32,7 @@ class CreateEditTaskFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val args: CreateEditTaskFragmentArgs by navArgs()
-    private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+    private val dateFormat = SimpleDateFormat("MMM d, yyyy HH:mm", Locale.getDefault())
     private var selectedDeadline: Long = 0L
     private var selectedAssigneeIds: MutableList<String> = mutableListOf()
     private var availableMembers: List<MemberOption> = emptyList()
@@ -56,7 +58,7 @@ class CreateEditTaskFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
 
-        binding.deadlineButton.setOnClickListener { showDatePicker() }
+        binding.deadlineButton.setOnClickListener { showDateTimePicker() }
         binding.assigneesButton.setOnClickListener { showAssigneeDialog() }
         binding.addSubtaskButton.setOnClickListener { addSubtaskRow() }
         binding.saveTaskButton.setOnClickListener { save() }
@@ -118,14 +120,34 @@ class CreateEditTaskFragment : Fragment() {
         }
     }
 
-    private fun showDatePicker() {
+    private fun showDateTimePicker() {
         val picker = MaterialDatePicker.Builder.datePicker()
             .setTitleText(getString(R.string.task_deadline_label))
             .setSelection(if (selectedDeadline > 0L) selectedDeadline else MaterialDatePicker.todayInUtcMilliseconds())
             .build()
         picker.addOnPositiveButtonClickListener { selection ->
-            selectedDeadline = selection
-            binding.deadlineButton.text = dateFormat.format(Date(selection))
+            val calendar = Calendar.getInstance().apply {
+                timeInMillis = selection
+                if (selectedDeadline > 0L) {
+                    val previous = Calendar.getInstance().apply { timeInMillis = selectedDeadline }
+                    set(Calendar.HOUR_OF_DAY, previous.get(Calendar.HOUR_OF_DAY))
+                    set(Calendar.MINUTE, previous.get(Calendar.MINUTE))
+                }
+            }
+            TimePickerDialog(
+                requireContext(),
+                { _, hourOfDay, minute ->
+                    calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                    calendar.set(Calendar.MINUTE, minute)
+                    calendar.set(Calendar.SECOND, 0)
+                    calendar.set(Calendar.MILLISECOND, 0)
+                    selectedDeadline = calendar.timeInMillis
+                    binding.deadlineButton.text = dateFormat.format(Date(selectedDeadline))
+                },
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                true
+            ).show()
         }
         picker.show(parentFragmentManager, "deadline_picker")
     }
@@ -153,8 +175,12 @@ class CreateEditTaskFragment : Fragment() {
             binding.assigneesTextView.visibility = View.GONE
         } else {
             binding.assigneesTextView.visibility = View.VISIBLE
+            val selectedNames = selectedAssigneeIds.map { selectedId ->
+                availableMembers.firstOrNull { it.userId == selectedId }?.name
+                    ?: getString(R.string.unknown_member)
+            }
             binding.assigneesTextView.text = getString(
-                R.string.selected_members_format, selectedAssigneeIds.size
+                R.string.selected_members_names_format, selectedNames.joinToString(", ")
             )
         }
     }

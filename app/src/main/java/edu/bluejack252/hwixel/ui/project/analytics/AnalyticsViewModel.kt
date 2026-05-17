@@ -115,7 +115,7 @@ class AnalyticsViewModel(
             val user = users.firstOrNull { it.id == userId }
             MemberAnalyticsUi(
                 userId = userId,
-                name = user?.name ?: userId,
+                name = user?.name?.takeIf { it.isNotBlank() } ?: UNKNOWN_MEMBER_NAME,
                 assignedCount = assignedTasks.size,
                 completedCount = completedTasks.size,
                 overdueCount = overdueTasks,
@@ -185,6 +185,8 @@ class AnalyticsViewModel(
         )
     }
 }
+
+private const val UNKNOWN_MEMBER_NAME = "Unknown member"
 
 private data class HealthFingerprint(
     val members: List<HealthMemberFingerprint>

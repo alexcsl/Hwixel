@@ -7,13 +7,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.data.model.AttendanceSession
 import edu.bluejack252.hwixel.data.model.ProjectMember
 import edu.bluejack252.hwixel.data.repository.AttendanceRepository
 import edu.bluejack252.hwixel.data.work.AttendanceReminderWorker
+import edu.bluejack252.hwixel.util.constants.Constants
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -43,7 +44,6 @@ class AttendanceViewModel(
         sessionsMediator.addSource(sessionSource) { list ->
             _sessions.value = list
         }
-        sessionsMediator.observeForever { }
     }
 
     fun setProjectMembers(members: List<ProjectMember>, names: Map<String, String>, currentRole: String) {
@@ -62,6 +62,8 @@ class AttendanceViewModel(
         )
     }
 
+    fun selectedSessionId(): String? = selectedSession?.id
+
     fun createSession(date: Long, nextSessionDate: Long) {
         viewModelScope.launch {
             _uiState.value = AttendanceUiState.Loading
@@ -72,7 +74,7 @@ class AttendanceViewModel(
     }
 
     fun toggleAttendance(sessionId: String, userId: String, present: Boolean) {
-        if (currentUserRole != "Team Lead") {
+        if (currentUserRole != Constants.ROLE_TEAM_LEAD) {
             _uiState.value = AttendanceUiState.Error("lead_only")
             return
         }
@@ -101,7 +103,11 @@ class AttendanceViewModel(
             .addTag("attendance_reminder_$projectId")
             .build()
 
-        WorkManager.getInstance(context).enqueue(request)
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            "attendance_reminder_$projectId",
+            ExistingWorkPolicy.REPLACE,
+            request
+        )
         _uiState.value = AttendanceUiState.ReminderSet
     }
 
@@ -112,11 +118,11 @@ class AttendanceViewModel(
     }
 
     fun isCurrentUserLead(userId: String): Boolean =
-        projectMembers.any { it.userId == userId && it.role == "Team Lead" }
+        projectMembers.any { it.userId == userId && it.role == Constants.ROLE_TEAM_LEAD }
 
     fun buildExportText(sessions: List<AttendanceSession>, projectName: String): String {
         val sb = StringBuilder()
-        sb.appendLine("Attendance Report — $projectName")
+        sb.appendLine("Attendance Report - $projectName")
         sb.appendLine("Total sessions: ${sessions.size}")
         sb.appendLine()
 
@@ -132,7 +138,7 @@ class AttendanceViewModel(
             sb.appendLine("$dateStr: $presentCount/${memberNames.size} present")
             session.records.forEach { (uid, present) ->
                 val name = memberNames[uid] ?: uid
-                sb.appendLine("  • $name: ${if (present) "Present" else "Absent"}")
+                sb.appendLine("  - $name: ${if (present) "Present" else "Absent"}")
             }
         }
         return sb.toString()

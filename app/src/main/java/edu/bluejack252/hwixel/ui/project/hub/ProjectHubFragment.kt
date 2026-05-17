@@ -56,7 +56,6 @@ class ProjectHubFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupToolbar()
         setupViewPager()
-        binding.activityRecyclerView.adapter = activityFeedAdapter
         viewModel.uiState.observe(viewLifecycleOwner, ::render)
         viewModel.createProjectResult.observe(viewLifecycleOwner) { result ->
             result ?: return@observe
@@ -67,11 +66,10 @@ class ProjectHubFragment : Fragment() {
             }
             viewModel.consumeCreateResult()
         }
-        binding.addProjectFab.setOnClickListener { showCreateProjectDialog() }
     }
 
     private fun setupToolbar() {
-        binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+        binding.backButton.setOnClickListener { findNavController().navigateUp() }
     }
 
     private fun setupViewPager() {
@@ -91,7 +89,6 @@ class ProjectHubFragment : Fragment() {
         val project = state.project ?: return
         renderHeader(project)
         activityFeedAdapter.submitList(state.recentActivity)
-        binding.emptyActivityTextView.isVisible = state.recentActivity.isEmpty()
     }
 
     private fun renderHeader(project: Project) {
@@ -101,37 +98,37 @@ class ProjectHubFragment : Fragment() {
         binding.projectDescriptionTextView.text = project.description
         binding.projectDescriptionTextView.isVisible = project.description.isNotBlank()
         binding.completionProgressBar.progress = project.completionPercentage.roundToInt().coerceIn(0, 100)
-        binding.completionTextView.text = getString(R.string.hub_completion_format, project.completionPercentage)
+        binding.completionPercentageTextView.text = getString(R.string.hub_completion_format, project.completionPercentage)
 
         val now = System.currentTimeMillis()
         if (project.dueDate > 0L) {
             val dateStr = dateFormat.format(Date(project.dueDate))
-            binding.projectDueDateTextView.text = getString(R.string.hub_due_date_format, dateStr)
+            binding.dueDateTextView.text = getString(R.string.hub_due_date_format, dateStr)
             if (project.dueDate < now) {
-                binding.projectDueDateTextView.setTextColor(
+                binding.dueDateTextView.setTextColor(
                     requireContext().getColor(android.R.color.holo_red_light)
                 )
             } else {
-                binding.projectDueDateTextView.setTextColor(
+                binding.dueDateTextView.setTextColor(
                     requireContext().getColor(android.R.color.darker_gray)
                 )
             }
         } else {
-            binding.projectDueDateTextView.isVisible = false
+            binding.dueDateTextView.isVisible = false
         }
     }
 
     private fun showCreateProjectDialog() {
         val dialogView = DialogCreateProjectBinding.inflate(layoutInflater)
         selectedDueDate = 0L
-        dialogView.pickDueDateButton.setOnClickListener {
+        dialogView.projectDeadlineButton.setOnClickListener {
             val cal = Calendar.getInstance()
             DatePickerDialog(
                 requireContext(),
                 { _, year, month, day ->
                     cal.set(year, month, day, 0, 0, 0)
                     selectedDueDate = cal.timeInMillis
-                    dialogView.pickDueDateButton.text = dateFormat.format(cal.time)
+                    dialogView.projectDeadlineButton.text = dateFormat.format(cal.time)
                 },
                 cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)
             ).show()
@@ -141,13 +138,13 @@ class ProjectHubFragment : Fragment() {
             .setTitle(R.string.create_project_title)
             .setView(dialogView.root)
             .setPositiveButton(R.string.btn_create) { _, _ ->
-                val name = dialogView.projectNameEditText.text?.toString().orEmpty().trim()
+                val name = dialogView.projectNameInput.editText?.text?.toString().orEmpty().trim()
                 if (name.isBlank()) {
                     Snackbar.make(binding.root, R.string.error_empty_project_name, Snackbar.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
-                val description = dialogView.projectDescriptionEditText.text?.toString().orEmpty().trim()
-                val goals = dialogView.projectGoalsEditText.text?.toString().orEmpty().trim()
+                val description = dialogView.projectDescriptionInput.editText?.text?.toString().orEmpty().trim()
+                val goals = dialogView.projectGoalsInput.editText?.text?.toString().orEmpty().trim()
                 val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
                 viewModel.createProject(name, description, goals, selectedDueDate, uid)
             }

@@ -53,21 +53,20 @@ class AnalyticsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.membersRecyclerView.adapter = memberAdapter
-        binding.dateRangeButton.setOnClickListener { showDateRangePicker() }
-        binding.clearDateRangeButton.setOnClickListener { viewModel.setDateRange(null, null) }
-        binding.refreshHealthButton.setOnClickListener { viewModel.refreshTeamHealth() }
+        binding.memberContributionRecyclerView.adapter = memberAdapter
+        binding.applyFilterButton.setOnClickListener { showDateRangePicker() }
+        binding.analyzeButton.setOnClickListener { viewModel.refreshTeamHealth() }
         configurePieChart()
         viewModel.uiState.observe(viewLifecycleOwner, ::render)
     }
 
     private fun configurePieChart() {
-        binding.completedPieChart.description.isEnabled = false
-        binding.completedPieChart.setUsePercentValues(false)
-        binding.completedPieChart.setDrawEntryLabels(false)
-        binding.completedPieChart.legend.isWordWrapEnabled = true
-        binding.completedPieChart.setNoDataText(getString(R.string.analytics_no_completed_tasks))
-        binding.completedPieChart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+        binding.pieChart.description.isEnabled = false
+        binding.pieChart.setUsePercentValues(false)
+        binding.pieChart.setDrawEntryLabels(false)
+        binding.pieChart.legend.isWordWrapEnabled = true
+        binding.pieChart.setNoDataText(getString(R.string.analytics_no_completed_tasks))
+        binding.pieChart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             override fun onValueSelected(e: com.github.mikephil.charting.data.Entry?, h: Highlight?) {
                 val member = e?.data as? MemberAnalyticsUi ?: return
                 viewModel.selectMember(member.userId)
@@ -80,10 +79,6 @@ class AnalyticsFragment : Fragment() {
     }
 
     private fun render(state: AnalyticsUiState) {
-        binding.analyticsLoadingIndicator.isVisible = state.isLoading
-        binding.analyticsContentGroup.isVisible = !state.isLoading && state.members.isNotEmpty()
-        binding.emptyAnalyticsTextView.isVisible = !state.isLoading && state.members.isEmpty()
-
         memberAdapter.selectedMemberId = state.selectedMemberId
         memberAdapter.submitList(state.members)
         renderPieChart(state.members, state.selectedMemberId)
@@ -94,7 +89,7 @@ class AnalyticsFragment : Fragment() {
     private fun renderPieChart(members: List<MemberAnalyticsUi>, selectedMemberId: String?) {
         val completedMembers = members.filter { it.completedCount > 0 }
         if (completedMembers.isEmpty()) {
-            binding.completedPieChart.clear()
+            binding.pieChart.clear()
             return
         }
         val entries = completedMembers.map { member ->
@@ -111,18 +106,18 @@ class AnalyticsFragment : Fragment() {
         dataSet.valueTextColor = Color.WHITE
         dataSet.valueTextSize = 12f
         dataSet.selectionShift = 10f
-        binding.completedPieChart.data = PieData(dataSet)
+        binding.pieChart.data = PieData(dataSet)
         val selectedIndex = completedMembers.indexOfFirst { it.userId == selectedMemberId }
         if (selectedIndex >= 0) {
-            binding.completedPieChart.highlightValue(selectedIndex.toFloat(), 0)
+            binding.pieChart.highlightValue(selectedIndex.toFloat(), 0)
         } else {
-            binding.completedPieChart.highlightValues(null)
+            binding.pieChart.highlightValues(null)
         }
-        binding.completedPieChart.invalidate()
+        binding.pieChart.invalidate()
     }
 
     private fun renderDateRange(state: AnalyticsUiState) {
-        binding.dateRangeButton.text = if (state.startDate != null || state.endDate != null) {
+        val rangeText = if (state.startDate != null || state.endDate != null) {
             val start = state.startDate?.let { dateFormat.format(Date(it)) }
                 ?: getString(R.string.analytics_range_any_start)
             val end = state.endDate?.let { dateFormat.format(Date(it)) }
@@ -131,21 +126,17 @@ class AnalyticsFragment : Fragment() {
         } else {
             getString(R.string.analytics_pick_date_range)
         }
-        binding.clearDateRangeButton.isVisible = state.startDate != null || state.endDate != null
+        binding.startDateButton.text = rangeText
+        binding.endDateButton.isVisible = false
     }
 
     private fun renderTeamHealth(state: AnalyticsUiState) {
-        binding.teamHealthProgressIndicator.isVisible = state.teamHealthLoading
-        binding.teamHealthErrorTextView.isVisible = state.teamHealthError != null
-        binding.teamHealthErrorTextView.text = state.teamHealthError.orEmpty()
-
         val health = state.teamHealth
-        binding.teamHealthStatusChip.text = health?.status ?: getString(R.string.analytics_health_pending)
-        binding.teamHealthSummaryTextView.text = health?.summary ?: getString(R.string.analytics_health_waiting)
-        binding.teamHealthRecommendationsTextView.text = health?.recommendations
+        binding.teamHealthStatusText.text = health?.status ?: getString(R.string.analytics_health_pending)
+        binding.teamHealthSummaryText.text = state.teamHealthError ?: health?.summary ?: getString(R.string.analytics_health_waiting)
+        binding.recommendationsText.text = health?.recommendations
             ?.joinToString(separator = "\n") { recommendation -> "- $recommendation" }
             .orEmpty()
-        binding.teamHealthStatusChip.setChipBackgroundColorResource(healthColor(health?.status))
     }
 
     private fun healthColor(status: String?): Int {

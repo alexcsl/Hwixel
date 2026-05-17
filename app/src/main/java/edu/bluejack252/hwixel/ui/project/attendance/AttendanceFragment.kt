@@ -61,10 +61,8 @@ class AttendanceFragment : Fragment() {
         view.findViewById<RecyclerView>(R.id.sessionsRecyclerView).adapter = sessionAdapter
 
         memberAdapter = AttendanceMemberAdapter(mutableListOf()) { userId, present ->
-            val sessions = allSessions
-            val selectedSessionId = sessions.firstOrNull()?.id
-            selectedSessionId?.let {
-                viewModel.toggleAttendance(it, userId, present)
+            viewModel.selectedSessionId()?.let { sessionId ->
+                viewModel.toggleAttendance(sessionId, userId, present)
             }
         }
         view.findViewById<RecyclerView>(R.id.membersAttendanceRecyclerView).adapter = memberAdapter
@@ -186,9 +184,6 @@ class AttendanceFragment : Fragment() {
 
         picker.addOnPositiveButtonClickListener { nextDateMs ->
             viewModel.createSession(sessionDate, nextDateMs)
-        }
-        picker.addOnNegativeButtonClickListener {
-            viewModel.createSession(sessionDate, 0L)
         }
         picker.show(parentFragmentManager, "next_session_picker")
     }

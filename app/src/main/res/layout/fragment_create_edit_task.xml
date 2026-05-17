@@ -220,13 +220,11 @@
 
                 </LinearLayout>
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/subtasksRecyclerView"
+                <LinearLayout
+                    android:id="@+id/subtasksContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/item_subtask_row" />
+                    android:orientation="vertical" />
 
             </LinearLayout>
 

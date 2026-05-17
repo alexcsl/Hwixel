@@ -90,7 +90,7 @@
                             android:id="@+id/activeProjectsStatTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="—"
+                            android:text="@string/dashboard_count_placeholder"
                             android:textColor="@color/brand_cyan"
                             android:textSize="28sp"
                             android:fontFamily="sans-serif-black" />

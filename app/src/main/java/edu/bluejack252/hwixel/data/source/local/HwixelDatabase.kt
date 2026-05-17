@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 
 @Database(
     entities = [ProjectEntity::class, TaskEntity::class, UserEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(ListStringConverter::class)

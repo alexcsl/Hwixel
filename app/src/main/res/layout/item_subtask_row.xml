@@ -4,40 +4,44 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:background="@drawable/bg_glass_card_small"
+    android:layout_marginBottom="8dp"
     android:gravity="center_vertical"
-    android:layout_marginTop="8dp">
+    android:orientation="horizontal"
+    android:padding="12dp">
 
-    <CheckBox
-        android:id="@+id/subtaskDoneCheckBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <!-- Drag Handle -->
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="8dp"
+        android:contentDescription="@string/drag_handle_description"
+        android:src="@drawable/ic_drag_handle"
+        app:tint="@color/text_hint" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/subtaskInputLayout"
+    <!-- Subtask Title Input -->
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/subtaskTitleEditText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:background="@android:color/transparent"
         android:hint="@string/task_subtask_hint"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        android:inputType="textCapSentences"
+        android:maxLines="1"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/text_hint"
+        android:textSize="14sp" />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/subtaskEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textCapSentences"
-            android:maxLines="1" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/removeSubtaskButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        app:icon="@drawable/ic_close"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:minWidth="0dp"
-        android:paddingHorizontal="8dp" />
+    <!-- Delete Button -->
+    <ImageButton
+        android:id="@+id/deleteSubtaskButton"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/delete_subtask_description"
+        android:src="@drawable/ic_delete"
+        app:tint="@color/text_hint" />
 
 </LinearLayout>

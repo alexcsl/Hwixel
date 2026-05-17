@@ -200,6 +200,59 @@
     <string name="selected_members_format">%1$d member(s) selected</string>
     <string name="no_members_available">No members available.</string>
 
+    <!-- Attendance -->
+    <string name="attendance_title">Attendance</string>
+    <string name="attendance_sessions_label">Sessions</string>
+    <string name="attendance_empty_sessions">No sessions recorded yet.</string>
+    <string name="attendance_add_session">New Session</string>
+    <string name="attendance_session_date_format">%1$s</string>
+    <string name="attendance_session_summary_format">%1$d / %2$d present</string>
+    <string name="attendance_member_percentage_format">%1$.0f%%</string>
+    <string name="attendance_present">Present</string>
+    <string name="attendance_absent">Absent</string>
+    <string name="attendance_mark_label">Mark attendance</string>
+    <string name="attendance_next_session_label">Next Session</string>
+    <string name="attendance_no_next_session">No next session scheduled.</string>
+    <string name="attendance_set_reminder">Set Reminder</string>
+    <string name="attendance_reminder_set">Reminder set for the next session.</string>
+    <string name="attendance_export">Export</string>
+    <string name="attendance_export_title">Attendance Report</string>
+    <string name="attendance_save_success">Attendance saved.</string>
+    <string name="attendance_save_failed">Failed to save attendance.</string>
+    <string name="attendance_lead_only">Only the Team Lead can mark attendance.</string>
+    <string name="attendance_session_title_format">Session — %1$s</string>
+    <string name="attendance_dialog_set_date">Set Session Date</string>
+    <string name="attendance_dialog_set_next_date">Set Next Session Date</string>
+    <string name="attendance_create_session">Create Session</string>
+    <string name="attendance_overall_rate_format">Avg attendance: %1$.0f%%</string>
+
+    <!-- UI strings for redesigned screens -->
+    <string name="app_logo_mark">Hx</string>
+    <string name="login_heading">Welcome\nback 👋</string>
+    <string name="register_heading">Create\naccount ✨</string>
+    <string name="divider_or">or</string>
+    <string name="dashboard_greeting">Good day</string>
+    <string name="dashboard_pending_label">pending tasks</string>
+    <string name="dashboard_active_label">active projects</string>
+    <string name="dashboard_see_all">See all</string>
+    <string name="analytics_title">Analytics</string>
+    <string name="placeholder_text">Coming soon</string>
+    <string name="filter_title">Filter Tasks</string>
+    <string name="filter_assignees_label">Assignees</string>
+    <string name="filter_priority_label">Priority</string>
+    <string name="filter_date_label">Date Range</string>
+    <string name="filter_apply">Apply</string>
+    <string name="filter_reset">Reset</string>
+    <string name="pick_deadline_label">Pick Deadline</string>
+    <string name="save_task_button">Save Task</string>
+    <string name="task_title_hint">Task Title</string>
+    <string name="task_description_hint">Description (optional)</string>
+    <string name="search_button">Search</string>
+    <string name="invite_button">Invite</string>
+    <string name="dialog_create_project_title">New Project</string>
+    <string name="dialog_invite_title">Invite Member</string>
+    <string name="comment_hint">Add a comment…</string>
+
     <!-- General -->
     <string name="error_generic">Something went wrong. Please try again.</string>
     <string name="loading">Loading…</string>

@@ -7,6 +7,8 @@ import edu.bluejack252.hwixel.data.repository.EvalRepository
 import edu.bluejack252.hwixel.data.repository.EvalRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.FileRepository
 import edu.bluejack252.hwixel.data.repository.FileRepositoryImpl
+import edu.bluejack252.hwixel.data.repository.NotificationRepository
+import edu.bluejack252.hwixel.data.repository.NotificationRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.AuthRepository
 import edu.bluejack252.hwixel.data.repository.AuthRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
@@ -21,6 +23,7 @@ import edu.bluejack252.hwixel.data.source.local.HwixelDatabase
 import edu.bluejack252.hwixel.data.source.remote.AttendanceFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.EvalFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.FileFirebaseSource
+import edu.bluejack252.hwixel.data.source.remote.NotificationFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.AuthFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.GptApiSource
 import edu.bluejack252.hwixel.data.source.remote.ProjectFirebaseSource
@@ -36,6 +39,7 @@ object ServiceLocator {
     private var attendanceRepository: AttendanceRepository? = null
     private var evalRepository: EvalRepository? = null
     private var fileRepository: FileRepository? = null
+    private var notificationRepository: NotificationRepository? = null
 
     fun getAuthRepository(context: Context): AuthRepository {
         return authRepository ?: AuthRepositoryImpl(
@@ -63,7 +67,8 @@ object ServiceLocator {
         return taskRepository ?: TaskRepositoryImpl(
             firebaseSource = TaskFirebaseSource(),
             localDao = HwixelDatabase.getInstance(context).taskDao(),
-            projectSource = ProjectFirebaseSource()
+            projectSource = ProjectFirebaseSource(),
+            notifSource = NotificationFirebaseSource()
         ).also { taskRepository = it }
     }
 
@@ -90,4 +95,12 @@ object ServiceLocator {
             firebaseSource = FileFirebaseSource()
         ).also { fileRepository = it }
     }
+
+    fun getNotificationRepository(): NotificationRepository {
+        return notificationRepository ?: NotificationRepositoryImpl(
+            source = NotificationFirebaseSource()
+        ).also { notificationRepository = it }
+    }
+
+    fun getNotificationSource(): NotificationFirebaseSource = NotificationFirebaseSource()
 }

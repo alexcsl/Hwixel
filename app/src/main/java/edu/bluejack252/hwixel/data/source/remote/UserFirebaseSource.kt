@@ -52,11 +52,12 @@ open class UserFirebaseSource(
     }
 
     override suspend fun findByEmail(email: String): User? = suspendCoroutine { continuation ->
+        val normalizedEmail = email.trim().lowercase()
         usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val user = snapshot.children.mapNotNull { child ->
                     child.getValue(User::class.java)?.copy(id = child.key.orEmpty())
-                }.firstOrNull { it.email == email }
+                }.firstOrNull { it.email.trim().lowercase() == normalizedEmail }
                 continuation.resume(user)
             }
 

@@ -98,6 +98,7 @@
     <string name="invite_success">Invitation sent.</string>
     <string name="invite_user_not_found">No user found with that email.</string>
     <string name="invite_failed">Failed to send invitation.</string>
+    <string name="invite_failed_format">Failed to send invitation: %1$s</string>
     <string name="btn_whatsapp">WhatsApp</string>
     <string name="btn_email">Email</string>
     <string name="role_team_lead">Team Lead</string>
@@ -202,7 +203,12 @@
     <string name="selected_members_names_format">Selected: %1$s</string>
     <string name="no_members_available">No members available.</string>
     <string name="unknown_member">Unknown member</string>
-    <string name="task_pick_deadline_with_time">Pick deadline date and time</string>
+    <string name="task_pick_deadline_time">Set deadline time</string>
+    <string name="task_deadline_time_format">Time: %1$02d:%2$02d</string>
+    <string name="task_time_dialog_title">Set deadline time</string>
+    <string name="task_hour_hint">Hour (0-23)</string>
+    <string name="task_minute_hint">Minute (0-59)</string>
+    <string name="error_invalid_deadline_time">Enter hour 0-23 and minute 0-59.</string>
 
     <!-- General -->
     <string name="error_generic">Something went wrong. Please try again.</string>

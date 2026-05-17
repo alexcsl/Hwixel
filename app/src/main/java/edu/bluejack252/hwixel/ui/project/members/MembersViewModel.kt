@@ -101,6 +101,10 @@ class MembersViewModel(
     fun inviteMember(email: String) {
         viewModelScope.launch {
             val result = userRepository.findUserByEmail(email)
+            if (result.isFailure) {
+                _actionResult.value = "error:${result.exceptionOrNull()?.localizedMessage.orEmpty()}"
+                return@launch
+            }
             val foundUser = result.getOrNull()
             if (foundUser == null) {
                 _actionResult.value = "user_not_found"
@@ -128,7 +132,7 @@ class MembersViewModel(
                 )
                 _actionResult.value = "invite_success"
             } else {
-                _actionResult.value = "error"
+                _actionResult.value = "error:${addResult.exceptionOrNull()?.localizedMessage.orEmpty()}"
             }
         }
     }

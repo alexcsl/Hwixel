@@ -44,7 +44,8 @@ class TaskBoardFragment : Fragment() {
     private val viewModel: TaskBoardViewModel by viewModels {
         TaskBoardViewModelFactory(
             projectId = projectId,
-            taskRepository = ServiceLocator.getTaskRepository(requireContext())
+            taskRepository = ServiceLocator.getTaskRepository(requireContext()),
+            userRepository = ServiceLocator.getUserRepository(requireContext())
         )
     }
 
@@ -104,13 +105,8 @@ class TaskBoardFragment : Fragment() {
     private fun setupFilter() {
         binding.filterButton.setOnClickListener {
             val state = viewModel.uiState.value ?: return@setOnClickListener
-            val allMembers = state.tasks
-                .flatMap { it.assignees }
-                .distinct()
-                .associateWith { it }
-
             val sheet = FilterBottomSheet()
-            sheet.setMembers(allMembers)
+            sheet.setMembers(state.memberNames)
             sheet.setCurrentFilter(state.filter)
             sheet.onFilterApplied = { filter -> viewModel.setFilter(filter) }
             sheet.onFilterReset = { viewModel.resetFilter() }

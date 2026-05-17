@@ -1,6 +1,7 @@
 package edu.bluejack252.hwixel.ui.project.members
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -58,15 +59,20 @@ class MembersFragment : Fragment() {
         viewModel.uiState.observe(viewLifecycleOwner, ::render)
         viewModel.actionResult.observe(viewLifecycleOwner) { result ->
             result ?: return@observe
-            val msgRes = when (result) {
-                "invite_success" -> R.string.invite_success
-                "user_not_found" -> R.string.invite_user_not_found
-                "no_permission" -> R.string.error_no_permission
-                "role_updated" -> R.string.member_role_updated
-                "status_toggled" -> R.string.member_status_toggled
-                else -> R.string.error_generic
+            val message = when {
+                result == "invite_success" -> getString(R.string.invite_success)
+                result == "user_not_found" -> getString(R.string.invite_user_not_found)
+                result == "no_permission" -> getString(R.string.error_no_permission)
+                result == "role_updated" -> getString(R.string.member_role_updated)
+                result == "status_toggled" -> getString(R.string.member_status_toggled)
+                result.startsWith("error:") -> {
+                    val detail = result.removePrefix("error:").ifBlank { getString(R.string.error_generic) }
+                    Log.e(TAG, "Member action failed: $detail")
+                    getString(R.string.invite_failed_format, detail)
+                }
+                else -> getString(R.string.error_generic)
             }
-            Snackbar.make(binding.root, msgRes, Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
             viewModel.consumeActionResult()
         }
         binding.inviteFab.setOnClickListener { showInviteDialog() }
@@ -111,5 +117,9 @@ class MembersFragment : Fragment() {
     override fun onDestroyView() {
         _binding = null
         super.onDestroyView()
+    }
+
+    private companion object {
+        const val TAG = "MembersFragment"
     }
 }

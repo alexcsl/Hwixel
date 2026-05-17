@@ -1,86 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <ProgressBar
-            android:id="@+id/analyticsLoadingIndicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" />
-
-        <TextView
-            android:id="@+id/emptyAnalyticsTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="24dp"
-            android:text="@string/analytics_empty"
-            android:visibility="gone" />
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/analyticsContentGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:orientation="vertical">
 
+            <!-- Header -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:background="@drawable/bg_header_gradient"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="8dp"
+                android:paddingTop="48dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="16dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dateRangeButton"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                <ImageButton
+                    android:id="@+id/backButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/back_button_description"
+                    android:src="@drawable/ic_arrow_back"
+                    app:tint="@color/text_primary" />
+
+                <TextView
+                    android:id="@+id/analyticsTitle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/analytics_pick_date_range" />
+                    android:text="@string/analytics_title"
+                    android:textColor="@color/text_primary"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/clearDateRangeButton"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/analytics_clear_range"
-                    android:visibility="gone" />
             </LinearLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/analytics_completed_distribution"
-            android:textAppearance="?attr/textAppearanceTitleMedium" />
-
-        <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/completedPieChart"
-            android:layout_width="match_parent"
-            android:layout_height="260dp"
-            android:layout_marginTop="8dp" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/teamHealthCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="2dp">
-
+            <!-- Date Range Filter Card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_glass_card"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
                 android:orientation="vertical"
                 android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/date_range_label"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="10dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -88,73 +73,156 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/startDateButton"
+                        style="@style/Widget.HWiXeL.Button.Ghost"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/analytics_team_health"
-                        android:textAppearance="?attr/textAppearanceTitleMedium" />
+                        android:text="@string/start_date_button" />
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/teamHealthStatusChip"
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/analytics_health_pending" />
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/date_range_separator"
+                        android:textColor="@color/text_hint" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/endDateButton"
+                        style="@style/Widget.HWiXeL.Button.Ghost"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/end_date_button" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/applyFilterButton"
+                        style="@style/Widget.HWiXeL.Button.Primary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/apply_filter_button" />
+
                 </LinearLayout>
 
-                <ProgressBar
-                    android:id="@+id/teamHealthProgressIndicator"
-                    style="?android:attr/progressBarStyleSmall"
+            </LinearLayout>
+
+            <!-- Pie Chart Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_glass_card"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/pieChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="240dp" />
+
+                <!-- Horizontal legend below pie chart -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/legendRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:nestedScrollingEnabled="false"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_analytics_member" />
+
+            </LinearLayout>
+
+            <!-- Team Health Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_glass_card"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:visibility="gone" />
+                    android:text="@string/team_health_title"
+                    style="@style/TextAppearance.HWiXeL.SectionHeader"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Gradient status strip -->
+                <View
+                    android:id="@+id/teamHealthStatusView"
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:background="@color/brand_violet"
+                    android:layout_marginBottom="12dp" />
 
                 <TextView
-                    android:id="@+id/teamHealthSummaryTextView"
-                    android:layout_width="match_parent"
+                    android:id="@+id/teamHealthStatusText"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/analytics_health_waiting" />
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="6dp"
+                    tools:text="@string/team_health_status_good" />
 
                 <TextView
-                    android:id="@+id/teamHealthRecommendationsTextView"
+                    android:id="@+id/teamHealthSummaryText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp" />
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="10dp"
+                    tools:text="@string/team_health_summary_placeholder" />
 
                 <TextView
-                    android:id="@+id/teamHealthErrorTextView"
+                    android:id="@+id/recommendationsText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textColor="@android:color/holo_red_dark"
-                    android:visibility="gone" />
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp"
+                    android:layout_marginBottom="14dp"
+                    tools:text="@string/recommendations_placeholder" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/refreshHealthButton"
-                    style="@style/Widget.Material3.Button.TextButton"
+                    android:id="@+id/analyzeButton"
+                    style="@style/Widget.HWiXeL.Button.Primary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/analytics_refresh_health" />
+                    android:text="@string/analyze_with_ai_button" />
+
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/analytics_member_breakdown"
-            android:textAppearance="?attr/textAppearanceTitleMedium" />
+            <!-- Per-Member Contribution Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/member_contributions_title"
+                style="@style/TextAppearance.HWiXeL.SectionHeader"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/membersRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:nestedScrollingEnabled="false"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/memberContributionRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="24dp"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_analytics_member" />
+
         </LinearLayout>
-    </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

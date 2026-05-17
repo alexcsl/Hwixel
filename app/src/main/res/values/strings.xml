@@ -52,6 +52,9 @@
     <string name="nav_profile">Profile</string>
     <string name="notifications_placeholder">Notifications will be built in Phase 10.</string>
     <string name="profile_placeholder">Profile and settings will be built in Phase 11.</string>
+    <string name="logout_button">Log out</string>
+    <string name="logout_confirm_title">Log out?</string>
+    <string name="logout_confirm_message">You will return to the login screen.</string>
 
     <!-- Project Hub -->
     <string name="project_hub_title">Project Hub</string>

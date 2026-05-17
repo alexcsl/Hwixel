@@ -8,7 +8,9 @@ import androidx.lifecycle.viewModelScope
 import edu.bluejack252.hwixel.data.model.EvaluationSubmission
 import edu.bluejack252.hwixel.data.model.ProjectMember
 import edu.bluejack252.hwixel.data.repository.EvalRepository
+import edu.bluejack252.hwixel.util.constants.Constants
 import kotlinx.coroutines.launch
+import kotlin.math.round
 
 class PeerEvalViewModel(
     private val repository: EvalRepository,
@@ -41,12 +43,12 @@ class PeerEvalViewModel(
         private set
 
     private val periodsMediator = MediatorLiveData<List<String>>()
+    private val periodsSource = repository.observePeriods(projectId)
     private var periodOpenSource: LiveData<Boolean>? = null
     private var submittedSource: LiveData<Map<String, EvaluationSubmission>>? = null
     private var receivedSource: LiveData<List<EvaluationSubmission>>? = null
 
     init {
-        val periodsSource = repository.observePeriods(projectId)
         periodsMediator.addSource(periodsSource) { ids ->
             _periods.value = ids
             val latest = ids.lastOrNull()
@@ -55,7 +57,6 @@ class PeerEvalViewModel(
                 subscribeToPeriod(latest)
             }
         }
-        periodsMediator.observeForever { }
     }
 
     private fun subscribeToPeriod(periodId: String) {
@@ -86,7 +87,7 @@ class PeerEvalViewModel(
     }
 
     fun togglePeriodOpen() {
-        if (currentUserRole != "Team Lead") {
+        if (currentUserRole != Constants.ROLE_TEAM_LEAD) {
             _uiState.value = PeerEvalUiState.Error("lead_only")
             return
         }
@@ -148,9 +149,10 @@ class PeerEvalViewModel(
         repository.fetchAllReceivedSubmissions(projectId, evaluateeId)
             .onSuccess { submissions ->
                 if (submissions.isNotEmpty()) {
-                    val avg = submissions.map { sub ->
+                    val rawAvg = submissions.map { sub ->
                         (sub.communication + sub.quality + sub.reliability + sub.effort) / 4f
                     }.average().toFloat()
+                    val avg = round(rawAvg * 10f) / 10f
                     repository.updateAveragePeerRating(evaluateeId, avg)
                 }
             }
@@ -170,6 +172,6 @@ class PeerEvalViewModel(
         periodOpenSource?.let { periodsMediator.removeSource(it) }
         submittedSource?.let { periodsMediator.removeSource(it) }
         receivedSource?.let { periodsMediator.removeSource(it) }
-        periodsMediator.removeSource(repository.observePeriods(projectId))
+        periodsMediator.removeSource(periodsSource)
     }
 }

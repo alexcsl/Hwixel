@@ -40,6 +40,22 @@
         <action
             android:id="@+id/action_projectHubFragment_to_createEditTaskFragment"
             app:destination="@id/createEditTaskFragment" />
+        <action
+            android:id="@+id/action_projectHubFragment_to_attendanceFragment"
+            app:destination="@id/attendanceFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/attendanceFragment"
+        android:name="edu.bluejack252.hwixel.ui.project.attendance.AttendanceFragment"
+        android:label="@string/attendance_title">
+        <argument
+            android:name="projectId"
+            app:argType="string" />
+        <argument
+            android:name="projectName"
+            app:argType="string"
+            android:defaultValue="" />
     </fragment>
 
     <fragment

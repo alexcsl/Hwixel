@@ -2,8 +2,9 @@ package edu.bluejack252.hwixel.ui.project.files
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
+import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import edu.bluejack252.hwixel.data.model.FileLink
 import edu.bluejack252.hwixel.data.repository.FileRepository
@@ -19,13 +20,18 @@ class FileRepoViewModel(
 
     val files: LiveData<List<FileLink>> = repository.observeFiles(projectId)
 
-    val versionHistory: LiveData<List<FileLink>> = Transformations.map(files) { list ->
+    val versionHistory: LiveData<List<FileLink>> = files.map { list ->
         list.filter { it.versionNotes.isNotBlank() }.sortedBy { it.id }
     }
 
     fun addFile(label: String, url: String, type: String, versionNotes: String) {
         if (label.isBlank() || url.isBlank()) {
             _uiState.value = FileRepoUiState.Error("empty_fields")
+            return
+        }
+        val parsedUrl = Uri.parse(url.trim())
+        if (parsedUrl.scheme !in setOf("http", "https")) {
+            _uiState.value = FileRepoUiState.Error("invalid_url")
             return
         }
         _uiState.value = FileRepoUiState.Loading

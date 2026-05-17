@@ -87,7 +87,9 @@ class FileRepoFragment : Fragment() {
             override fun onMove(rv: RecyclerView, vh: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder) = false
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val file = filesAdapter.currentList[viewHolder.adapterPosition]
+                val position = viewHolder.bindingAdapterPosition
+                if (position == RecyclerView.NO_POSITION) return
+                val file = filesAdapter.currentList[position]
                 viewModel.deleteFile(file.id)
             }
 
@@ -153,6 +155,7 @@ class FileRepoFragment : Fragment() {
                     loading.isVisible = false
                     val msg = when (state.message) {
                         "empty_fields" -> getString(R.string.file_error_empty_fields)
+                        "invalid_url" -> getString(R.string.file_error_invalid_url)
                         else -> state.message.ifBlank { getString(R.string.error_generic) }
                     }
                     Snackbar.make(view, msg, Snackbar.LENGTH_SHORT).show()

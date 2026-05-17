@@ -138,8 +138,88 @@
                     app:trackCornerRadius="3dp"
                     app:trackThickness="6dp" />
 
+                <!-- Quick action buttons row -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="4dp"
+                    android:background="@color/glass_border" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/attendanceButton"
+                        style="@style/Widget.HWiXeL.Button.Ghost"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="1"
+                        android:text="@string/attendance_title"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/peerEvalButton"
+                        style="@style/Widget.HWiXeL.Button.Ghost"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/eval_title"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+                <!-- Recent Activity -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="4dp"
+                    android:background="@color/glass_border" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/hub_recent_activity"
+                    android:textAppearance="@style/TextAppearance.HWiXeL.SectionHeader" />
+
+                <TextView
+                    android:id="@+id/emptyActivityTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/hub_no_activity"
+                    android:textColor="@color/text_hint"
+                    android:textSize="13sp"
+                    android:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/activityRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:nestedScrollingEnabled="false" />
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
+
+        <!-- FAB to create a new project -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addProjectFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/hub_add_project"
+            android:src="@drawable/ic_add"
+            app:backgroundTint="@color/brand_violet"
+            app:tint="@color/white" />
 
     </FrameLayout>
 

@@ -1,0 +1,43 @@
+package edu.bluejack252.hwixel.ui.notifications
+
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import edu.bluejack252.hwixel.data.model.Notification
+import edu.bluejack252.hwixel.data.repository.NotificationRepository
+import kotlinx.coroutines.launch
+
+class NotificationsViewModel(
+    private val repository: NotificationRepository,
+    private val currentUserId: String
+) : ViewModel() {
+
+    private val _uiState = MutableLiveData<NotificationsUiState>(NotificationsUiState.Idle)
+    val uiState: LiveData<NotificationsUiState> = _uiState
+
+    val notifications: LiveData<List<Notification>> = repository.observeNotifications(currentUserId)
+
+    val unreadCount: LiveData<Int> = Transformations.map(notifications) { list ->
+        list.count { !it.isRead }
+    }
+
+    fun markRead(notifId: String) {
+        viewModelScope.launch {
+            repository.markRead(currentUserId, notifId)
+        }
+    }
+
+    fun markAllRead() {
+        _uiState.value = NotificationsUiState.Loading
+        viewModelScope.launch {
+            val result = repository.markAllRead(currentUserId)
+            _uiState.value = if (result.isSuccess) {
+                NotificationsUiState.MarkedAllRead
+            } else {
+                NotificationsUiState.Error(result.exceptionOrNull()?.message ?: "")
+            }
+        }
+    }
+}

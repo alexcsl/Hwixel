@@ -110,7 +110,7 @@
         <item name="android:paddingBottom">14dp</item>
         <item name="cornerRadius">14dp</item>
         <item name="elevation">0dp</item>
-        <item name="stateListAnimator">@null</item>
+        <item name="android:stateListAnimator">@null</item>
     </style>
 
     <style name="Widget.HWiXeL.Button.Ghost" parent="Widget.MaterialComponents.Button.OutlinedButton">

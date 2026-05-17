@@ -30,7 +30,7 @@ class AttendanceReminderWorker(
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_attendance)
             .setContentTitle(context.getString(R.string.attendance_next_session_label))
-            .setContentText("$projectName — $sessionDate")
+            .setContentText("$projectName - $sessionDate")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()

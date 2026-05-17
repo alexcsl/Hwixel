@@ -18,6 +18,7 @@ interface AuthRemoteSource {
 interface ProjectRemoteSource {
     fun observeProjects(): LiveData<List<Project>>
     fun observeProject(projectId: String): LiveData<Project?>
+    suspend fun fetchProjectOnce(projectId: String): Project? = null
     suspend fun createProject(project: Project)
     suspend fun updateProject(project: Project)
     suspend fun updateCompletionPercentage(projectId: String, percentage: Float)
@@ -33,7 +34,7 @@ interface TaskRemoteSource {
     suspend fun fetchTasksOnce(projectId: String): List<Task>
     suspend fun createTask(task: Task)
     suspend fun updateTask(task: Task)
-    suspend fun updateTaskStatus(projectId: String, taskId: String, status: String)
+    suspend fun updateTaskStatus(projectId: String, taskId: String, status: String, completedAt: Long = 0L)
     suspend fun addHistoryEntry(projectId: String, taskId: String, entry: HistoryEntry)
     suspend fun addComment(projectId: String, taskId: String, comment: Comment)
     suspend fun updateSubtask(projectId: String, taskId: String, subtaskId: String, isDone: Boolean)
@@ -43,7 +44,9 @@ interface TaskRemoteSource {
 interface UserRemoteSource {
     fun observeUsers(): LiveData<List<User>>
     fun observeUser(userId: String): LiveData<User?>
+    suspend fun fetchUser(userId: String): User? = null
     suspend fun upsertUser(user: User)
+    suspend fun updateBadges(userId: String, badges: List<String>) = Unit
     suspend fun findByEmail(email: String): User?
     suspend fun writeNotification(userId: String, notifId: String, payload: Map<String, Any>)
 }

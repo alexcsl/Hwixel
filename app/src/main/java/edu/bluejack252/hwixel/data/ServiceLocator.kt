@@ -13,6 +13,8 @@ import edu.bluejack252.hwixel.data.repository.AuthRepository
 import edu.bluejack252.hwixel.data.repository.AuthRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
 import edu.bluejack252.hwixel.data.repository.ProjectRepositoryImpl
+import edu.bluejack252.hwixel.data.repository.ProfileSettingsRepository
+import edu.bluejack252.hwixel.data.repository.SharedPrefsProfileSettingsRepository
 import edu.bluejack252.hwixel.data.repository.TaskRepository
 import edu.bluejack252.hwixel.data.repository.TaskRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.TeamHealthRepository
@@ -40,6 +42,7 @@ object ServiceLocator {
     private var evalRepository: EvalRepository? = null
     private var fileRepository: FileRepository? = null
     private var notificationRepository: NotificationRepository? = null
+    private var profileSettingsRepository: ProfileSettingsRepository? = null
 
     fun getAuthRepository(context: Context): AuthRepository {
         return authRepository ?: AuthRepositoryImpl(
@@ -68,7 +71,8 @@ object ServiceLocator {
             firebaseSource = TaskFirebaseSource(),
             localDao = HwixelDatabase.getInstance(context).taskDao(),
             projectSource = ProjectFirebaseSource(),
-            notifSource = NotificationFirebaseSource()
+            notifSource = NotificationFirebaseSource(),
+            userSource = UserFirebaseSource()
         ).also { taskRepository = it }
     }
 
@@ -103,4 +107,9 @@ object ServiceLocator {
     }
 
     fun getNotificationSource(): NotificationFirebaseSource = NotificationFirebaseSource()
+
+    fun getProfileSettingsRepository(context: Context): ProfileSettingsRepository {
+        return profileSettingsRepository ?: SharedPrefsProfileSettingsRepository(context)
+            .also { profileSettingsRepository = it }
+    }
 }

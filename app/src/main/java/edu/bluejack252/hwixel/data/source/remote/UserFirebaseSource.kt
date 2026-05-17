@@ -47,8 +47,24 @@ open class UserFirebaseSource(
         return liveData
     }
 
+    override suspend fun fetchUser(userId: String): User? = suspendCoroutine { continuation ->
+        usersRef.child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                continuation.resume(snapshot.getValue(User::class.java)?.copy(id = snapshot.key.orEmpty()))
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                continuation.resumeWithException(error.toException())
+            }
+        })
+    }
+
     override suspend fun upsertUser(user: User) {
         usersRef.child(user.id).setValue(user).awaitResult()
+    }
+
+    override suspend fun updateBadges(userId: String, badges: List<String>) {
+        usersRef.child(userId).child("badges").setValue(badges).awaitResult()
     }
 
     override suspend fun findByEmail(email: String): User? = suspendCoroutine { continuation ->

@@ -1,6 +1,7 @@
 package edu.bluejack252.hwixel.util
 
 import android.content.Context
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
@@ -15,12 +16,12 @@ object DeadlineScheduler {
 
         val now = System.currentTimeMillis()
         val intervals = listOf(
-            Triple("24h", 24 * 60 * 60 * 1000L, deadlineMs - 24 * 60 * 60 * 1000L - now),
-            Triple("1h",  60 * 60 * 1000L,       deadlineMs - 60 * 60 * 1000L - now),
-            Triple("15m", 15 * 60 * 1000L,        deadlineMs - 15 * 60 * 1000L - now)
+            "24h" to deadlineMs - 24 * 60 * 60 * 1000L - now,
+            "1h" to deadlineMs - 60 * 60 * 1000L - now,
+            "15m" to deadlineMs - 15 * 60 * 1000L - now
         )
 
-        intervals.forEach { (label, _, delay) ->
+        intervals.forEach { (label, delay) ->
             if (delay > 0) {
                 val request = OneTimeWorkRequestBuilder<DeadlineReminderWorker>()
                     .setInitialDelay(delay, TimeUnit.MILLISECONDS)
@@ -33,7 +34,11 @@ object DeadlineScheduler {
                     )
                     .addTag("deadline_$taskId")
                     .build()
-                wm.enqueue(request)
+                wm.enqueueUniqueWork(
+                    "deadline_${taskId}_$label",
+                    ExistingWorkPolicy.REPLACE,
+                    request
+                )
             }
         }
     }

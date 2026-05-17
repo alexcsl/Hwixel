@@ -2,8 +2,8 @@ package edu.bluejack252.hwixel.ui.notifications
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import edu.bluejack252.hwixel.data.model.Notification
 import edu.bluejack252.hwixel.data.repository.NotificationRepository
@@ -19,7 +19,7 @@ class NotificationsViewModel(
 
     val notifications: LiveData<List<Notification>> = repository.observeNotifications(currentUserId)
 
-    val unreadCount: LiveData<Int> = Transformations.map(notifications) { list ->
+    val unreadCount: LiveData<Int> = notifications.map { list ->
         list.count { !it.isRead }
     }
 

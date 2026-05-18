@@ -99,6 +99,14 @@ class TaskDetailViewModel(
     }
 
     fun toggleSubtask(subtaskId: String, isDone: Boolean) {
+        currentTask?.let { task ->
+            task.subtasks[subtaskId]?.let { subtask ->
+                currentTask = task.copy(
+                    subtasks = task.subtasks + (subtaskId to subtask.copy(isDone = isDone))
+                )
+                publishState()
+            }
+        }
         viewModelScope.launch {
             taskRepository.updateSubtask(projectId, taskId, subtaskId, isDone)
         }

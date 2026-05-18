@@ -83,6 +83,7 @@ class ProjectHubFragment : Fragment() {
     private fun setupViewPager() {
         val pagerAdapter = ProjectPagerAdapter(childFragmentManager, lifecycle, args.projectId)
         binding.viewPager.adapter = pagerAdapter
+        binding.viewPager.isUserInputEnabled = false
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = when (position) {
                 0 -> getString(R.string.hub_tab_tasks)

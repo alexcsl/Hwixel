@@ -7,6 +7,8 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="divider_line">#FFE0E0E0</color>
+    <color name="avatar_circle_background">#FFE8EEF7</color>
     <color name="kanban_column_header_background">#FFE8EEF7</color>
     <color name="analytics_healthy">#FF2E7D32</color>
     <color name="analytics_mild">#FFF9A825</color>

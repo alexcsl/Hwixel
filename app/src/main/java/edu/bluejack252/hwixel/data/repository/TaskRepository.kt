@@ -1,8 +1,6 @@
 package edu.bluejack252.hwixel.data.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.map
-import edu.bluejack252.hwixel.data.mapper.toDomain
 import edu.bluejack252.hwixel.data.mapper.toEntity
 import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.model.HistoryEntry
@@ -42,11 +40,11 @@ class TaskRepositoryImpl(
 ) : TaskRepository {
 
     override fun observeAllTasks(): LiveData<List<Task>> {
-        return localDao.observeAll().map { entities -> entities.map { it.toDomain() } }
+        return firebaseSource.observeAllTasks()
     }
 
     override fun observeTasks(projectId: String): LiveData<List<Task>> {
-        return localDao.observeByProject(projectId).map { entities -> entities.map { it.toDomain() } }
+        return firebaseSource.observeTasks(projectId)
     }
 
     override fun observeTask(projectId: String, taskId: String): LiveData<Task?> {

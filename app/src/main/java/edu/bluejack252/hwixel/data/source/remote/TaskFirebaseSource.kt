@@ -3,6 +3,7 @@ package edu.bluejack252.hwixel.data.source.remote
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseException
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
@@ -25,10 +26,7 @@ open class TaskFirebaseSource(
                 liveData.value = snapshot.children.flatMap { projectSnapshot ->
                     val projectId = projectSnapshot.key.orEmpty()
                     projectSnapshot.children.mapNotNull { taskSnapshot ->
-                        taskSnapshot.getValue(Task::class.java)?.copy(
-                            id = taskSnapshot.key.orEmpty(),
-                            projectId = projectId
-                        )
+                        taskSnapshot.toTaskOrNull(projectId)
                     }
                 }
             }
@@ -45,10 +43,7 @@ open class TaskFirebaseSource(
         tasksRef.child(projectId).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 liveData.value = snapshot.children.mapNotNull { child ->
-                    child.getValue(Task::class.java)?.copy(
-                        id = child.key.orEmpty(),
-                        projectId = projectId
-                    )
+                    child.toTaskOrNull(projectId)
                 }
             }
 
@@ -63,10 +58,7 @@ open class TaskFirebaseSource(
         val liveData = MutableLiveData<Task?>()
         tasksRef.child(projectId).child(taskId).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                liveData.value = snapshot.getValue(Task::class.java)?.copy(
-                    id = snapshot.key.orEmpty(),
-                    projectId = projectId
-                )
+                liveData.value = snapshot.toTaskOrNull(projectId)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -81,10 +73,7 @@ open class TaskFirebaseSource(
             tasksRef.child(projectId).addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val tasks = snapshot.children.mapNotNull { child ->
-                        child.getValue(Task::class.java)?.copy(
-                            id = child.key.orEmpty(),
-                            projectId = projectId
-                        )
+                        child.toTaskOrNull(projectId)
                     }
                     continuation.resume(tasks)
                 }
@@ -133,5 +122,17 @@ open class TaskFirebaseSource(
 
     override suspend fun deleteTask(projectId: String, taskId: String) {
         tasksRef.child(projectId).child(taskId).removeValue().awaitResult()
+    }
+
+    private fun DataSnapshot.toTaskOrNull(projectId: String): Task? {
+        if (value !is Map<*, *>) return null
+        return try {
+            getValue(Task::class.java)?.copy(
+                id = key.orEmpty(),
+                projectId = projectId
+            )
+        } catch (exception: DatabaseException) {
+            null
+        }
     }
 }

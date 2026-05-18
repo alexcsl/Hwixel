@@ -1,7 +1,9 @@
 package edu.bluejack252.hwixel.data.repository
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import edu.bluejack252.hwixel.data.mapper.toEntity
+import edu.bluejack252.hwixel.data.model.Notification
 import edu.bluejack252.hwixel.data.model.User
 import edu.bluejack252.hwixel.data.source.local.UserDao
 import edu.bluejack252.hwixel.data.source.remote.UserRemoteSource
@@ -9,9 +11,11 @@ import edu.bluejack252.hwixel.data.source.remote.UserRemoteSource
 interface UserRepository {
     fun observeUsers(): LiveData<List<User>>
     fun observeUser(userId: String): LiveData<User?>
+    fun observeNotifications(userId: String): LiveData<List<Notification>> = MutableLiveData(emptyList())
     suspend fun upsertUser(user: User): Result<Unit>
     suspend fun findUserByEmail(email: String): Result<User?>
     suspend fun writeNotification(userId: String, notifId: String, payload: Map<String, Any>): Result<Unit>
+    suspend fun markNotificationRead(userId: String, notifId: String): Result<Unit> = Result.success(Unit)
 }
 
 class UserRepositoryImpl(
@@ -25,6 +29,10 @@ class UserRepositoryImpl(
 
     override fun observeUser(userId: String): LiveData<User?> {
         return firebaseSource.observeUser(userId)
+    }
+
+    override fun observeNotifications(userId: String): LiveData<List<Notification>> {
+        return firebaseSource.observeNotifications(userId)
     }
 
     override suspend fun upsertUser(user: User): Result<Unit> = runCatching {
@@ -42,5 +50,12 @@ class UserRepositoryImpl(
         payload: Map<String, Any>
     ): Result<Unit> = runCatching {
         firebaseSource.writeNotification(userId, notifId, payload)
+    }
+
+    override suspend fun markNotificationRead(
+        userId: String,
+        notifId: String
+    ): Result<Unit> = runCatching {
+        firebaseSource.markNotificationRead(userId, notifId)
     }
 }

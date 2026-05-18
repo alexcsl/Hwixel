@@ -103,6 +103,63 @@ class DashboardViewModelTest {
         assertEquals(75f, result.single().completionPercentage)
     }
 
+    @Test
+    fun projectItemsIncludeProjectsWhereCurrentUserWasInvited() {
+        val projects = listOf(
+            Project(
+                id = "invited-project",
+                name = "Group Assignment",
+                members = mapOf(
+                    "owner" to ProjectMember(userId = "owner", role = "Team Lead", status = Constants.MEMBER_STATUS_ACTIVE),
+                    "invited-user" to ProjectMember(userId = "invited-user", role = "Other", status = Constants.MEMBER_STATUS_ACTIVE)
+                )
+            )
+        )
+
+        val result = viewModel.buildProjectItems(projects, "invited-user")
+
+        assertEquals(listOf("invited-project"), result.map { it.id })
+        assertEquals("Other", result.single().role)
+    }
+
+    @Test
+    fun projectItemsHideProjectsWhereCurrentUserIsNotMember() {
+        val projects = listOf(
+            Project(id = "other", name = "Zoo", members = mapOf("other-user" to ProjectMember("other-user"))),
+            Project(
+                id = "mine",
+                name = "Alpha",
+                members = mapOf(
+                    "current-user" to ProjectMember(
+                        "current-user",
+                        role = "Team Lead",
+                        status = Constants.MEMBER_STATUS_ACTIVE
+                    )
+                )
+            )
+        )
+
+        val result = viewModel.buildProjectItems(projects, "current-user")
+
+        assertEquals(listOf("mine"), result.map { it.id })
+        assertEquals("Team Lead", result.single().role)
+    }
+
+    @Test
+    fun projectItemsIncludeCurrentUserMembershipEvenWhenStatusIsMissing() {
+        val projects = listOf(
+            Project(
+                id = "legacy-member",
+                name = "Legacy",
+                members = mapOf("current-user" to ProjectMember(userId = "current-user", role = "Other"))
+            )
+        )
+
+        val result = viewModel.buildProjectItems(projects, "current-user")
+
+        assertEquals(listOf("legacy-member"), result.map { it.id })
+    }
+
     private class FakeProjectRepository : ProjectRepository {
         override fun observeProjects(): LiveData<List<Project>> = MutableLiveData(emptyList())
         override fun observeProject(projectId: String): LiveData<Project?> = MutableLiveData(null)

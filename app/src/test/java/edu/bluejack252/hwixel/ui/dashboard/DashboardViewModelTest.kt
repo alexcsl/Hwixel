@@ -160,6 +160,38 @@ class DashboardViewModelTest {
         assertEquals(listOf("legacy-member"), result.map { it.id })
     }
 
+    @Test
+    fun projectItemsHideProjectsWhereCurrentUserIsInactive() {
+        val projects = listOf(
+            Project(
+                id = "inactive-member",
+                name = "Hidden",
+                members = mapOf(
+                    "current-user" to ProjectMember(
+                        userId = "current-user",
+                        role = "Other",
+                        status = Constants.MEMBER_STATUS_INACTIVE
+                    )
+                )
+            ),
+            Project(
+                id = "active-member",
+                name = "Shown",
+                members = mapOf(
+                    "current-user" to ProjectMember(
+                        userId = "current-user",
+                        role = "Other",
+                        status = Constants.MEMBER_STATUS_ACTIVE
+                    )
+                )
+            )
+        )
+
+        val result = viewModel.buildProjectItems(projects, "current-user")
+
+        assertEquals(listOf("active-member"), result.map { it.id })
+    }
+
     private class FakeProjectRepository : ProjectRepository {
         override fun observeProjects(): LiveData<List<Project>> = MutableLiveData(emptyList())
         override fun observeProject(projectId: String): LiveData<Project?> = MutableLiveData(null)

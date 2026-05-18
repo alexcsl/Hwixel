@@ -76,7 +76,8 @@ class DashboardViewModel(
     fun buildProjectItems(projects: List<Project>, userId: String): List<DashboardProjectUi> {
         return projects
             .filter { project ->
-                project.members.containsKey(userId)
+                val member = project.members[userId]
+                member != null && member.status != Constants.MEMBER_STATUS_INACTIVE
             }
             .sortedBy { project -> project.name.lowercase() }
             .map { project ->

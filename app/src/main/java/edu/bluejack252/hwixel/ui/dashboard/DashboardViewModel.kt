@@ -43,7 +43,7 @@ class DashboardViewModel(
         if (hasLoaded && currentUserId == userId) return
         hasLoaded = true
         currentUserId = userId
-        _uiState.addSource(projectRepository.observeProjects()) { value ->
+        _uiState.addSource(projectRepository.observeProjectsForUser(userId)) { value ->
             projects = value
             publishState()
         }
@@ -76,9 +76,9 @@ class DashboardViewModel(
     fun buildProjectItems(projects: List<Project>, userId: String): List<DashboardProjectUi> {
         return projects
             .filter { project ->
-                val member = project.members[userId]
-                project.members.isEmpty() || (member != null && member.status != Constants.MEMBER_STATUS_INACTIVE)
+                project.members.containsKey(userId)
             }
+            .sortedBy { project -> project.name.lowercase() }
             .map { project ->
                 DashboardProjectUi(
                     id = project.id,

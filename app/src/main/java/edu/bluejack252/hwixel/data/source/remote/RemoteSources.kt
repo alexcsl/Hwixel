@@ -1,8 +1,10 @@
 package edu.bluejack252.hwixel.data.source.remote
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.model.HistoryEntry
+import edu.bluejack252.hwixel.data.model.Notification
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
 import edu.bluejack252.hwixel.data.model.Task
@@ -17,6 +19,7 @@ interface AuthRemoteSource {
 
 interface ProjectRemoteSource {
     fun observeProjects(): LiveData<List<Project>>
+    fun observeProjectsForUser(userId: String): LiveData<List<Project>> = observeProjects()
     fun observeProject(projectId: String): LiveData<Project?>
     suspend fun createProject(project: Project): Project
     suspend fun updateProject(project: Project)
@@ -43,7 +46,9 @@ interface TaskRemoteSource {
 interface UserRemoteSource {
     fun observeUsers(): LiveData<List<User>>
     fun observeUser(userId: String): LiveData<User?>
+    fun observeNotifications(userId: String): LiveData<List<Notification>> = MutableLiveData(emptyList())
     suspend fun upsertUser(user: User)
     suspend fun findByEmail(email: String): User?
     suspend fun writeNotification(userId: String, notifId: String, payload: Map<String, Any>)
+    suspend fun markNotificationRead(userId: String, notifId: String) = Unit
 }

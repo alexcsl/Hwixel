@@ -50,7 +50,8 @@
     <string name="nav_dashboard">Dashboard</string>
     <string name="nav_notifications">Notifications</string>
     <string name="nav_profile">Profile</string>
-    <string name="notifications_placeholder">Notifications will be built in Phase 10.</string>
+    <string name="notifications_empty">No notifications yet.</string>
+    <string name="notification_invite_title">Project invitation</string>
     <string name="profile_placeholder">Profile and settings will be built in Phase 11.</string>
     <string name="logout_button">Log out</string>
     <string name="logout_confirm_title">Log out?</string>

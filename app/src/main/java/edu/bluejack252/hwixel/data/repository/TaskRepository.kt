@@ -54,6 +54,7 @@ class TaskRepositoryImpl(
     override suspend fun createTask(task: Task): Result<Unit> = runCatching {
         firebaseSource.createTask(task)
         localDao.upsert(task.toEntity())
+        recomputeCompletionPercentage(task.projectId)
     }
 
     override suspend fun updateTask(task: Task, actorId: String): Result<Unit> = runCatching {
@@ -70,6 +71,7 @@ class TaskRepositoryImpl(
             )
         }
         localDao.upsert(task.toEntity())
+        recomputeCompletionPercentage(task.projectId)
     }
 
     override suspend fun updateTaskStatus(
@@ -90,13 +92,8 @@ class TaskRepositoryImpl(
         val cached = localDao.getById(taskId)
         if (cached != null) localDao.upsert(cached.copy(status = newStatus))
 
+        val allTasks = recomputeCompletionPercentage(projectId)
         if (newStatus == Constants.STATUS_DONE && projectSource != null) {
-            val allTasks = firebaseSource.fetchTasksOnce(projectId)
-            val total = allTasks.size
-            val done = allTasks.count { it.status == Constants.STATUS_DONE }
-            val completionPct = if (total > 0) (done.toFloat() / total) * 100f else 0f
-            projectSource.updateCompletionPercentage(projectId, completionPct)
-
             val actorTasks = allTasks.filter { it.assignees.contains(actorId) }
             val actorCompleted = actorTasks.count { it.status == Constants.STATUS_DONE }
             val actorHighPri = actorTasks.count {
@@ -127,5 +124,17 @@ class TaskRepositoryImpl(
     override suspend fun deleteTask(task: Task): Result<Unit> = runCatching {
         firebaseSource.deleteTask(task.projectId, task.id)
         localDao.delete(task.toEntity())
+        recomputeCompletionPercentage(task.projectId)
+    }
+
+    private suspend fun recomputeCompletionPercentage(projectId: String): List<Task> {
+        val allTasks = firebaseSource.fetchTasksOnce(projectId)
+        if (projectSource != null) {
+            val total = allTasks.size
+            val done = allTasks.count { it.status == Constants.STATUS_DONE }
+            val completionPct = if (total > 0) (done.toFloat() / total) * 100f else 0f
+            projectSource.updateCompletionPercentage(projectId, completionPct)
+        }
+        return allTasks
     }
 }

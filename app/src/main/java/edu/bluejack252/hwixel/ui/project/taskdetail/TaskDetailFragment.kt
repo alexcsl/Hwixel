@@ -43,7 +43,8 @@ class TaskDetailFragment : Fragment() {
         TaskDetailViewModelFactory(
             projectId = args.projectId,
             taskId = args.taskId,
-            taskRepository = ServiceLocator.getTaskRepository(requireContext())
+            taskRepository = ServiceLocator.getTaskRepository(requireContext()),
+            userRepository = ServiceLocator.getUserRepository(requireContext())
         )
     }
 
@@ -122,7 +123,7 @@ class TaskDetailFragment : Fragment() {
 
     private fun render(state: TaskDetailUiState) {
         val task = state.task ?: return
-        renderTask(task)
+        renderTask(task, state.assigneeNames)
         attachmentAdapter.submitList(state.attachments)
         subtaskAdapter.submitList(state.subtasks)
         commentsAdapter.submitList(state.comments)
@@ -130,7 +131,7 @@ class TaskDetailFragment : Fragment() {
         binding.subtaskOverallProgress.isVisible = state.subtasks.isNotEmpty()
     }
 
-    private fun renderTask(task: Task) {
+    private fun renderTask(task: Task, assigneeNames: List<String>) {
         binding.taskTitleTextView.text = task.title
         binding.statusChip.text = task.status.replace("_", " ").replaceFirstChar { it.uppercase() }
         binding.priorityChip.text = task.priority.replaceFirstChar { it.uppercase() }
@@ -157,7 +158,7 @@ class TaskDetailFragment : Fragment() {
             binding.assigneesTextView.isVisible = true
             binding.assigneesTextView.text = getString(
                 R.string.task_detail_assignees_label,
-                task.assignees.joinToString(", ")
+                assigneeNames.joinToString(", ")
             )
         } else {
             binding.assigneesTextView.isVisible = false

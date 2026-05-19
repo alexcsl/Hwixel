@@ -4,10 +4,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.model.HistoryEntry
+import edu.bluejack252.hwixel.data.model.Project
+import edu.bluejack252.hwixel.data.model.ProjectMember
 import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.data.source.local.TaskDao
 import edu.bluejack252.hwixel.data.source.local.TaskEntity
+import edu.bluejack252.hwixel.data.source.remote.ProjectRemoteSource
 import edu.bluejack252.hwixel.data.source.remote.TaskRemoteSource
+import edu.bluejack252.hwixel.util.constants.Constants
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -16,7 +20,8 @@ import org.junit.Test
 class TaskRepositoryTest {
     private val firebaseSource = FakeTaskRemoteSource()
     private val localDao = FakeTaskDao()
-    private val repository = TaskRepositoryImpl(firebaseSource, localDao)
+    private val projectSource = FakeProjectRemoteSource()
+    private val repository = TaskRepositoryImpl(firebaseSource, localDao, projectSource)
 
     @Test
     fun createTaskWritesToFirebaseAndLocalCache() = runTest {
@@ -40,9 +45,43 @@ class TaskRepositoryTest {
         assertEquals(task.id, localDao.upsertedTask?.id)
     }
 
+    @Test
+    fun createTaskRecomputesCompletionPercentageAfterAddingTodoTask() = runTest {
+        firebaseSource.tasksForProject = listOf(
+            Task(id = "done", projectId = "project-1", status = Constants.STATUS_DONE),
+            Task(id = "new", projectId = "project-1", status = Constants.STATUS_TODO)
+        )
+
+        val result = repository.createTask(
+            Task(id = "new", projectId = "project-1", status = Constants.STATUS_TODO)
+        )
+
+        assertTrue(result.isSuccess)
+        assertEquals(50f, projectSource.updatedCompletionPercentage)
+    }
+
+    @Test
+    fun statusChangeAwayFromDoneRecomputesCompletionPercentage() = runTest {
+        firebaseSource.tasksForProject = listOf(
+            Task(id = "task-1", projectId = "project-1", status = Constants.STATUS_TODO),
+            Task(id = "task-2", projectId = "project-1", status = Constants.STATUS_DONE)
+        )
+
+        val result = repository.updateTaskStatus(
+            projectId = "project-1",
+            taskId = "task-1",
+            newStatus = Constants.STATUS_TODO,
+            actorId = "u1"
+        )
+
+        assertTrue(result.isSuccess)
+        assertEquals(50f, projectSource.updatedCompletionPercentage)
+    }
+
     private class FakeTaskRemoteSource : TaskRemoteSource {
         var createdTask: Task? = null
         var updatedTask: Task? = null
+        var tasksForProject: List<Task> = emptyList()
 
         override fun observeAllTasks(): LiveData<List<Task>> = MutableLiveData(emptyList())
 
@@ -50,7 +89,9 @@ class TaskRepositoryTest {
 
         override fun observeTask(projectId: String, taskId: String): LiveData<Task?> = MutableLiveData(null)
 
-        override suspend fun fetchTasksOnce(projectId: String): List<Task> = emptyList()
+        override suspend fun fetchTasksOnce(projectId: String): List<Task> {
+            return tasksForProject.filter { it.projectId == projectId }
+        }
 
         override suspend fun createTask(task: Task) {
             createdTask = task
@@ -74,6 +115,28 @@ class TaskRepositoryTest {
         override suspend fun updateSubtask(projectId: String, taskId: String, subtaskId: String, isDone: Boolean) = Unit
 
         override suspend fun deleteTask(projectId: String, taskId: String) = Unit
+    }
+
+    private class FakeProjectRemoteSource : ProjectRemoteSource {
+        var updatedCompletionPercentage: Float? = null
+
+        override fun observeProjects(): LiveData<List<Project>> = MutableLiveData(emptyList())
+
+        override fun observeProject(projectId: String): LiveData<Project?> = MutableLiveData(null)
+
+        override suspend fun createProject(project: Project): Project = project
+
+        override suspend fun updateProject(project: Project) = Unit
+
+        override suspend fun updateCompletionPercentage(projectId: String, percentage: Float) {
+            updatedCompletionPercentage = percentage
+        }
+
+        override suspend fun addMember(projectId: String, userId: String, member: ProjectMember) = Unit
+
+        override suspend fun updateMember(projectId: String, userId: String, member: ProjectMember) = Unit
+
+        override suspend fun updateMemberScore(projectId: String, userId: String, score: Float) = Unit
     }
 
     private class FakeTaskDao : TaskDao {

@@ -3,119 +3,28 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_main_gradient"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="20dp">
 
-    <!-- ===== HEADER ===== -->
-    <FrameLayout
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_header_gradient"
-        android:paddingTop="52dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="20dp">
+        android:text="@string/nav_notifications"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline4" />
 
-        <!-- Title row -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:background="@drawable/bg_glass_card_primary"
-                android:gravity="center">
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:src="@drawable/ic_notifications_24"
-                    app:tint="@color/brand_violet_light" />
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_weight="1"
-                android:fontFamily="sans-serif-medium"
-                android:text="@string/nav_notifications"
-                android:textColor="@color/text_primary"
-                android:textSize="20sp" />
-
-            <!-- Unread badge -->
-            <TextView
-                android:id="@+id/unreadCountBadge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_glass_card_primary"
-                android:fontFamily="sans-serif-medium"
-                android:minWidth="24dp"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="3dp"
-                android:textColor="@color/brand_violet_light"
-                android:textSize="12sp"
-                android:gravity="center"
-                android:visibility="gone" />
-
-            <!-- Mark all read -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/markAllReadButton"
-                style="@style/Widget.HWiXeL.Button.Ghost"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:layout_marginStart="8dp"
-                android:text="@string/notif_mark_all_read"
-                android:textSize="12sp" />
-        </LinearLayout>
-    </FrameLayout>
-
-    <!-- Loading indicator -->
-    <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/notifLoadingIndicator"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:indicatorColor="@color/brand_violet"
-        app:trackColor="@color/glass_fill" />
-
-    <!-- Content -->
-    <androidx.core.widget.NestedScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/notificationsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="20dp"
         android:layout_weight="1"
-        android:fillViewport="true"
-        android:padding="16dp"
-        android:clipToPadding="false">
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/emptyNotificationsTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_glass_card"
-                android:gravity="center"
-                android:padding="32dp"
-                android:text="@string/notif_empty"
-                android:textColor="@color/text_hint"
-                android:textSize="14sp"
-                android:visibility="gone" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/notificationsRecyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false" />
-
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
+    <TextView
+        android:id="@+id/emptyNotificationsTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/notifications_empty"
+        android:visibility="gone" />
 </LinearLayout>

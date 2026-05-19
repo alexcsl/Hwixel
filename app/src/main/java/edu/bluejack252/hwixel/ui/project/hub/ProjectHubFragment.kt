@@ -2,6 +2,7 @@ package edu.bluejack252.hwixel.ui.project.hub
 
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -62,7 +63,12 @@ class ProjectHubFragment : Fragment() {
             if (result.isSuccess) {
                 Snackbar.make(binding.root, R.string.project_created, Snackbar.LENGTH_SHORT).show()
             } else {
-                Snackbar.make(binding.root, R.string.project_create_failed, Snackbar.LENGTH_SHORT).show()
+                Log.e(TAG, "Failed to create project", result.exceptionOrNull())
+                val message = result.exceptionOrNull()?.localizedMessage
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { getString(R.string.project_create_failed_format, it) }
+                    ?: getString(R.string.project_create_failed)
+                Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
             }
             viewModel.consumeCreateResult()
         }
@@ -100,6 +106,7 @@ class ProjectHubFragment : Fragment() {
     private fun setupViewPager() {
         val pagerAdapter = ProjectPagerAdapter(childFragmentManager, lifecycle, args.projectId)
         binding.viewPager.adapter = pagerAdapter
+        binding.viewPager.isUserInputEnabled = false
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = when (position) {
                 0 -> getString(R.string.hub_tab_tasks)
@@ -180,5 +187,9 @@ class ProjectHubFragment : Fragment() {
     override fun onDestroyView() {
         _binding = null
         super.onDestroyView()
+    }
+
+    private companion object {
+        const val TAG = "ProjectHubFragment"
     }
 }

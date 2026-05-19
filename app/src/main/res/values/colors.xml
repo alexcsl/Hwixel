@@ -83,4 +83,5 @@
     <color name="teal_700">#FF0284C7</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="avatar_circle_background">#FFE8EEF7</color>
 </resources>

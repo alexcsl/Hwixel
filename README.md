@@ -22,6 +22,13 @@ Expected AI key entry (Jatevo GPT-5.5):
 gpt.api.key=your_jatevo_api_key
 ```
 
-The base URL (`https://lb.jatevo.ai/v1`) and model (`gpt-5.5`) are baked into `BuildConfig` from `app/build.gradle.kts`.
+Optional overrides:
+
+```properties
+gpt.base.url=https://lb.jatevo.ai/v1
+gpt.model=gpt-5.5
+```
+
+The Analytics Team Health card uses `GptApiSource` through `ServiceLocator.getTeamHealthRepository()`.
 
 Do not commit `local.properties`, `google-services.json`, keystores, or `keystore.properties`.

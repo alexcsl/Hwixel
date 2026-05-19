@@ -4,82 +4,51 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.progressindicator.LinearProgressIndicator
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.data.model.Notification
+import edu.bluejack252.hwixel.databinding.FragmentNotificationsBinding
 
 class NotificationsFragment : Fragment() {
+    private var _binding: FragmentNotificationsBinding? = null
+    private val binding get() = _binding!!
+    private val adapter = NotificationsAdapter(::onNotificationClicked)
 
     private val viewModel: NotificationsViewModel by viewModels {
-        NotificationsViewModelFactory(
-            repository = ServiceLocator.getNotificationRepository(),
-            currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-        )
+        NotificationsViewModelFactory(ServiceLocator.getUserRepository(requireContext()))
     }
-
-    private lateinit var adapter: NotificationAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_notifications, container, false)
+    ): View {
+        _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        adapter = NotificationAdapter { notif -> handleNotifTap(notif) }
-        view.findViewById<RecyclerView>(R.id.notificationsRecyclerView).apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = this@NotificationsFragment.adapter
+        binding.notificationsRecyclerView.adapter = adapter
+        viewModel.notifications.observe(viewLifecycleOwner) { notifications ->
+            adapter.submitList(notifications)
+            binding.emptyNotificationsTextView.isVisible = notifications.isEmpty()
         }
+        viewModel.load(FirebaseAuth.getInstance().currentUser?.uid.orEmpty())
+    }
 
-        view.findViewById<MaterialButton>(R.id.markAllReadButton).setOnClickListener {
-            viewModel.markAllRead()
-        }
-
-        val loading = view.findViewById<LinearProgressIndicator>(R.id.notifLoadingIndicator)
-        val emptyText = view.findViewById<TextView>(R.id.emptyNotificationsTextView)
-        val unreadBadge = view.findViewById<TextView>(R.id.unreadCountBadge)
-
-        viewModel.notifications.observe(viewLifecycleOwner) { list ->
-            adapter.submitList(list)
-            emptyText.isVisible = list.isEmpty()
-        }
-
-        viewModel.unreadCount.observe(viewLifecycleOwner) { count ->
-            if (count > 0) {
-                unreadBadge.isVisible = true
-                unreadBadge.text = count.toString()
-            } else {
-                unreadBadge.isVisible = false
-            }
-        }
-
-        viewModel.uiState.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                is NotificationsUiState.Loading -> loading.isVisible = true
-                is NotificationsUiState.MarkedAllRead -> {
-                    loading.isVisible = false
-                    Snackbar.make(view, getString(R.string.notif_marked_all_read), Snackbar.LENGTH_SHORT).show()
-                }
-                is NotificationsUiState.Error -> {
-                    loading.isVisible = false
-                    Snackbar.make(view, getString(R.string.error_generic), Snackbar.LENGTH_SHORT).show()
-                }
-                else -> loading.isVisible = false
-            }
+    private fun onNotificationClicked(notification: Notification) {
+        viewModel.markRead(notification.id)
+        if (notification.type == TYPE_INVITE && notification.referenceId.isNotBlank()) {
+            findNavController().navigate(
+                R.id.projectHubFragment,
+                bundleOf("projectId" to notification.referenceId)
+            )
         }
     }
 
@@ -105,5 +74,9 @@ class NotificationsFragment : Fragment() {
                 findNavController().navigate(action)
             }
         }
+    }
+
+    private companion object {
+        const val TYPE_INVITE = "invite"
     }
 }

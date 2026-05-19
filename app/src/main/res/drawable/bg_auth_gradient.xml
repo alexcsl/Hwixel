@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Base deep dark -->
+    <item>
+        <color android:color="#0D0B1E" />
+    </item>
+    <!-- Radial violet glow top-right -->
+    <item>
+        <shape android:shape="oval">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="400dp"
+                android:centerX="0.85"
+                android:centerY="0.1"
+                android:startColor="#5C2D9140"
+                android:endColor="#00000000" />
+        </shape>
+    </item>
+    <!-- Radial cyan glow bottom-left -->
+    <item>
+        <shape android:shape="oval">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="300dp"
+                android:centerX="0.1"
+                android:centerY="0.85"
+                android:startColor="#06B6D430"
+                android:endColor="#00000000" />
+        </shape>
+    </item>
+</layer-list>

@@ -4,96 +4,156 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/bg_glass_card_elevated"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:padding="24dp">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/task_filter"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+    <!-- Handle Bar -->
+    <View
+        android:layout_width="32dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/text_hint"
         android:layout_marginBottom="16dp" />
 
-    <!-- Assignee filter -->
+    <!-- Title -->
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/task_filter_assignee"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2" />
+        android:text="@string/filter_title"
+        android:textColor="@color/text_primary"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Assignee Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/filter_assignees_label"
+        style="@style/TextAppearance.HWiXeL.SectionHeader"
+        android:layout_marginBottom="8dp" />
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/assigneeChipGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginBottom="20dp"
         app:singleLine="false" />
 
-    <!-- Priority filter -->
+    <!-- Priority Section -->
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/filter_priority_label"
+        style="@style/TextAppearance.HWiXeL.SectionHeader"
+        android:layout_marginBottom="8dp" />
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/priorityToggleGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/task_filter_priority"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2" />
+        android:layout_marginBottom="20dp"
+        app:singleSelection="true"
+        app:selectionRequired="false">
 
-    <RadioGroup
-        android:id="@+id/priorityRadioGroup"
-        android:layout_width="match_parent"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/filterPriorityLowButton"
+            style="@style/Widget.HWiXeL.Button.Ghost"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/task_priority_low" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/filterPriorityMediumButton"
+            style="@style/Widget.HWiXeL.Button.Ghost"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/task_priority_medium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/filterPriorityHighButton"
+            style="@style/Widget.HWiXeL.Button.Ghost"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/task_priority_high" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/filterPriorityAllButton"
+            style="@style/Widget.HWiXeL.Button.Ghost"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/task_filter_priority_all" />
+
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <!-- Date Range Section -->
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="8dp">
+        android:text="@string/filter_date_label"
+        style="@style/TextAppearance.HWiXeL.SectionHeader"
+        android:layout_marginBottom="8dp" />
 
-        <RadioButton
-            android:id="@+id/priorityAll"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/task_filter_priority_all"
-            android:checked="true" />
-
-        <RadioButton
-            android:id="@+id/priorityLow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="@string/task_filter_priority_low" />
-
-        <RadioButton
-            android:id="@+id/priorityMedium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="@string/task_filter_priority_medium" />
-
-        <RadioButton
-            android:id="@+id/priorityHigh"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="@string/task_filter_priority_high" />
-
-    </RadioGroup>
-
-    <!-- Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="20dp"
-        android:gravity="end">
+        android:gravity="center_vertical"
+        android:layout_marginBottom="24dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/filterStartDateButton"
+            style="@style/Widget.HWiXeL.Button.Ghost"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/start_date_button" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/date_range_separator"
+            android:textColor="@color/text_hint" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/filterEndDateButton"
+            style="@style/Widget.HWiXeL.Button.Ghost"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/end_date_button" />
+
+    </LinearLayout>
+
+    <!-- Apply + Reset Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="horizontal">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/resetFilterButton"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="@string/task_filter_reset"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            android:text="@string/filter_reset"
+            android:textColor="@color/text_secondary" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/applyFilterButton"
+            style="@style/Widget.HWiXeL.Button.Primary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/task_filter_apply" />
+            android:text="@string/filter_apply" />
 
     </LinearLayout>
 

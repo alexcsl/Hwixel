@@ -75,7 +75,7 @@ class MembersFragment : Fragment() {
             Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
             viewModel.consumeActionResult()
         }
-        binding.inviteFab.setOnClickListener { showInviteDialog() }
+        binding.inviteMemberButton.setOnClickListener { showInviteDialog() }
     }
 
     private fun render(state: MembersUiState) {
@@ -107,7 +107,7 @@ class MembersFragment : Fragment() {
             .setTitle(R.string.invite_dialog_title)
             .setView(dialogView.root)
             .setPositiveButton(R.string.btn_invite) { _, _ ->
-                val email = dialogView.inviteEmailEditText.text?.toString().orEmpty().trim()
+                val email = dialogView.inviteEmailInput.editText?.text?.toString().orEmpty().trim()
                 if (email.isNotBlank()) viewModel.inviteMember(email)
             }
             .setNegativeButton(R.string.btn_cancel, null)

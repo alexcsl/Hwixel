@@ -1,135 +1,167 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
+    <!-- ===== HEADER GRADIENT AREA ===== -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:navigationIconTint="?attr/colorOnSurface"
-            app:navigationIcon="@drawable/ic_back" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="20dp"
-            android:paddingBottom="12dp">
-
-            <TextView
-                android:id="@+id/projectNameTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-                android:maxLines="2"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/projectDueDateTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
-
-            <TextView
-                android:id="@+id/projectGoalsTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-                android:maxLines="3"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/projectDescriptionTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-                android:maxLines="3"
-                android:ellipsize="end" />
-
-            <com.google.android.material.progressindicator.LinearProgressIndicator
-                android:id="@+id/completionProgressBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:trackThickness="8dp"
-                app:trackCornerRadius="4dp" />
-
-            <TextView
-                android:id="@+id/completionTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
-
-        </LinearLayout>
-
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:tabMode="fixed"
-            app:tabGravity="fill" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <TextView
-            android:id="@+id/recentActivityTitleTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="20dp"
-            android:paddingTop="12dp"
-            android:text="@string/hub_recent_activity"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/activityRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:nestedScrollingEnabled="false"
-            android:paddingHorizontal="12dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-        <TextView
-            android:id="@+id/emptyActivityTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="20dp"
-            android:paddingBottom="12dp"
-            android:text="@string/hub_no_recent_activity"
-            android:visibility="gone" />
-    </LinearLayout>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addProjectFab"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="20dp"
-        android:contentDescription="@string/hub_add_project"
-        android:visibility="gone"
-        app:srcCompat="@drawable/ic_add" />
+        android:background="@drawable/bg_header_gradient"
+        android:paddingTop="48dp"
+        android:paddingBottom="20dp">
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <!-- Back button top-left -->
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="start|top"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="0dp"
+            android:background="@drawable/bg_glass_card"
+            android:contentDescription="@string/btn_close"
+            android:padding="8dp"
+            android:src="@drawable/ic_back"
+            app:tint="@color/text_primary" />
+
+        <!-- Glass info card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="48dp"
+            android:layout_marginEnd="16dp"
+            app:cardBackgroundColor="@color/glass_fill"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/glass_border"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Project name -->
+                <TextView
+                    android:id="@+id/projectNameTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="2"
+                    android:textColor="@color/text_primary"
+                    android:textSize="20sp"
+                    tools:text="Mobile App Redesign" />
+
+                <!-- Project goals -->
+                <TextView
+                    android:id="@+id/projectGoalsTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:textColor="@color/brand_violet_light"
+                    android:textSize="13sp"
+                    tools:text="Deliver a polished UI with full glass design system" />
+
+                <!-- Project description -->
+                <TextView
+                    android:id="@+id/projectDescriptionTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="3"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp"
+                    tools:text="Redesign all screens using the liquid glass design language on dark background." />
+
+                <!-- Thin divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/glass_border" />
+
+                <!-- Due date + completion % row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/ic_calendar"
+                        app:tint="@color/text_hint" />
+
+                    <TextView
+                        android:id="@+id/dueDateTextView"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                        tools:text="Due: 31 May 2026" />
+
+                    <TextView
+                        android:id="@+id/completionPercentageTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:textColor="@color/brand_violet_light"
+                        android:textSize="12sp"
+                        tools:text="65% complete" />
+
+                </LinearLayout>
+
+                <!-- Completion progress bar -->
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/completionProgressBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:indicatorColor="@color/brand_violet"
+                    app:trackColor="@color/glass_border"
+                    app:trackCornerRadius="3dp"
+                    app:trackThickness="6dp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </FrameLayout>
+
+    <!-- ===== TAB LAYOUT ===== -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/bg_surface"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="@color/brand_violet"
+        app:tabIndicatorHeight="3dp"
+        app:tabMode="fixed"
+        app:tabRippleColor="@color/glass_fill"
+        app:tabSelectedTextColor="@color/brand_violet_light"
+        app:tabTextColor="@color/text_hint" />
+
+    <!-- ===== VIEW PAGER ===== -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>

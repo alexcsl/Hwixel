@@ -1,37 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="8dp"
-    android:gravity="center_vertical">
+    android:layout_marginBottom="4dp"
+    android:padding="10dp">
 
+    <!-- Dot Indicator -->
     <View
         android:layout_width="8dp"
         android:layout_height="8dp"
-        android:background="@drawable/circle_background"
-        android:layout_marginEnd="10dp" />
+        android:background="@drawable/bg_glass_card_primary"
+        android:layout_marginEnd="12dp" />
 
-    <LinearLayout
+    <!-- Action Text -->
+    <TextView
+        android:id="@+id/actionTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp"
+        tools:text="Task status changed to In Progress" />
 
-        <TextView
-            android:id="@+id/historyActionTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
-
-        <TextView
-            android:id="@+id/historyTimestampTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-            android:alpha="0.6" />
-
-    </LinearLayout>
+    <!-- Timestamp -->
+    <TextView
+        android:id="@+id/historyTimestampTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:textColor="@color/text_hint"
+        android:textSize="11sp"
+        tools:text="2h ago" />
 
 </LinearLayout>

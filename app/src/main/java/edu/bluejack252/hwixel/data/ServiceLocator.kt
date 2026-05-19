@@ -1,6 +1,8 @@
 package edu.bluejack252.hwixel.data
 
 import android.content.Context
+import edu.bluejack252.hwixel.data.repository.AttendanceRepository
+import edu.bluejack252.hwixel.data.repository.AttendanceRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.AuthRepository
 import edu.bluejack252.hwixel.data.repository.AuthRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
@@ -12,6 +14,7 @@ import edu.bluejack252.hwixel.data.repository.TeamHealthRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.UserRepository
 import edu.bluejack252.hwixel.data.repository.UserRepositoryImpl
 import edu.bluejack252.hwixel.data.source.local.HwixelDatabase
+import edu.bluejack252.hwixel.data.source.remote.AttendanceFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.AuthFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.GptApiSource
 import edu.bluejack252.hwixel.data.source.remote.ProjectFirebaseSource
@@ -24,6 +27,7 @@ object ServiceLocator {
     private var projectRepository: ProjectRepository? = null
     private var taskRepository: TaskRepository? = null
     private var teamHealthRepository: TeamHealthRepository? = null
+    private var attendanceRepository: AttendanceRepository? = null
 
     fun getAuthRepository(context: Context): AuthRepository {
         return authRepository ?: AuthRepositoryImpl(
@@ -59,5 +63,11 @@ object ServiceLocator {
         return teamHealthRepository ?: TeamHealthRepositoryImpl(
             source = GptApiSource()
         ).also { teamHealthRepository = it }
+    }
+
+    fun getAttendanceRepository(): AttendanceRepository {
+        return attendanceRepository ?: AttendanceRepositoryImpl(
+            firebaseSource = AttendanceFirebaseSource()
+        ).also { attendanceRepository = it }
     }
 }

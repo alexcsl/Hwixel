@@ -28,7 +28,7 @@ class HistoryAdapter : ListAdapter<HistoryUi, HistoryAdapter.HistoryViewHolder>(
         private val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
 
         fun bind(entry: HistoryUi) {
-            binding.historyActionTextView.text = "${entry.actorName}: ${entry.action}"
+            binding.actionTextView.text = "${entry.actorName}: ${entry.action}"
             binding.historyTimestampTextView.text = dateFormat.format(Date(entry.timestamp))
         }
     }

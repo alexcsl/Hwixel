@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -58,10 +57,13 @@ class CreateEditTaskFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+        binding.backButton.setOnClickListener { findNavController().navigateUp() }
 
         binding.deadlineButton.setOnClickListener { showDatePicker() }
-        binding.deadlineTimeButton.setOnClickListener { showTimeInputDialog() }
+        binding.deadlineButton.setOnLongClickListener {
+            showTimeInputDialog()
+            true
+        }
         binding.assigneesButton.setOnClickListener { showAssigneeDialog() }
         binding.addSubtaskButton.setOnClickListener { addSubtaskRow() }
         binding.saveTaskButton.setOnClickListener { save() }
@@ -86,14 +88,14 @@ class CreateEditTaskFragment : Fragment() {
         }
 
         val isEdit = args.taskId.isNotBlank()
-        binding.toolbar.title = getString(
+        binding.formTitleTextView.text = getString(
             if (isEdit) R.string.edit_task_title else R.string.create_task_title
         )
     }
 
     private fun prefillTask(task: Task) {
-        binding.titleEditText.setText(task.title)
-        binding.descriptionEditText.setText(task.description)
+        binding.taskTitleInputLayout.editText?.setText(task.title)
+        binding.taskDescriptionInputLayout.editText?.setText(task.description)
 
         if (task.deadline > 0L) {
             selectedDeadline = task.deadline
@@ -101,25 +103,23 @@ class CreateEditTaskFragment : Fragment() {
             selectedHour = calendar.get(Calendar.HOUR_OF_DAY)
             selectedMinute = calendar.get(Calendar.MINUTE)
             binding.deadlineButton.text = dateFormat.format(Date(task.deadline))
-            updateTimeButton()
         }
 
         selectedAssigneeIds = task.assignees.toMutableList()
         updateAssigneesLabel()
 
         val priorityBtnId = when (task.priority) {
-            Constants.PRIORITY_LOW -> binding.btnPriorityLow.id
-            Constants.PRIORITY_HIGH -> binding.btnPriorityHigh.id
-            else -> binding.btnPriorityMedium.id
+            Constants.PRIORITY_LOW -> binding.lowPriorityButton.id
+            Constants.PRIORITY_HIGH -> binding.highPriorityButton.id
+            else -> binding.mediumPriorityButton.id
         }
         binding.priorityToggleGroup.check(priorityBtnId)
 
         task.subtasks.values.forEach { subtask ->
             val rowBinding = ItemSubtaskRowBinding.inflate(layoutInflater, binding.subtasksContainer, true)
             rowBinding.root.tag = subtask.id
-            rowBinding.subtaskEditText.setText(subtask.title)
-            rowBinding.subtaskDoneCheckBox.isChecked = subtask.isDone
-            rowBinding.removeSubtaskButton.setOnClickListener {
+            rowBinding.subtaskTitleEditText.setText(subtask.title)
+            rowBinding.deleteSubtaskButton.setOnClickListener {
                 binding.subtasksContainer.removeView(rowBinding.root)
                 subtaskViews.remove(rowBinding)
             }
@@ -181,17 +181,8 @@ class CreateEditTaskFragment : Fragment() {
 
     private fun updateDeadlineButtons() {
         if (selectedDeadline > 0L) {
-            binding.deadlineButton.text = dateOnlyFormat.format(Date(selectedDeadline))
+            binding.deadlineButton.text = dateFormat.format(Date(selectedDeadline))
         }
-        updateTimeButton()
-    }
-
-    private fun updateTimeButton() {
-        binding.deadlineTimeButton.text = getString(
-            R.string.task_deadline_time_format,
-            selectedHour,
-            selectedMinute
-        )
     }
 
     private fun showAssigneeDialog() {
@@ -214,14 +205,13 @@ class CreateEditTaskFragment : Fragment() {
 
     private fun updateAssigneesLabel() {
         if (selectedAssigneeIds.isEmpty()) {
-            binding.assigneesTextView.visibility = View.GONE
+            binding.assigneesButton.text = getString(R.string.task_assign_members)
         } else {
-            binding.assigneesTextView.visibility = View.VISIBLE
             val selectedNames = selectedAssigneeIds.map { selectedId ->
                 availableMembers.firstOrNull { it.userId == selectedId }?.name
                     ?: getString(R.string.unknown_member)
             }
-            binding.assigneesTextView.text = getString(
+            binding.assigneesButton.text = getString(
                 R.string.selected_members_names_format, selectedNames.joinToString(", ")
             )
         }
@@ -230,7 +220,7 @@ class CreateEditTaskFragment : Fragment() {
     private fun addSubtaskRow() {
         val rowBinding = ItemSubtaskRowBinding.inflate(layoutInflater, binding.subtasksContainer, true)
         rowBinding.root.tag = ""
-        rowBinding.removeSubtaskButton.setOnClickListener {
+        rowBinding.deleteSubtaskButton.setOnClickListener {
             binding.subtasksContainer.removeView(rowBinding.root)
             subtaskViews.remove(rowBinding)
         }
@@ -238,26 +228,26 @@ class CreateEditTaskFragment : Fragment() {
     }
 
     private fun save() {
-        val title = binding.titleEditText.text?.toString().orEmpty().trim()
+        val title = binding.taskTitleInputLayout.editText?.text?.toString().orEmpty().trim()
         if (title.isBlank()) {
-            binding.titleInputLayout.error = getString(R.string.error_empty_task_title)
+            binding.taskTitleInputLayout.error = getString(R.string.error_empty_task_title)
             return
         }
-        binding.titleInputLayout.error = null
+        binding.taskTitleInputLayout.error = null
 
-        val description = binding.descriptionEditText.text?.toString().orEmpty().trim()
+        val description = binding.taskDescriptionInputLayout.editText?.text?.toString().orEmpty().trim()
         val priority = when (binding.priorityToggleGroup.checkedButtonId) {
-            binding.btnPriorityLow.id -> Constants.PRIORITY_LOW
-            binding.btnPriorityHigh.id -> Constants.PRIORITY_HIGH
+            binding.lowPriorityButton.id -> Constants.PRIORITY_LOW
+            binding.highPriorityButton.id -> Constants.PRIORITY_HIGH
             else -> Constants.PRIORITY_MEDIUM
         }
         val subtasks = subtaskViews.mapNotNull {
-            val title = it.subtaskEditText.text?.toString()?.trim().orEmpty()
+            val title = it.subtaskTitleEditText.text?.toString()?.trim().orEmpty()
             if (title.isBlank()) return@mapNotNull null
             Subtask(
                 id = it.root.tag as? String ?: "",
                 title = title,
-                isDone = it.subtaskDoneCheckBox.isChecked
+                isDone = false
             )
         }
 

@@ -2,24 +2,69 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_glass_card_small"
+    android:orientation="vertical"
+    android:padding="8dp">
 
-    <TextView
-        android:id="@+id/columnTitleTextView"
+    <!-- Column header -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
-        android:background="@color/kanban_column_header_background" />
+        android:background="@drawable/bg_glass_card"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="10dp">
 
+        <!-- Column status title -->
+        <TextView
+            android:id="@+id/columnTitleTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:textColor="@color/text_primary"
+            android:textSize="13sp"
+            tools:text="To-Do" />
+
+        <!-- Task count chip -->
+        <TextView
+            android:id="@+id/taskCountTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_glass_card_elevated"
+            android:fontFamily="sans-serif-medium"
+            android:minWidth="24dp"
+            android:gravity="center"
+            android:paddingStart="6dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="6dp"
+            android:paddingBottom="2dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp"
+            tools:text="4" />
+
+    </LinearLayout>
+
+    <!-- Task cards list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/columnRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="4dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:clipToPadding="false"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        android:nestedScrollingEnabled="true"
+        android:paddingBottom="4dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:itemCount="3"
+        tools:listitem="@layout/item_task_card" />
 
 </LinearLayout>

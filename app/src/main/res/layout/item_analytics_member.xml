@@ -1,50 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/memberAnalyticsCard"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/bg_glass_card_small"
     android:layout_marginBottom="8dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="1dp"
-    app:strokeWidth="1dp">
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="14dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="14dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/memberNameTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textAppearance="?attr/textAppearanceTitleSmall" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/memberScoreTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
+    <!-- Avatar Circle -->
+    <FrameLayout
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@drawable/bg_glass_card_primary"
+        android:layout_marginEnd="14dp">
 
         <TextView
-            android:id="@+id/memberBreakdownTextView"
+            android:id="@+id/avatarInitialTextView"
             android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textColor="@color/brand_violet_light"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="A" />
+
+    </FrameLayout>
+
+    <!-- Info Column -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/memberNameTextView"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp" />
+            android:textColor="@color/text_primary"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="2dp"
+            tools:text="Alice Smith" />
+
+        <TextView
+            android:id="@+id/contributionScoreTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/brand_violet_light"
+            android:textSize="13sp"
+            android:layout_marginBottom="2dp"
+            tools:text="@string/score_placeholder" />
+
+        <TextView
+            android:id="@+id/taskRatioTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            android:layout_marginBottom="6dp"
+            tools:text="@string/task_ratio_placeholder" />
 
         <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/memberProgressIndicator"
+            android:id="@+id/scoreProgressBar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:max="100" />
+            android:layout_height="4dp"
+            android:progress="87"
+            app:indicatorColor="@color/brand_violet"
+            app:trackColor="@color/text_hint"
+            app:trackCornerRadius="2dp" />
+
     </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

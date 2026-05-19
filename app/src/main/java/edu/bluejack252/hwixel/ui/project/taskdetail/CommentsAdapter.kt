@@ -28,9 +28,10 @@ class CommentsAdapter : ListAdapter<CommentUi, CommentsAdapter.CommentViewHolder
         private val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
 
         fun bind(comment: CommentUi) {
-            binding.commentAuthorTextView.text = comment.authorName
-            binding.commentContentTextView.text = comment.content
-            binding.commentTimestampTextView.text = dateFormat.format(Date(comment.timestamp))
+            binding.authorInitialTextView.text = comment.authorName.firstOrNull()?.uppercase() ?: "?"
+            binding.authorNameTextView.text = comment.authorName
+            binding.commentTextView.text = comment.content
+            binding.timestampTextView.text = dateFormat.format(Date(comment.timestamp))
         }
     }
 

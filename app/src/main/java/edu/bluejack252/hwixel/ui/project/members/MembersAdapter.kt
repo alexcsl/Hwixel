@@ -41,22 +41,22 @@ class MembersAdapter(
         ) {
             val ctx = binding.root.context
             binding.memberNameTextView.text = item.name
-            binding.memberRoleTextView.text = ctx.getString(R.string.member_role_label, item.role)
-            binding.memberScoreTextView.text = ctx.getString(R.string.member_score_label, item.contributionScore)
+            binding.roleChip.text = ctx.getString(R.string.member_role_label, item.role)
+            binding.scoreTextView.text = ctx.getString(R.string.member_score_label, item.contributionScore)
 
             val isActive = item.status == Constants.MEMBER_STATUS_ACTIVE
-            binding.memberStatusChip.text = if (isActive)
+            binding.statusTextView.text = if (isActive)
                 ctx.getString(R.string.member_status_active)
             else
                 ctx.getString(R.string.member_status_inactive)
 
-            binding.memberCard.alpha = if (isActive) 1f else 0.5f
+            binding.root.alpha = if (isActive) 1f else 0.5f
 
-            binding.memberRoleTextView.setOnClickListener {
+            binding.roleChip.setOnClickListener {
                 if (isTeamLead) onRoleClick(item)
             }
 
-            binding.memberStatusChip.setOnClickListener {
+            binding.statusTextView.setOnClickListener {
                 if (isTeamLead) onStatusToggle(item)
             }
 

@@ -2,74 +2,118 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/taskCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="4dp"
-    app:cardCornerRadius="10dp">
+    app:cardBackgroundColor="@color/glass_fill"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/glass_border"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="12dp">
+        android:orientation="vertical">
+
+        <!-- Priority accent bar (color set via code) -->
+        <View
+            android:id="@+id/priorityBar"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="@color/brand_violet" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:orientation="vertical"
+            android:paddingStart="12dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="10dp">
 
+            <!-- Task title -->
             <TextView
                 android:id="@+id/taskTitleTextView"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
                 android:maxLines="2"
-                android:ellipsize="end" />
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                tools:text="Redesign login screen with glass cards" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/priorityChip"
-                android:layout_width="wrap_content"
+            <!-- Status and priority chips row -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:clickable="false"
-                style="@style/Widget.MaterialComponents.Chip.Entry" />
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/statusChip"
+                    style="@style/Widget.MaterialComponents.Chip.Entry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:layout_marginEnd="6dp"
+                    android:checkable="false"
+                    android:clickable="false"
+                    android:textSize="11sp"
+                    tools:text="In Progress" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/priorityChip"
+                    style="@style/Widget.MaterialComponents.Chip.Entry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:checkable="false"
+                    android:clickable="false"
+                    android:textSize="11sp"
+                    tools:text="High" />
+
+            </LinearLayout>
+
+            <!-- Deadline text with calendar icon -->
+            <TextView
+                android:id="@+id/deadlineTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:drawablePadding="4dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                app:drawableStartCompat="@drawable/ic_calendar"
+                app:drawableTint="@color/text_hint"
+                tools:text="Due: 25 May 2026" />
+
+            <!-- Subtask ratio text -->
+            <TextView
+                android:id="@+id/subtaskProgressTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/text_hint"
+                android:textSize="11sp"
+                tools:text="2/5 subtasks" />
+
+            <!-- Subtask progress bar -->
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/subtaskProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                app:indicatorColor="@color/brand_violet"
+                app:trackColor="@color/glass_border"
+                app:trackCornerRadius="2dp"
+                app:trackThickness="4dp" />
 
         </LinearLayout>
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/statusChip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:clickable="false"
-            style="@style/Widget.MaterialComponents.Chip.Entry" />
-
-        <TextView
-            android:id="@+id/deadlineTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-            android:alpha="0.7" />
-
-        <TextView
-            android:id="@+id/subtaskProgressTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
-
-        <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/subtaskProgressBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            app:trackThickness="4dp"
-            app:trackCornerRadius="2dp" />
-
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

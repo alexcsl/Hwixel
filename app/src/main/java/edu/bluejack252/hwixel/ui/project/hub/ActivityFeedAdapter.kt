@@ -29,8 +29,8 @@ class ActivityFeedAdapter :
         private val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
 
         fun bind(item: ActivityUi) {
-            binding.activityActionTextView.text = "${item.actorName}: ${item.action}"
-            binding.activityTimestampTextView.text = dateFormat.format(Date(item.timestamp))
+            binding.feedActionTextView.text = "${item.actorName}: ${item.action}"
+            binding.feedTimeTextView.text = dateFormat.format(Date(item.timestamp))
         }
     }
 

@@ -58,8 +58,16 @@ class TaskDetailFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
-        binding.toolbar.setOnMenuItemClickListener(::onMenuItemClick)
+        binding.backButton.setOnClickListener { findNavController().navigateUp() }
+        binding.editButton.setOnClickListener {
+            val state = viewModel.uiState.value?.task ?: return@setOnClickListener
+            findNavController().navigate(
+                TaskDetailFragmentDirections.actionTaskDetailFragmentToCreateEditTaskFragment(
+                    projectId = args.projectId,
+                    taskId = state.id
+                )
+            )
+        }
         binding.attachmentsRecyclerView.adapter = attachmentAdapter
         binding.subtasksRecyclerView.adapter = subtaskAdapter
         binding.commentsRecyclerView.adapter = commentsAdapter
@@ -120,10 +128,7 @@ class TaskDetailFragment : Fragment() {
         subtaskAdapter.submitList(state.subtasks)
         commentsAdapter.submitList(state.comments)
         historyAdapter.submitList(state.history)
-        binding.emptyAttachmentsTextView.isVisible = state.attachments.isEmpty()
-        binding.emptySubtasksTextView.isVisible = state.subtasks.isEmpty()
-        binding.emptyCommentsTextView.isVisible = state.comments.isEmpty()
-        binding.emptyHistoryTextView.isVisible = state.history.isEmpty()
+        binding.subtaskOverallProgress.isVisible = state.subtasks.isNotEmpty()
     }
 
     private fun renderTask(task: Task, assigneeNames: List<String>) {

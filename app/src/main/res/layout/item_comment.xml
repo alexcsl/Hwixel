@@ -1,45 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:background="@drawable/bg_glass_card_small"
+    android:layout_marginBottom="8dp"
+    android:orientation="horizontal"
+    android:padding="14dp">
 
+    <!-- Avatar Circle -->
+    <FrameLayout
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:background="@drawable/bg_glass_card_primary"
+        android:layout_marginEnd="10dp">
+
+        <TextView
+            android:id="@+id/authorInitialTextView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textColor="@color/brand_violet_light"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            tools:text="A" />
+
+    </FrameLayout>
+
+    <!-- Content Column -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Author + Timestamp Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:layout_marginBottom="2dp">
+
+            <TextView
+                android:id="@+id/authorNameTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                tools:text="Alice Smith" />
+
+            <TextView
+                android:id="@+id/timestampTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_hint"
+                android:textSize="11sp"
+                tools:text="2h ago" />
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/commentAuthorTextView"
-            android:layout_width="0dp"
+            android:id="@+id/commentTextView"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/commentTimestampTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-            android:alpha="0.6" />
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            tools:text="This is a comment on the task." />
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/commentContentTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="8dp"
-        android:background="@color/divider_line" />
 
 </LinearLayout>

@@ -1,94 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/memberCard"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
-    app:cardCornerRadius="12dp">
+    android:background="@drawable/bg_glass_card"
+    android:layout_marginBottom="12dp"
+    android:orientation="vertical"
+    android:padding="16dp">
 
+    <!-- Main Row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="14dp">
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
+        <!-- Avatar Circle -->
+        <FrameLayout
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_glass_card_primary"
+            android:layout_marginEnd="12dp">
+
+            <TextView
+                android:id="@+id/avatarInitialTextView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textColor="@color/brand_violet_light"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                tools:text="A" />
+
+        </FrameLayout>
+
+        <!-- Name + Role + Status -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/memberAvatarImageView"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:contentDescription="@string/content_description_avatar"
-                android:scaleType="centerCrop"
-                android:background="@drawable/circle_background"
-                android:src="@drawable/ic_person" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="12dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/memberNameTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
-
-                <TextView
-                    android:id="@+id/memberRoleTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
-
-                <TextView
-                    android:id="@+id/memberScoreTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
-
-            </LinearLayout>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/memberStatusChip"
+            <TextView
+                android:id="@+id/memberNameTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:clickable="false"
-                style="@style/Widget.MaterialComponents.Chip.Entry" />
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:text="Alice Smith" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/roleChip"
+                style="@style/Widget.HWiXeL.Button.Ghost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textSize="11sp"
+                tools:text="Developer" />
+
+            <TextView
+                android:id="@+id/statusTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                tools:text="Active" />
 
         </LinearLayout>
 
+        <!-- Right Side: Score + Action Buttons -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="12dp"
-            android:gravity="end">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <com.google.android.material.button.MaterialButton
+            <TextView
+                android:id="@+id/scoreTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:textColor="@color/brand_violet_light"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                tools:text="87" />
+
+            <ImageButton
                 android:id="@+id/whatsappButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/btn_whatsapp"
-                android:layout_marginEnd="8dp"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/whatsapp_button_description"
+                android:src="@drawable/ic_whatsapp"
+                android:layout_marginStart="8dp"
+                app:tint="@color/brand_emerald" />
 
-            <com.google.android.material.button.MaterialButton
+            <ImageButton
                 android:id="@+id/emailButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/btn_email"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/email_button_description"
+                android:src="@drawable/ic_email"
+                android:layout_marginStart="8dp"
+                app:tint="@color/brand_cyan" />
 
         </LinearLayout>
 
     </LinearLayout>
 
-</com.google.android.material.card.MaterialCardView>
+    <!-- Role Spinner (visible to team lead only) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="@string/role_spinner_hint"
+        android:visibility="gone"
+        style="@style/Widget.HWiXeL.TextInputLayout">
+
+        <AutoCompleteTextView
+            android:id="@+id/roleSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Active Switch (team lead only) -->
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/activeSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/active_switch_label"
+        android:textColor="@color/text_secondary"
+        android:visibility="gone"
+        app:thumbTint="@color/brand_violet"
+        app:trackTint="@color/brand_violet_light" />
+
+</LinearLayout>

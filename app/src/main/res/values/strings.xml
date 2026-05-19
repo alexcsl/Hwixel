@@ -72,7 +72,7 @@
     <string name="hub_recent_activity">Recent Activity</string>
     <string name="hub_no_activity">No recent activity.</string>
     <string name="hub_add_project">Add New Project</string>
-    <string name="activity_format">%1$s — %2$s</string>
+    <string name="activity_format">%1$s - %2$s</string>
 
     <!-- Create Project Dialog -->
     <string name="create_project_title">New Project</string>
@@ -174,7 +174,7 @@
     <string name="task_detail_no_comments">No comments yet.</string>
     <string name="task_detail_history_label">Activity History</string>
     <string name="task_detail_no_history">No activity yet.</string>
-    <string name="task_detail_add_comment_hint">Add a comment…</string>
+    <string name="task_detail_add_comment_hint">Add a comment...</string>
     <string name="task_detail_send">Send</string>
     <string name="task_detail_edit">Edit Task</string>
     <string name="comment_added">Comment posted.</string>
@@ -214,9 +214,85 @@
     <string name="task_minute_hint">Minute (0-59)</string>
     <string name="error_invalid_deadline_time">Enter hour 0-23 and minute 0-59.</string>
 
+    <!-- Attendance -->
+    <string name="attendance_title">Attendance</string>
+    <string name="attendance_sessions_label">Sessions</string>
+    <string name="attendance_empty_sessions">No sessions recorded yet.</string>
+    <string name="attendance_add_session">New Session</string>
+    <string name="attendance_session_date_format">%1$s</string>
+    <string name="attendance_session_summary_format">%1$d / %2$d present</string>
+    <string name="attendance_member_percentage_format">%1$.0f%%</string>
+    <string name="attendance_present">Present</string>
+    <string name="attendance_absent">Absent</string>
+    <string name="attendance_mark_label">Mark attendance</string>
+    <string name="attendance_next_session_label">Next Session</string>
+    <string name="attendance_no_next_session">No next session scheduled.</string>
+    <string name="attendance_set_reminder">Set Reminder</string>
+    <string name="attendance_reminder_set">Reminder set for the next session.</string>
+    <string name="attendance_export">Export</string>
+    <string name="attendance_export_title">Attendance Report</string>
+    <string name="attendance_save_success">Attendance saved.</string>
+    <string name="attendance_save_failed">Failed to save attendance.</string>
+    <string name="attendance_lead_only">Only the Team Lead can mark attendance.</string>
+    <string name="attendance_session_title_format">Session - %1$s</string>
+    <string name="attendance_dialog_set_date">Set Session Date</string>
+    <string name="attendance_dialog_set_next_date">Set Next Session Date</string>
+    <string name="attendance_create_session">Create Session</string>
+    <string name="attendance_overall_rate_format">Avg attendance: %1$.0f%%</string>
+
+    <!-- UI strings for redesigned screens -->
+    <string name="app_logo_mark">Hx</string>
+    <string name="login_heading">Welcome\nback</string>
+    <string name="register_heading">Create\naccount</string>
+    <string name="divider_or">or</string>
+    <string name="dashboard_greeting">Good day</string>
+    <string name="dashboard_pending_label">pending tasks</string>
+    <string name="dashboard_active_label">active projects</string>
+    <string name="dashboard_see_all">See all</string>
+    <string name="analytics_title">Analytics</string>
+    <string name="placeholder_text">Coming soon</string>
+    <string name="filter_title">Filter Tasks</string>
+    <string name="filter_assignees_label">Assignees</string>
+    <string name="filter_priority_label">Priority</string>
+    <string name="filter_date_label">Date Range</string>
+    <string name="filter_apply">Apply</string>
+    <string name="filter_reset">Reset</string>
+    <string name="pick_deadline_label">Pick Deadline</string>
+    <string name="save_task_button">Save Task</string>
+    <string name="task_title_hint">Task Title</string>
+    <string name="task_description_hint">Description (optional)</string>
+    <string name="search_button">Search</string>
+    <string name="invite_button">Invite</string>
+    <string name="dialog_create_project_title">New Project</string>
+    <string name="dialog_invite_title">Invite Member</string>
+    <string name="comment_hint">Add a comment...</string>
+    <string name="back_button_description">Go back</string>
+    <string name="empty_members_text">No members yet.</string>
+    <string name="placeholder_icon_description">Placeholder icon</string>
+    <string name="drag_handle_description">Drag subtask</string>
+    <string name="delete_subtask_description">Delete subtask</string>
+    <string name="whatsapp_button_description">Open WhatsApp</string>
+    <string name="email_button_description">Send email</string>
+    <string name="role_spinner_hint">Role</string>
+    <string name="active_switch_label">Active</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="start_date_button">Start</string>
+    <string name="end_date_button">End</string>
+    <string name="date_range_separator">to</string>
+    <string name="dashboard_count_placeholder">-</string>
+    <string name="create_project_button">Create Project</string>
+    <string name="date_range_label">Date range</string>
+    <string name="apply_filter_button">Apply filter</string>
+    <string name="team_health_title">Team Health</string>
+    <string name="analyze_with_ai_button">Analyze with AI</string>
+    <string name="member_contributions_title">Member Contributions</string>
+    <string name="basic_info_section_title">Basic Info</string>
+    <string name="settings_section_title">Settings</string>
+    <string name="add_subtask_button">Add Subtask</string>
+
     <!-- General -->
     <string name="error_generic">Something went wrong. Please try again.</string>
-    <string name="loading">Loading…</string>
+    <string name="loading">Loading...</string>
     <string name="btn_ok">OK</string>
     <string name="btn_close">Close</string>
     <string name="content_description_avatar">User avatar</string>

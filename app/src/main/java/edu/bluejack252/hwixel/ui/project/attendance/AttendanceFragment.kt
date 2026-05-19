@@ -1,5 +1,6 @@
 package edu.bluejack252.hwixel.ui.project.attendance
 
+import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -25,6 +26,7 @@ import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
 import edu.bluejack252.hwixel.data.model.User
 import edu.bluejack252.hwixel.util.constants.Constants
+import java.util.Calendar
 
 class AttendanceFragment : Fragment() {
 
@@ -67,15 +69,32 @@ class AttendanceFragment : Fragment() {
 
         fun publishMembers() {
             val currentProject = project ?: return
-            projectMembers = currentProject.members.mapNotNull { (userId, member) ->
+            val activeMembers = currentProject.members.mapNotNull { (userId, member) ->
                 if (member.status == Constants.MEMBER_STATUS_INACTIVE) return@mapNotNull null
                 member.copy(userId = member.userId.ifBlank { userId })
+            }.toMutableList()
+            if (
+                currentProject.createdBy.isNotBlank() &&
+                activeMembers.none { member -> member.userId == currentProject.createdBy }
+            ) {
+                activeMembers.add(
+                    0,
+                    ProjectMember(
+                        userId = currentProject.createdBy,
+                        role = Constants.ROLE_TEAM_LEAD,
+                        status = Constants.MEMBER_STATUS_ACTIVE
+                    )
+                )
             }
+            projectMembers = activeMembers.distinctBy { member -> member.userId }
             val names = projectMembers.associate { member ->
                 val user = users.firstOrNull { it.id == member.userId }
                 member.userId to (user?.name?.takeIf { it.isNotBlank() } ?: member.userId)
             }
-            val currentRole = currentProject.members[currentUserId]?.role.orEmpty()
+            val currentRole = currentProject.members[currentUserId]?.role
+                ?.takeIf { it.isNotBlank() }
+                ?: Constants.ROLE_TEAM_LEAD.takeIf { currentProject.createdBy == currentUserId }
+                ?: ""
             val isLead = currentRole == Constants.ROLE_TEAM_LEAD
             sessionAdapter.totalMemberCount = projectMembers.size
             view.findViewById<MaterialButton>(R.id.addSessionButton).isVisible = isLead
@@ -174,7 +193,9 @@ class AttendanceFragment : Fragment() {
 
                     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
                     val isLead = viewModel.isCurrentUserLead(currentUserId)
-                    val items = state.memberNames.map { (userId, name) ->
+                    val items = projectMembers.map { member ->
+                        val userId = member.userId
+                        val name = state.memberNames[userId] ?: userId
                         AttendanceMemberItem(
                             userId = userId,
                             name = name,
@@ -219,7 +240,9 @@ class AttendanceFragment : Fragment() {
             .build()
 
         picker.addOnPositiveButtonClickListener { dateMs ->
-            showNextSessionPicker(dateMs)
+            showTimePicker(dateMs) { sessionDateTime ->
+                showNextSessionPicker(sessionDateTime)
+            }
         }
         picker.show(parentFragmentManager, "session_date_picker")
     }
@@ -230,8 +253,29 @@ class AttendanceFragment : Fragment() {
             .build()
 
         picker.addOnPositiveButtonClickListener { nextDateMs ->
-            viewModel.createSession(sessionDate, nextDateMs)
+            showTimePicker(nextDateMs) { nextDateTime ->
+                viewModel.createSession(sessionDate, nextDateTime)
+            }
         }
         picker.show(parentFragmentManager, "next_session_picker")
+    }
+
+    private fun showTimePicker(dateMs: Long, onSelected: (Long) -> Unit) {
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = dateMs
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        TimePickerDialog(
+            requireContext(),
+            { _, hourOfDay, minute ->
+                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                calendar.set(Calendar.MINUTE, minute)
+                onSelected(calendar.timeInMillis)
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        ).show()
     }
 }

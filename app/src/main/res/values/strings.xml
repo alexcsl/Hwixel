@@ -237,6 +237,7 @@
     <string name="attendance_session_title_format">Session - %1$s</string>
     <string name="attendance_dialog_set_date">Set Session Date</string>
     <string name="attendance_dialog_set_next_date">Set Next Session Date</string>
+    <string name="attendance_dialog_set_time">Set Session Time</string>
     <string name="attendance_create_session">Create Session</string>
     <string name="attendance_overall_rate_format">Avg attendance: %1$.0f%%</string>
 

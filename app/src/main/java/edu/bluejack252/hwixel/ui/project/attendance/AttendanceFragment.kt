@@ -215,7 +215,7 @@ class AttendanceFragment : Fragment() {
                 }
                 is AttendanceUiState.SessionCreated -> {
                     loading.isVisible = false
-                    Snackbar.make(view, getString(R.string.attendance_save_success), Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(view, getString(R.string.attendance_session_created), Snackbar.LENGTH_SHORT).show()
                 }
                 is AttendanceUiState.Error -> {
                     loading.isVisible = false
@@ -244,7 +244,7 @@ class AttendanceFragment : Fragment() {
                 showNextSessionPicker(sessionDateTime)
             }
         }
-        picker.show(parentFragmentManager, "session_date_picker")
+        picker.show(childFragmentManager, "session_date_picker")
     }
 
     private fun showNextSessionPicker(sessionDate: Long) {
@@ -257,7 +257,7 @@ class AttendanceFragment : Fragment() {
                 viewModel.createSession(sessionDate, nextDateTime)
             }
         }
-        picker.show(parentFragmentManager, "next_session_picker")
+        picker.show(childFragmentManager, "next_session_picker")
     }
 
     private fun showTimePicker(dateMs: Long, onSelected: (Long) -> Unit) {

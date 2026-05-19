@@ -239,6 +239,7 @@
     <string name="attendance_dialog_set_next_date">Set Next Session Date</string>
     <string name="attendance_dialog_set_time">Set Session Time</string>
     <string name="attendance_create_session">Create Session</string>
+    <string name="attendance_session_created">Session created successfully.</string>
     <string name="attendance_overall_rate_format">Avg attendance: %1$.0f%%</string>
 
     <!-- UI strings for redesigned screens -->

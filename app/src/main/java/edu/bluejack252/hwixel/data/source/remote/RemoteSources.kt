@@ -2,6 +2,7 @@ package edu.bluejack252.hwixel.data.source.remote
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import edu.bluejack252.hwixel.data.model.AttendanceSession
 import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.model.HistoryEntry
 import edu.bluejack252.hwixel.data.model.Notification
@@ -51,4 +52,11 @@ interface UserRemoteSource {
     suspend fun findByEmail(email: String): User?
     suspend fun writeNotification(userId: String, notifId: String, payload: Map<String, Any>)
     suspend fun markNotificationRead(userId: String, notifId: String) = Unit
+}
+
+interface AttendanceRemoteSource {
+    fun observeSessions(projectId: String): LiveData<List<AttendanceSession>>
+    suspend fun createSession(projectId: String, date: Long, nextSessionDate: Long): Result<String>
+    suspend fun markAttendance(projectId: String, sessionId: String, userId: String, present: Boolean): Result<Unit>
+    suspend fun setNextSessionDate(projectId: String, sessionId: String, nextDate: Long): Result<Unit>
 }

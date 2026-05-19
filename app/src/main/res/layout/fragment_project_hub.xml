@@ -138,6 +138,19 @@
                     app:trackCornerRadius="3dp"
                     app:trackThickness="6dp" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/attendanceButton"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:text="@string/attendance_title"
+                    android:textAllCaps="false"
+                    android:textColor="@color/brand_violet_light"
+                    app:icon="@drawable/ic_attendance"
+                    app:iconTint="@color/brand_violet_light"
+                    app:strokeColor="@color/brand_violet_light" />
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

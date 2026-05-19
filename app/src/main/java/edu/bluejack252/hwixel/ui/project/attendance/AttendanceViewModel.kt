@@ -29,7 +29,7 @@ class AttendanceViewModel(
     private val _uiState = MutableLiveData<AttendanceUiState>(AttendanceUiState.Idle)
     val uiState: LiveData<AttendanceUiState> = _uiState
 
-    private val _sessions = MutableLiveData<List<AttendanceSession>>()
+    private val _sessions = MediatorLiveData<List<AttendanceSession>>()
     val sessions: LiveData<List<AttendanceSession>> = _sessions
 
     private var selectedSession: AttendanceSession? = null
@@ -38,10 +38,9 @@ class AttendanceViewModel(
     private var currentUserRole: String = ""
 
     private val sessionSource = repository.observeSessions(projectId)
-    private val sessionsMediator = MediatorLiveData<List<AttendanceSession>>()
 
     init {
-        sessionsMediator.addSource(sessionSource) { list ->
+        _sessions.addSource(sessionSource) { list ->
             _sessions.value = list
         }
     }
@@ -50,6 +49,7 @@ class AttendanceViewModel(
         projectMembers = members
         memberNames = names
         currentUserRole = currentRole
+        selectedSession?.let(::selectSession)
     }
 
     fun selectSession(session: AttendanceSession) {
@@ -86,7 +86,7 @@ class AttendanceViewModel(
     }
 
     fun scheduleReminder(context: Context, projectName: String, nextSessionDate: Long) {
-        val delayMs = nextSessionDate - System.currentTimeMillis()
+        val delayMs = computeReminderDelayMs(System.currentTimeMillis(), nextSessionDate)
         if (delayMs <= 0) return
 
         val dateStr = SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault())
@@ -109,6 +109,10 @@ class AttendanceViewModel(
             request
         )
         _uiState.value = AttendanceUiState.ReminderSet
+    }
+
+    fun computeReminderDelayMs(now: Long, nextSessionDate: Long): Long {
+        return nextSessionDate - now
     }
 
     fun computeMemberAttendancePercentage(sessions: List<AttendanceSession>, userId: String): Float {
@@ -152,6 +156,6 @@ class AttendanceViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        sessionsMediator.removeSource(sessionSource)
+        _sessions.removeSource(sessionSource)
     }
 }

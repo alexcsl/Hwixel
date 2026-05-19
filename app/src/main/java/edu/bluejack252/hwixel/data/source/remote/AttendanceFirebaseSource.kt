@@ -9,11 +9,11 @@ import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.AttendanceSession
 import kotlinx.coroutines.tasks.await
 
-class AttendanceFirebaseSource {
+class AttendanceFirebaseSource : AttendanceRemoteSource {
 
     private val db = FirebaseDatabase.getInstance().reference
 
-    fun observeSessions(projectId: String): LiveData<List<AttendanceSession>> {
+    override fun observeSessions(projectId: String): LiveData<List<AttendanceSession>> {
         val liveData = MutableLiveData<List<AttendanceSession>>()
         db.child("attendance").child(projectId)
             .addValueEventListener(object : ValueEventListener {
@@ -43,7 +43,7 @@ class AttendanceFirebaseSource {
         return liveData
     }
 
-    suspend fun createSession(
+    override suspend fun createSession(
         projectId: String,
         date: Long,
         nextSessionDate: Long
@@ -58,7 +58,7 @@ class AttendanceFirebaseSource {
         sessionId
     }
 
-    suspend fun markAttendance(
+    override suspend fun markAttendance(
         projectId: String,
         sessionId: String,
         userId: String,
@@ -73,7 +73,7 @@ class AttendanceFirebaseSource {
             .await()
     }
 
-    suspend fun setNextSessionDate(
+    override suspend fun setNextSessionDate(
         projectId: String,
         sessionId: String,
         nextDate: Long

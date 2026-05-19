@@ -86,6 +86,7 @@ class DashboardFragment : Fragment() {
             state.pendingTaskCount,
             state.pendingTaskCount
         )
+        binding.activeProjectsStatTextView.text = state.projects.size.toString()
         binding.emptyProjectsTextView.isVisible = state.projects.isEmpty()
         binding.emptyDeadlinesTextView.isVisible = state.deadlines.isEmpty()
     }

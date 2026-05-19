@@ -21,6 +21,10 @@ import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.data.model.AttendanceSession
+import edu.bluejack252.hwixel.data.model.Project
+import edu.bluejack252.hwixel.data.model.ProjectMember
+import edu.bluejack252.hwixel.data.model.User
+import edu.bluejack252.hwixel.util.constants.Constants
 
 class AttendanceFragment : Fragment() {
 
@@ -38,6 +42,7 @@ class AttendanceFragment : Fragment() {
 
     private var projectName: String = ""
     private var allSessions: List<AttendanceSession> = emptyList()
+    private var projectMembers: List<ProjectMember> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,7 +56,45 @@ class AttendanceFragment : Fragment() {
         projectName = args.projectName
         setupAdapters(view)
         setupClickListeners(view)
+        observeProjectMembers(view)
         observeViewModel(view)
+    }
+
+    private fun observeProjectMembers(view: View) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        var project: Project? = null
+        var users: List<User> = emptyList()
+
+        fun publishMembers() {
+            val currentProject = project ?: return
+            projectMembers = currentProject.members.mapNotNull { (userId, member) ->
+                if (member.status == Constants.MEMBER_STATUS_INACTIVE) return@mapNotNull null
+                member.copy(userId = member.userId.ifBlank { userId })
+            }
+            val names = projectMembers.associate { member ->
+                val user = users.firstOrNull { it.id == member.userId }
+                member.userId to (user?.name?.takeIf { it.isNotBlank() } ?: member.userId)
+            }
+            val currentRole = currentProject.members[currentUserId]?.role.orEmpty()
+            val isLead = currentRole == Constants.ROLE_TEAM_LEAD
+            sessionAdapter.totalMemberCount = projectMembers.size
+            view.findViewById<MaterialButton>(R.id.addSessionButton).isVisible = isLead
+            view.findViewById<MaterialButton>(R.id.setReminderButton).isVisible = isLead
+            viewModel.setProjectMembers(projectMembers, names, currentRole)
+        }
+
+        ServiceLocator.getProjectRepository(requireContext())
+            .observeProject(args.projectId)
+            .observe(viewLifecycleOwner) { value ->
+                project = value
+                publishMembers()
+            }
+        ServiceLocator.getUserRepository(requireContext())
+            .observeUsers()
+            .observe(viewLifecycleOwner) { value ->
+                users = value
+                publishMembers()
+            }
     }
 
     private fun setupAdapters(view: View) {

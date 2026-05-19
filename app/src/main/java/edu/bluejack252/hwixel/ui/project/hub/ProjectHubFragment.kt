@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -34,6 +35,7 @@ class ProjectHubFragment : Fragment() {
     private val args: ProjectHubFragmentArgs by navArgs()
     private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
     private var selectedDueDate: Long = 0L
+    private var currentProject: Project? = null
     private val activityFeedAdapter = ActivityFeedAdapter()
 
     private val viewModel: ProjectHubViewModel by viewModels {
@@ -76,6 +78,15 @@ class ProjectHubFragment : Fragment() {
 
     private fun setupToolbar() {
         binding.backButton.setOnClickListener { findNavController().navigateUp() }
+        binding.attendanceButton.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_projectHubFragment_to_attendanceFragment,
+                bundleOf(
+                    "projectId" to args.projectId,
+                    "projectName" to currentProject?.name.orEmpty()
+                )
+            )
+        }
     }
 
     private fun setupViewPager() {
@@ -94,6 +105,7 @@ class ProjectHubFragment : Fragment() {
 
     private fun render(state: ProjectHubUiState) {
         val project = state.project ?: return
+        currentProject = project
         renderHeader(project)
         activityFeedAdapter.submitList(state.recentActivity)
     }

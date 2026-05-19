@@ -42,6 +42,15 @@ class AttendanceViewModel(
     init {
         _sessions.addSource(sessionSource) { list ->
             _sessions.value = list
+            selectedSession?.let { selected ->
+                val updated = list.firstOrNull { it.id == selected.id }
+                if (updated != null) {
+                    selectedSession = updated
+                    publishSelectedSession()
+                } else {
+                    clearSelectedSession()
+                }
+            }
         }
     }
 
@@ -49,11 +58,29 @@ class AttendanceViewModel(
         projectMembers = members
         memberNames = names
         currentUserRole = currentRole
-        selectedSession?.let(::selectSession)
+        selectedSession?.let { publishSelectedSession() }
     }
 
     fun selectSession(session: AttendanceSession) {
         selectedSession = session
+        publishSelectedSession()
+    }
+
+    fun toggleSessionSelection(session: AttendanceSession) {
+        if (selectedSession?.id == session.id) {
+            clearSelectedSession()
+        } else {
+            selectSession(session)
+        }
+    }
+
+    private fun clearSelectedSession() {
+        selectedSession = null
+        _uiState.value = AttendanceUiState.Idle
+    }
+
+    private fun publishSelectedSession() {
+        val session = selectedSession ?: return
         val attendance = buildMemberAttendanceMap(session)
         _uiState.value = AttendanceUiState.SessionSelected(
             session = session,
@@ -78,10 +105,19 @@ class AttendanceViewModel(
             _uiState.value = AttendanceUiState.Error("lead_only")
             return
         }
+        val previousSession = selectedSession
+        selectedSession = selectedSession?.takeIf { it.id == sessionId }?.copy(
+            records = selectedSession?.records.orEmpty() + (userId to present)
+        )
+        publishSelectedSession()
         viewModelScope.launch {
             repository.markAttendance(projectId, sessionId, userId, present)
-                .onSuccess { _uiState.value = AttendanceUiState.AttendanceSaved }
-                .onFailure { _uiState.value = AttendanceUiState.Error(it.message ?: "") }
+                .onSuccess { publishSelectedSession() }
+                .onFailure {
+                    selectedSession = previousSession
+                    publishSelectedSession()
+                    _uiState.value = AttendanceUiState.Error(it.message ?: "")
+                }
         }
     }
 

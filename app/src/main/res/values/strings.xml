@@ -218,7 +218,7 @@
     <string name="attendance_title">Attendance</string>
     <string name="attendance_sessions_label">Sessions</string>
     <string name="attendance_empty_sessions">No sessions recorded yet.</string>
-    <string name="attendance_add_session">New Session</string>
+    <string name="attendance_add_session">Add Session</string>
     <string name="attendance_session_date_format">%1$s</string>
     <string name="attendance_session_summary_format">%1$d / %2$d present</string>
     <string name="attendance_member_percentage_format">%1$.0f%%</string>

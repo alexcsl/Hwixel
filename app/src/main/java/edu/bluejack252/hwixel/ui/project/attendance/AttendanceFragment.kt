@@ -88,7 +88,7 @@ class AttendanceFragment : Fragment() {
             .observe(viewLifecycleOwner) { value ->
                 project = value
                 publishMembers()
-            }
+        }
         ServiceLocator.getUserRepository(requireContext())
             .observeUsers()
             .observe(viewLifecycleOwner) { value ->
@@ -99,7 +99,7 @@ class AttendanceFragment : Fragment() {
 
     private fun setupAdapters(view: View) {
         sessionAdapter = AttendanceSessionAdapter { session ->
-            viewModel.selectSession(session)
+            viewModel.toggleSessionSelection(session)
         }
         view.findViewById<RecyclerView>(R.id.sessionsRecyclerView).adapter = sessionAdapter
 
@@ -203,6 +203,10 @@ class AttendanceFragment : Fragment() {
                     else
                         state.message.ifBlank { getString(R.string.error_generic) }
                     Snackbar.make(view, msg, Snackbar.LENGTH_SHORT).show()
+                }
+                AttendanceUiState.Idle -> {
+                    loading.isVisible = false
+                    memberSection.isVisible = false
                 }
                 else -> loading.isVisible = false
             }

@@ -29,6 +29,7 @@ class AnalyticsFragment : Fragment() {
     private var _binding: FragmentAnalyticsBinding? = null
     private val binding get() = _binding!!
     private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+    private var isUpdatingChartSelection = false
 
     private val memberAdapter = AnalyticsMemberAdapter { member ->
         viewModel.selectMember(member.userId)
@@ -70,11 +71,13 @@ class AnalyticsFragment : Fragment() {
         binding.completedPieChart.setNoDataText(getString(R.string.analytics_no_completed_tasks))
         binding.completedPieChart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             override fun onValueSelected(e: com.github.mikephil.charting.data.Entry?, h: Highlight?) {
+                if (isUpdatingChartSelection) return
                 val member = e?.data as? MemberAnalyticsUi ?: return
                 viewModel.selectMember(member.userId)
             }
 
             override fun onNothingSelected() {
+                if (isUpdatingChartSelection) return
                 viewModel.selectMember(null)
             }
         })
@@ -114,10 +117,15 @@ class AnalyticsFragment : Fragment() {
         dataSet.selectionShift = 10f
         binding.completedPieChart.data = PieData(dataSet)
         val selectedIndex = completedMembers.indexOfFirst { it.userId == selectedMemberId }
-        if (selectedIndex >= 0) {
-            binding.completedPieChart.highlightValue(selectedIndex.toFloat(), 0)
-        } else {
-            binding.completedPieChart.highlightValues(null)
+        isUpdatingChartSelection = true
+        try {
+            if (selectedIndex >= 0) {
+                binding.completedPieChart.highlightValue(selectedIndex.toFloat(), 0, false)
+            } else {
+                binding.completedPieChart.highlightValues(null)
+            }
+        } finally {
+            isUpdatingChartSelection = false
         }
         binding.completedPieChart.invalidate()
     }

@@ -62,6 +62,7 @@ class AnalyticsViewModel(
     }
 
     fun selectMember(userId: String?) {
+        if (_uiState.value?.selectedMemberId == userId) return
         _uiState.value = _uiState.value?.copy(selectedMemberId = userId)
     }
 
@@ -94,6 +95,7 @@ class AnalyticsViewModel(
         fingerprint: HealthFingerprint,
         forceHealthRefresh: Boolean
     ): Boolean {
+        if (!GPT_TEAM_HEALTH_ENABLED) return false
         if (members.isEmpty()) return false
         if (!projectLoaded || !tasksLoaded || !usersLoaded) return false
         return forceHealthRefresh || lastHealthFingerprint != fingerprint
@@ -187,6 +189,7 @@ class AnalyticsViewModel(
 }
 
 private const val UNKNOWN_MEMBER_NAME = "Unknown member"
+private const val GPT_TEAM_HEALTH_ENABLED = false
 
 private data class HealthFingerprint(
     val members: List<HealthMemberFingerprint>

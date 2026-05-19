@@ -46,7 +46,7 @@ class AnalyticsViewModelTest {
     }
 
     @Test
-    fun buildsMemberStatsAndSuccessHealthState() {
+    fun buildsMemberStatsWithoutCallingDisabledHealthAnalysis() {
         healthRepository.result = Result.success(
             TeamHealthResult("Healthy", "Balanced work.", listOf("Keep rotating tasks"))
         )
@@ -69,8 +69,8 @@ class AnalyticsViewModelTest {
         assertEquals("Alice", state.members.first().name)
         assertEquals(2, state.members.first { it.userId == "u1" }.assignedCount)
         assertEquals(1, state.members.first { it.userId == "u1" }.completedCount)
-        assertEquals("Healthy", state.teamHealth?.status)
-        assertTrue(healthRepository.lastPrompt.contains("- Alice: assigned=2, completed=1, overdue=0"))
+        assertEquals(null, state.teamHealth)
+        assertEquals(0, healthRepository.callCount)
     }
 
     @Test
@@ -105,7 +105,7 @@ class AnalyticsViewModelTest {
     }
 
     @Test
-    fun healthFailureShowsNonCrashingErrorState() {
+    fun disabledHealthAnalysisDoesNotShowNetworkError() {
         healthRepository.result = Result.failure(IllegalStateException("network down"))
         projectLiveData.value = Project(
             id = "p1",
@@ -117,7 +117,8 @@ class AnalyticsViewModelTest {
         val state = viewModel.uiState.value!!
 
         assertFalse(state.teamHealthLoading)
-        assertEquals("network down", state.teamHealthError)
+        assertEquals(null, state.teamHealthError)
+        assertEquals(0, healthRepository.callCount)
     }
 
     @Test

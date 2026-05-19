@@ -53,6 +53,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/analytics_clear_range"
+                    android:textSize="18sp"
                     android:visibility="gone" />
             </LinearLayout>
 
@@ -61,7 +62,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@string/analytics_completed_distribution"
-            android:textAppearance="?attr/textAppearanceTitleLarge" />
+            android:textAppearance="?attr/textAppearanceTitleLarge"
+            android:textSize="22sp" />
 
         <com.github.mikephil.charting.charts.PieChart
             android:id="@+id/completedPieChart"
@@ -94,7 +96,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/analytics_team_health"
-                        android:textAppearance="?attr/textAppearanceTitleMedium" />
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:visibility="gone" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/teamHealthStatusChip"
@@ -138,7 +141,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="@string/analytics_refresh_health" />
+                    android:text="@string/analytics_refresh_health"
+                    android:textSize="18sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

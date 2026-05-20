@@ -6,7 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import edu.bluejack252.hwixel.MainDispatcherRule
 import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.model.Task
+import edu.bluejack252.hwixel.data.model.User
 import edu.bluejack252.hwixel.data.repository.TaskRepository
+import edu.bluejack252.hwixel.data.repository.UserRepository
 import edu.bluejack252.hwixel.util.constants.Constants
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -20,11 +22,12 @@ class TaskBoardViewModelTest {
 
     private val tasksLiveData = MutableLiveData<List<Task>>()
     private val repository = FakeTaskRepository(tasksLiveData)
+    private val usersLiveData = MutableLiveData<List<User>>()
     private lateinit var viewModel: TaskBoardViewModel
 
     @Before
     fun setUp() {
-        viewModel = TaskBoardViewModel("p1", repository)
+        viewModel = TaskBoardViewModel("p1", repository, FakeUserRepository(usersLiveData))
         viewModel.uiState.observeForever { }
     }
 
@@ -68,5 +71,15 @@ class TaskBoardViewModelTest {
         override suspend fun addComment(projectId: String, taskId: String, comment: Comment): Result<Unit> = Result.success(Unit)
         override suspend fun updateSubtask(projectId: String, taskId: String, subtaskId: String, isDone: Boolean): Result<Unit> = Result.success(Unit)
         override suspend fun deleteTask(task: Task): Result<Unit> = Result.success(Unit)
+    }
+
+    private class FakeUserRepository(
+        private val usersLiveData: LiveData<List<User>>
+    ) : UserRepository {
+        override fun observeUsers(): LiveData<List<User>> = usersLiveData
+        override fun observeUser(userId: String): LiveData<User?> = MutableLiveData(null)
+        override suspend fun upsertUser(user: User): Result<Unit> = Result.success(Unit)
+        override suspend fun findUserByEmail(email: String): Result<User?> = Result.success(null)
+        override suspend fun writeNotification(userId: String, notifId: String, payload: Map<String, Any>): Result<Unit> = Result.success(Unit)
     }
 }

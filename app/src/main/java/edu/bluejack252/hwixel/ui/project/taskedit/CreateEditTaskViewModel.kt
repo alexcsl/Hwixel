@@ -33,7 +33,7 @@ class CreateEditTaskViewModel(
         _uiState.value = CreateEditTaskUiState.Loading
         _uiState.addSource(projectRepository.observeProject(projectId)) { project ->
             val members = project?.members?.map { (userId, _) ->
-                MemberOption(userId = userId, name = userId)
+                MemberOption(userId = userId, name = UNKNOWN_MEMBER_NAME)
             } ?: emptyList()
             memberOptions = members
             publishLoaded()
@@ -42,7 +42,7 @@ class CreateEditTaskViewModel(
             usersLoaded = true
             memberOptions = memberOptions.map { option ->
                 val user = users.firstOrNull { it.id == option.userId }
-                option.copy(name = user?.name ?: option.userId)
+                option.copy(name = user?.name?.takeIf { it.isNotBlank() } ?: UNKNOWN_MEMBER_NAME)
             }
             publishLoaded()
         }
@@ -119,5 +119,9 @@ class CreateEditTaskViewModel(
                 CreateEditTaskUiState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
             }
         }
+    }
+
+    private companion object {
+        const val UNKNOWN_MEMBER_NAME = "Unknown member"
     }
 }

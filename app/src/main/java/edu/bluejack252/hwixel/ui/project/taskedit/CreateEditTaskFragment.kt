@@ -22,6 +22,7 @@ import edu.bluejack252.hwixel.util.constants.Constants
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.Calendar
 
 class CreateEditTaskFragment : Fragment() {
 
@@ -29,8 +30,11 @@ class CreateEditTaskFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val args: CreateEditTaskFragmentArgs by navArgs()
-    private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+    private val dateFormat = SimpleDateFormat("MMM d, yyyy HH:mm", Locale.getDefault())
+    private val dateOnlyFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
     private var selectedDeadline: Long = 0L
+    private var selectedHour: Int = 23
+    private var selectedMinute: Int = 59
     private var selectedAssigneeIds: MutableList<String> = mutableListOf()
     private var availableMembers: List<MemberOption> = emptyList()
     private val subtaskViews = mutableListOf<ItemSubtaskRowBinding>()
@@ -56,6 +60,10 @@ class CreateEditTaskFragment : Fragment() {
         binding.backButton.setOnClickListener { findNavController().navigateUp() }
 
         binding.deadlineButton.setOnClickListener { showDatePicker() }
+        binding.deadlineButton.setOnLongClickListener {
+            showTimeInputDialog()
+            true
+        }
         binding.assigneesButton.setOnClickListener { showAssigneeDialog() }
         binding.addSubtaskButton.setOnClickListener { addSubtaskRow() }
         binding.saveTaskButton.setOnClickListener { save() }
@@ -91,6 +99,9 @@ class CreateEditTaskFragment : Fragment() {
 
         if (task.deadline > 0L) {
             selectedDeadline = task.deadline
+            val calendar = Calendar.getInstance().apply { timeInMillis = task.deadline }
+            selectedHour = calendar.get(Calendar.HOUR_OF_DAY)
+            selectedMinute = calendar.get(Calendar.MINUTE)
             binding.deadlineButton.text = dateFormat.format(Date(task.deadline))
         }
 
@@ -122,10 +133,56 @@ class CreateEditTaskFragment : Fragment() {
             .setSelection(if (selectedDeadline > 0L) selectedDeadline else MaterialDatePicker.todayInUtcMilliseconds())
             .build()
         picker.addOnPositiveButtonClickListener { selection ->
-            selectedDeadline = selection
-            binding.deadlineButton.text = dateFormat.format(Date(selection))
+            selectedDeadline = buildDeadlineMillis(selection, selectedHour, selectedMinute)
+            updateDeadlineButtons()
         }
         picker.show(parentFragmentManager, "deadline_picker")
+    }
+
+    private fun showTimeInputDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_deadline_time, null)
+        val hourEditText = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.deadlineHourEditText)
+        val minuteEditText = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.deadlineMinuteEditText)
+        hourEditText.setText(selectedHour.toString())
+        minuteEditText.setText(selectedMinute.toString())
+
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.task_time_dialog_title)
+            .setView(dialogView)
+            .setPositiveButton(R.string.btn_ok) { _, _ ->
+                val hour = hourEditText.text?.toString()?.toIntOrNull()
+                val minute = minuteEditText.text?.toString()?.toIntOrNull()
+                if (hour == null || minute == null || hour !in 0..23 || minute !in 0..59) {
+                    Snackbar.make(binding.root, R.string.error_invalid_deadline_time, Snackbar.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                selectedHour = hour
+                selectedMinute = minute
+                selectedDeadline = if (selectedDeadline > 0L) {
+                    buildDeadlineMillis(selectedDeadline, selectedHour, selectedMinute)
+                } else {
+                    selectedDeadline
+                }
+                updateDeadlineButtons()
+            }
+            .setNegativeButton(R.string.btn_cancel, null)
+            .show()
+    }
+
+    private fun buildDeadlineMillis(dateMillis: Long, hour: Int, minute: Int): Long {
+        return Calendar.getInstance().apply {
+            timeInMillis = dateMillis
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+    }
+
+    private fun updateDeadlineButtons() {
+        if (selectedDeadline > 0L) {
+            binding.deadlineButton.text = dateFormat.format(Date(selectedDeadline))
+        }
     }
 
     private fun showAssigneeDialog() {
@@ -150,8 +207,12 @@ class CreateEditTaskFragment : Fragment() {
         if (selectedAssigneeIds.isEmpty()) {
             binding.assigneesButton.text = getString(R.string.task_assign_members)
         } else {
+            val selectedNames = selectedAssigneeIds.map { selectedId ->
+                availableMembers.firstOrNull { it.userId == selectedId }?.name
+                    ?: getString(R.string.unknown_member)
+            }
             binding.assigneesButton.text = getString(
-                R.string.selected_members_format, selectedAssigneeIds.size
+                R.string.selected_members_names_format, selectedNames.joinToString(", ")
             )
         }
     }

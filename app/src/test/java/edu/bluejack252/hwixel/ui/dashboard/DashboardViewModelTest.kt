@@ -48,7 +48,7 @@ class DashboardViewModelTest {
     }
 
     @Test
-    fun deadlinesExcludeOtherUsersProjectsButIncludeProjectTasks() {
+    fun deadlinesExcludeOtherUsersProjectsAndAssignments() {
         val projects = listOf(
             Project(id = "p1", name = "Mine", members = mapOf("new-user" to ProjectMember("new-user", status = Constants.MEMBER_STATUS_ACTIVE))),
             Project(id = "p2", name = "Other", members = mapOf("other-user" to ProjectMember("other-user", status = Constants.MEMBER_STATUS_ACTIVE)))
@@ -61,11 +61,11 @@ class DashboardViewModelTest {
 
         val result = viewModel.buildDeadlineItems(projects, tasks, nowMillis = 0L, userId = "new-user")
 
-        assertEquals(listOf("mine", "other-assignee"), result.map { it.taskId })
+        assertEquals(listOf("mine"), result.map { it.taskId })
     }
 
     @Test
-    fun pendingTasksCountTodoAndInProgressInCurrentUsersActiveProjects() {
+    fun pendingTasksCountTodoAndInProgressAssignedToCurrentUserInActiveProjects() {
         val projects = listOf(
             Project(id = "p1", members = mapOf("u1" to ProjectMember("u1", status = Constants.MEMBER_STATUS_ACTIVE))),
             Project(id = "p2", members = mapOf("u2" to ProjectMember("u2", status = Constants.MEMBER_STATUS_ACTIVE)))
@@ -77,7 +77,7 @@ class DashboardViewModelTest {
             Task(id = "4", projectId = "p2", status = Constants.STATUS_TODO, assignees = listOf("u1"))
         )
 
-        assertEquals(2, viewModel.countPendingTasks(projects, tasks, "u1"))
+        assertEquals(1, viewModel.countPendingTasks(projects, tasks, "u1"))
     }
 
     @Test

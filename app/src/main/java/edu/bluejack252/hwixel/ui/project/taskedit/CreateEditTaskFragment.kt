@@ -60,10 +60,7 @@ class CreateEditTaskFragment : Fragment() {
         binding.backButton.setOnClickListener { findNavController().navigateUp() }
 
         binding.deadlineButton.setOnClickListener { showDatePicker() }
-        binding.deadlineButton.setOnLongClickListener {
-            showTimeInputDialog()
-            true
-        }
+        binding.deadlineTimeButton.setOnClickListener { showTimeInputDialog() }
         binding.assigneesButton.setOnClickListener { showAssigneeDialog() }
         binding.addSubtaskButton.setOnClickListener { addSubtaskRow() }
         binding.saveTaskButton.setOnClickListener { save() }
@@ -183,6 +180,11 @@ class CreateEditTaskFragment : Fragment() {
         if (selectedDeadline > 0L) {
             binding.deadlineButton.text = dateFormat.format(Date(selectedDeadline))
         }
+        binding.deadlineTimeButton.text = getString(
+            R.string.task_deadline_time_format,
+            selectedHour,
+            selectedMinute
+        )
     }
 
     private fun showAssigneeDialog() {

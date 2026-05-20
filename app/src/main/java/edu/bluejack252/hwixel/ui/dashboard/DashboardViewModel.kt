@@ -106,6 +106,7 @@ class DashboardViewModel(
         return tasks
             .filter { task ->
                 task.projectId in activeProjectIds &&
+                    task.assignees.contains(userId) &&
                     task.deadline > 0L &&
                     task.deadline >= nowMillis
             }
@@ -133,6 +134,7 @@ class DashboardViewModel(
             .toSet()
         return tasks.count { task ->
             task.projectId in activeProjectIds &&
+                task.assignees.contains(userId) &&
                 (task.status == Constants.STATUS_TODO || task.status == Constants.STATUS_IN_PROGRESS)
         }
     }

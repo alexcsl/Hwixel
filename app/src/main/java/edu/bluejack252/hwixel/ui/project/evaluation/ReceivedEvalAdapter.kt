@@ -50,9 +50,9 @@ class ReceivedEvalAdapter(
         holder.ratingBar.rating = avg
         holder.feedbackText.text = sub.feedback.ifBlank { ctx.getString(R.string.eval_no_feedback) }
 
-        holder.commScore.text = ctx.getString(R.string.eval_score_format, sub.communication)
-        holder.qualScore.text = ctx.getString(R.string.eval_score_format, sub.quality)
-        holder.relScore.text = ctx.getString(R.string.eval_score_format, sub.reliability)
-        holder.effortScore.text = ctx.getString(R.string.eval_score_format, sub.effort)
+        holder.commScore.text = ctx.getString(R.string.eval_score_format, sub.communication.toFloat())
+        holder.qualScore.text = ctx.getString(R.string.eval_score_format, sub.quality.toFloat())
+        holder.relScore.text = ctx.getString(R.string.eval_score_format, sub.reliability.toFloat())
+        holder.effortScore.text = ctx.getString(R.string.eval_score_format, sub.effort.toFloat())
     }
 }

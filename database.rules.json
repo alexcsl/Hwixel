@@ -3,7 +3,7 @@
     "users": {
       ".read": "auth != null",
       "$userId": {
-        ".write": "$userId === auth.uid"
+        ".write": "$userId === auth.uid || (newData.child('id').val() === data.child('id').val() && newData.child('name').val() === data.child('name').val() && newData.child('studentId').val() === data.child('studentId').val() && newData.child('email').val() === data.child('email').val() && newData.child('phone').val() === data.child('phone').val() && newData.child('avatarUrl').val() === data.child('avatarUrl').val() && newData.child('totalProjectsCompleted').val() === data.child('totalProjectsCompleted').val() && newData.child('badges').val() === data.child('badges').val() && newData.child('averagePeerRating').isNumber())"
       }
     },
     "projects": {
@@ -36,6 +36,12 @@
       "$projectId": {
         ".read": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()",
         ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()"
+      }
+    },
+    "peerRatings": {
+      "$userId": {
+        ".read": "auth != null",
+        ".write": "auth != null && newData.child('averagePeerRating').isNumber()"
       }
     },
     "notifications": {

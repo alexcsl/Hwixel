@@ -101,6 +101,12 @@ class ProjectHubViewModel(
         _createProjectResult.value = null
     }
 
+    fun getMembersForNav(): Triple<Array<String>, Array<String>, Array<String>> {
+        val project = currentProject ?: return Triple(emptyArray(), emptyArray(), emptyArray())
+        val ids = project.members.keys.toList()
+        val names = ids.map { id -> users.firstOrNull { it.id == id }?.name ?: "" }
+        val roles = ids.map { id -> project.members[id]?.role ?: "" }
+        return Triple(ids.toTypedArray(), names.toTypedArray(), roles.toTypedArray())
     private companion object {
         const val UNKNOWN_MEMBER_NAME = "Unknown member"
     }

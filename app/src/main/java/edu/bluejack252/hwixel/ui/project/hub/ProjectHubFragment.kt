@@ -76,6 +76,26 @@ class ProjectHubFragment : Fragment() {
 
     private fun setupToolbar() {
         binding.backButton.setOnClickListener { findNavController().navigateUp() }
+        binding.attendanceButton.setOnClickListener {
+            val project = viewModel.uiState.value?.project ?: return@setOnClickListener
+            val action = ProjectHubFragmentDirections
+                .actionProjectHubFragmentToAttendanceFragment(
+                    projectId = args.projectId,
+                    projectName = project.name
+                )
+            findNavController().navigate(action)
+        }
+        binding.peerEvalButton.setOnClickListener {
+            val (ids, names, roles) = viewModel.getMembersForNav()
+            val action = ProjectHubFragmentDirections
+                .actionProjectHubFragmentToPeerEvalFragment(
+                    projectId = args.projectId,
+                    memberIds = ids,
+                    memberNames = names,
+                    memberRoles = roles
+            )
+            findNavController().navigate(action)
+        }
     }
 
     private fun setupViewPager() {

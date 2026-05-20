@@ -26,6 +26,12 @@
         }
       }
     },
+    "usersByEmail": {
+      ".read": "auth != null",
+      "$emailKey": {
+        ".write": "auth != null && newData.val() === auth.uid"
+      }
+    },
     "attendance": {
       "$projectId": {
         ".read": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()",

@@ -68,7 +68,9 @@ open class UserFirebaseSource(
     override suspend fun upsertUser(user: User) {
         usersRef.child(user.id).setValue(user).awaitResult()
         val emailKey = user.email.trim().lowercase().replace(".", ",")
-        usersByEmailRef.child(emailKey).setValue(user.id).awaitResult()
+        runCatching {
+            usersByEmailRef.child(emailKey).setValue(user.id).awaitResult()
+        }
     }
 
     override suspend fun findByEmail(email: String): User? = suspendCoroutine { continuation ->

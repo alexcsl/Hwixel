@@ -269,9 +269,10 @@
 
                             <RatingBar
                                 android:id="@+id/ratingCommunication"
-                                style="@style/Widget.AppCompat.RatingBar.Small"
+                                style="@style/Widget.AppCompat.RatingBar"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:isIndicator="false"
                                 android:numStars="5"
                                 android:stepSize="1"
                                 android:rating="3"
@@ -311,9 +312,10 @@
 
                             <RatingBar
                                 android:id="@+id/ratingQuality"
-                                style="@style/Widget.AppCompat.RatingBar.Small"
+                                style="@style/Widget.AppCompat.RatingBar"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:isIndicator="false"
                                 android:numStars="5"
                                 android:stepSize="1"
                                 android:rating="3"
@@ -353,9 +355,10 @@
 
                             <RatingBar
                                 android:id="@+id/ratingReliability"
-                                style="@style/Widget.AppCompat.RatingBar.Small"
+                                style="@style/Widget.AppCompat.RatingBar"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:isIndicator="false"
                                 android:numStars="5"
                                 android:stepSize="1"
                                 android:rating="3"
@@ -395,9 +398,10 @@
 
                             <RatingBar
                                 android:id="@+id/ratingEffort"
-                                style="@style/Widget.AppCompat.RatingBar.Small"
+                                style="@style/Widget.AppCompat.RatingBar"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:isIndicator="false"
                                 android:numStars="5"
                                 android:stepSize="1"
                                 android:rating="3"

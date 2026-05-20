@@ -141,33 +141,38 @@ class PeerEvalViewModel(
             repository.submitEvaluation(submission)
                 .onSuccess {
                     recomputeAverageRating(evaluateeId)
-                    _uiState.value = PeerEvalUiState.SubmitSuccess
+                        .onSuccess { _uiState.value = PeerEvalUiState.SubmitSuccess }
+                        .onFailure { _uiState.value = PeerEvalUiState.Error(it.message ?: "") }
                 }
                 .onFailure { _uiState.value = PeerEvalUiState.Error(it.message ?: "") }
         }
     }
 
-    private suspend fun recomputeAverageRating(evaluateeId: String) {
-        repository.fetchAllReceivedSubmissions(projectId, evaluateeId)
-            .onSuccess { submissions ->
-                if (submissions.isNotEmpty()) {
+    private suspend fun recomputeAverageRating(evaluateeId: String): Result<Unit> {
+        return repository.fetchAllReceivedSubmissions(projectId, evaluateeId)
+            .fold(
+                onSuccess = { submissions ->
+                    if (submissions.isEmpty()) return Result.success(Unit)
                     val rawAvg = submissions.map { sub ->
                         (sub.communication + sub.quality + sub.reliability + sub.effort) / 4f
                     }.average().toFloat()
-                    val avg = round(rawAvg * 10f) / 10f
-                    repository.updateAveragePeerRating(evaluateeId, avg)
-                }
+                    repository.updateAveragePeerRating(evaluateeId, roundToOneDecimal(rawAvg))
+                },
+                onFailure = { Result.failure(it) }
+            )
             }
-    }
 
     fun computeMyAverageReceived(): Float {
         val evals = _receivedEvals.value ?: return 0f
         if (evals.isEmpty()) return 0f
-        return evals.map { (it.communication + it.quality + it.reliability + it.effort) / 4f }.average().toFloat()
+        val rawAvg = evals.map { (it.communication + it.quality + it.reliability + it.effort) / 4f }.average().toFloat()
+        return roundToOneDecimal(rawAvg)
     }
 
     fun hasAlreadySubmittedFor(evaluateeId: String): Boolean =
         _submittedByMe.value?.containsKey(evaluateeId) == true
+
+    private fun roundToOneDecimal(value: Float): Float = round(value * 10f) / 10f
 
     override fun onCleared() {
         super.onCleared()

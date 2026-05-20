@@ -49,10 +49,11 @@ class EvalRepositoryImpl(
         runCatching { firebaseSource.fetchAllReceivedSubmissions(projectId, evaluateeId) }
 
     override suspend fun updateAveragePeerRating(userId: String, average: Float): Result<Unit> = runCatching {
+        val roundedAverage = average.toDouble()
         db.updateChildren(
             mapOf(
-                "users/$userId/averagePeerRating" to average,
-                "peerRatings/$userId/averagePeerRating" to average
+                "users/$userId/averagePeerRating" to roundedAverage,
+                "peerRatings/$userId/averagePeerRating" to roundedAverage
             )
         ).await()
     }

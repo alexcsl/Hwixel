@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
@@ -68,6 +69,8 @@ class TaskDetailFragment : Fragment() {
                 )
             )
         }
+        binding.attachmentsRecyclerView.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.attachmentsRecyclerView.adapter = attachmentAdapter
         binding.subtasksRecyclerView.adapter = subtaskAdapter
         binding.commentsRecyclerView.adapter = commentsAdapter
@@ -88,6 +91,11 @@ class TaskDetailFragment : Fragment() {
             result ?: return@observe
             if (result.isSuccess) {
                 Snackbar.make(binding.root, R.string.comment_added, Snackbar.LENGTH_SHORT).show()
+            } else {
+                val msg = result.exceptionOrNull()?.localizedMessage
+                    ?.takeIf { it.isNotBlank() }
+                    ?: getString(R.string.error_generic)
+                Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG).show()
             }
             viewModel.consumeCommentResult()
         }
@@ -122,6 +130,10 @@ class TaskDetailFragment : Fragment() {
     }
 
     private fun render(state: TaskDetailUiState) {
+        binding.loadingIndicator.isVisible = state.isLoading
+        binding.titleContainer.isVisible = !state.isLoading
+        binding.bodyContainer.isVisible = !state.isLoading
+        if (state.isLoading) return
         val task = state.task ?: return
         renderTask(task, state.assigneeNames)
         attachmentAdapter.submitList(state.attachments)
@@ -144,6 +156,10 @@ class TaskDetailFragment : Fragment() {
             if (task.deadline < System.currentTimeMillis() && task.status != Constants.STATUS_DONE) {
                 binding.deadlineTextView.setTextColor(
                     requireContext().getColor(android.R.color.holo_red_light)
+                )
+            } else {
+                binding.deadlineTextView.setTextColor(
+                    requireContext().getColor(android.R.color.darker_gray)
                 )
             }
         } else {

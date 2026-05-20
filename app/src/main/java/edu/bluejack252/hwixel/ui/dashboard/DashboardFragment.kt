@@ -79,6 +79,7 @@ class DashboardFragment : Fragment() {
     }
 
     private fun render(state: DashboardUiState) {
+        binding.loadingIndicator.isVisible = state.isLoading
         projectAdapter.submitList(state.projects)
         deadlineAdapter.submitList(state.deadlines)
         binding.pendingTasksTextView.text = resources.getQuantityString(
@@ -86,8 +87,9 @@ class DashboardFragment : Fragment() {
             state.pendingTaskCount,
             state.pendingTaskCount
         )
-        binding.emptyProjectsTextView.isVisible = state.projects.isEmpty()
-        binding.emptyDeadlinesTextView.isVisible = state.deadlines.isEmpty()
+        binding.activeProjectsStatTextView.text = state.projects.size.toString()
+        binding.emptyProjectsTextView.isVisible = !state.isLoading && state.projects.isEmpty()
+        binding.emptyDeadlinesTextView.isVisible = !state.isLoading && state.deadlines.isEmpty()
     }
 
     private fun showCreateProjectDialog() {

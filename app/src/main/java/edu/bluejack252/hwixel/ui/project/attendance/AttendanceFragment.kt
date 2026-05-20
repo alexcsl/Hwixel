@@ -1,5 +1,6 @@
 package edu.bluejack252.hwixel.ui.project.attendance
 
+import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,6 +22,11 @@ import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.data.model.AttendanceSession
+import edu.bluejack252.hwixel.data.model.Project
+import edu.bluejack252.hwixel.data.model.ProjectMember
+import edu.bluejack252.hwixel.data.model.User
+import edu.bluejack252.hwixel.util.constants.Constants
+import java.util.Calendar
 
 class AttendanceFragment : Fragment() {
 
@@ -38,6 +44,7 @@ class AttendanceFragment : Fragment() {
 
     private var projectName: String = ""
     private var allSessions: List<AttendanceSession> = emptyList()
+    private var projectMembers: List<ProjectMember> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,12 +58,67 @@ class AttendanceFragment : Fragment() {
         projectName = args.projectName
         setupAdapters(view)
         setupClickListeners(view)
+        observeProjectMembers(view)
         observeViewModel(view)
+    }
+
+    private fun observeProjectMembers(view: View) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        var project: Project? = null
+        var users: List<User> = emptyList()
+
+        fun publishMembers() {
+            val currentProject = project ?: return
+            val activeMembers = currentProject.members.mapNotNull { (userId, member) ->
+                if (member.status == Constants.MEMBER_STATUS_INACTIVE) return@mapNotNull null
+                member.copy(userId = member.userId.ifBlank { userId })
+            }.toMutableList()
+            if (
+                currentProject.createdBy.isNotBlank() &&
+                activeMembers.none { member -> member.userId == currentProject.createdBy }
+            ) {
+                activeMembers.add(
+                    0,
+                    ProjectMember(
+                        userId = currentProject.createdBy,
+                        role = Constants.ROLE_TEAM_LEAD,
+                        status = Constants.MEMBER_STATUS_ACTIVE
+                    )
+                )
+            }
+            projectMembers = activeMembers.distinctBy { member -> member.userId }
+            val names = projectMembers.associate { member ->
+                val user = users.firstOrNull { it.id == member.userId }
+                member.userId to (user?.name?.takeIf { it.isNotBlank() } ?: member.userId)
+            }
+            val currentRole = currentProject.members[currentUserId]?.role
+                ?.takeIf { it.isNotBlank() }
+                ?: Constants.ROLE_TEAM_LEAD.takeIf { currentProject.createdBy == currentUserId }
+                ?: ""
+            val isLead = currentRole == Constants.ROLE_TEAM_LEAD
+            sessionAdapter.totalMemberCount = projectMembers.size
+            view.findViewById<MaterialButton>(R.id.addSessionButton).isVisible = isLead
+            view.findViewById<MaterialButton>(R.id.setReminderButton).isVisible = isLead
+            viewModel.setProjectMembers(projectMembers, names, currentRole)
+        }
+
+        ServiceLocator.getProjectRepository(requireContext())
+            .observeProject(args.projectId)
+            .observe(viewLifecycleOwner) { value ->
+                project = value
+                publishMembers()
+        }
+        ServiceLocator.getUserRepository(requireContext())
+            .observeUsers()
+            .observe(viewLifecycleOwner) { value ->
+                users = value
+                publishMembers()
+            }
     }
 
     private fun setupAdapters(view: View) {
         sessionAdapter = AttendanceSessionAdapter { session ->
-            viewModel.selectSession(session)
+            viewModel.toggleSessionSelection(session)
         }
         view.findViewById<RecyclerView>(R.id.sessionsRecyclerView).adapter = sessionAdapter
 
@@ -80,7 +142,7 @@ class AttendanceFragment : Fragment() {
         view.findViewById<MaterialButton>(R.id.setReminderButton).setOnClickListener {
             val nextDate = allSessions.maxByOrNull { it.nextSessionDate }?.nextSessionDate ?: 0L
             if (nextDate > System.currentTimeMillis()) {
-                viewModel.scheduleReminder(requireContext(), projectName, nextDate)
+                viewModel.scheduleReminder(requireContext().applicationContext, projectName, nextDate)
             } else {
                 Snackbar.make(view, getString(R.string.attendance_no_next_session), Snackbar.LENGTH_SHORT).show()
             }
@@ -131,7 +193,9 @@ class AttendanceFragment : Fragment() {
 
                     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
                     val isLead = viewModel.isCurrentUserLead(currentUserId)
-                    val items = state.memberNames.map { (userId, name) ->
+                    val items = projectMembers.map { member ->
+                        val userId = member.userId
+                        val name = state.memberNames[userId] ?: userId
                         AttendanceMemberItem(
                             userId = userId,
                             name = name,
@@ -151,7 +215,7 @@ class AttendanceFragment : Fragment() {
                 }
                 is AttendanceUiState.SessionCreated -> {
                     loading.isVisible = false
-                    Snackbar.make(view, getString(R.string.attendance_save_success), Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(view, getString(R.string.attendance_session_created), Snackbar.LENGTH_SHORT).show()
                 }
                 is AttendanceUiState.Error -> {
                     loading.isVisible = false
@@ -160,6 +224,10 @@ class AttendanceFragment : Fragment() {
                     else
                         state.message.ifBlank { getString(R.string.error_generic) }
                     Snackbar.make(view, msg, Snackbar.LENGTH_SHORT).show()
+                }
+                AttendanceUiState.Idle -> {
+                    loading.isVisible = false
+                    memberSection.isVisible = false
                 }
                 else -> loading.isVisible = false
             }
@@ -172,9 +240,11 @@ class AttendanceFragment : Fragment() {
             .build()
 
         picker.addOnPositiveButtonClickListener { dateMs ->
-            showNextSessionPicker(dateMs)
+            showTimePicker(dateMs) { sessionDateTime ->
+                showNextSessionPicker(sessionDateTime)
+            }
         }
-        picker.show(parentFragmentManager, "session_date_picker")
+        picker.show(childFragmentManager, "session_date_picker")
     }
 
     private fun showNextSessionPicker(sessionDate: Long) {
@@ -183,8 +253,29 @@ class AttendanceFragment : Fragment() {
             .build()
 
         picker.addOnPositiveButtonClickListener { nextDateMs ->
-            viewModel.createSession(sessionDate, nextDateMs)
+            showTimePicker(nextDateMs) { nextDateTime ->
+                viewModel.createSession(sessionDate, nextDateTime)
+            }
         }
-        picker.show(parentFragmentManager, "next_session_picker")
+        picker.show(childFragmentManager, "next_session_picker")
+    }
+
+    private fun showTimePicker(dateMs: Long, onSelected: (Long) -> Unit) {
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = dateMs
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        TimePickerDialog(
+            requireContext(),
+            { _, hourOfDay, minute ->
+                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                calendar.set(Calendar.MINUTE, minute)
+                onSelected(calendar.timeInMillis)
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        ).show()
     }
 }

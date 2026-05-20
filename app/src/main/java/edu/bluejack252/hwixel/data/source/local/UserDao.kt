@@ -2,6 +2,7 @@ package edu.bluejack252.hwixel.data.source.local
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -16,4 +17,7 @@ interface UserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(user: UserEntity)
+
+    @Delete
+    suspend fun delete(user: UserEntity)
 }

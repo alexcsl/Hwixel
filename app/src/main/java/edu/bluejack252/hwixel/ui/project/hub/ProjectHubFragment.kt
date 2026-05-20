@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -34,6 +35,7 @@ class ProjectHubFragment : Fragment() {
     private val args: ProjectHubFragmentArgs by navArgs()
     private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
     private var selectedDueDate: Long = 0L
+    private var currentProject: Project? = null
     private val activityFeedAdapter = ActivityFeedAdapter()
 
     private val viewModel: ProjectHubViewModel by viewModels {
@@ -93,7 +95,7 @@ class ProjectHubFragment : Fragment() {
                     memberIds = ids,
                     memberNames = names,
                     memberRoles = roles
-            )
+                )
             findNavController().navigate(action)
         }
     }
@@ -113,8 +115,9 @@ class ProjectHubFragment : Fragment() {
     }
 
     private fun render(state: ProjectHubUiState) {
-        val project = state.project ?: return
-        renderHeader(project)
+        if (state.isLoading || state.project == null) return
+        currentProject = state.project
+        renderHeader(state.project)
         activityFeedAdapter.submitList(state.recentActivity)
     }
 

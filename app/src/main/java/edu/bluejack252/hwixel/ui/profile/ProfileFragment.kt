@@ -39,6 +39,7 @@ class ProfileFragment : Fragment() {
 
     private fun logout() {
         ServiceLocator.getAuthRepository(requireContext()).logout()
+        ServiceLocator.reset()
         findNavController().setGraph(R.navigation.auth_nav_graph)
     }
 

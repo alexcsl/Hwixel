@@ -80,4 +80,14 @@ object ServiceLocator {
             firebaseSource = EvalFirebaseSource()
         ).also { evalRepository = it }
     }
+
+    fun reset() {
+        authRepository = null
+        userRepository = null
+        projectRepository = null
+        taskRepository = null
+        teamHealthRepository = null
+        attendanceRepository = null
+        evalRepository = null
+    }
 }

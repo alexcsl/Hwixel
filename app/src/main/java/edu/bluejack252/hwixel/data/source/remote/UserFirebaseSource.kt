@@ -17,6 +17,7 @@ open class UserFirebaseSource(
 ) : UserRemoteSource {
     private val usersRef = database.reference.child("users")
     private val notificationsRef = database.reference.child("notifications")
+    private val usersByEmailRef = database.reference.child("usersByEmail")
 
     override fun observeUsers(): LiveData<List<User>> {
         val liveData = MutableLiveData<List<User>>()
@@ -66,18 +67,29 @@ open class UserFirebaseSource(
 
     override suspend fun upsertUser(user: User) {
         usersRef.child(user.id).setValue(user).awaitResult()
+        val emailKey = user.email.trim().lowercase().replace(".", ",")
+        usersByEmailRef.child(emailKey).setValue(user.id).awaitResult()
     }
 
     override suspend fun findByEmail(email: String): User? = suspendCoroutine { continuation ->
-        val normalizedEmail = email.trim().lowercase()
-        usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        val emailKey = email.trim().lowercase().replace(".", ",")
+        usersByEmailRef.child(emailKey).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val user = snapshot.children.mapNotNull { child ->
-                    child.getValue(User::class.java)?.copy(id = child.key.orEmpty())
-                }.firstOrNull { it.email.trim().lowercase() == normalizedEmail }
-                continuation.resume(user)
+                val uid = snapshot.getValue(String::class.java)
+                if (uid == null) {
+                    continuation.resume(null)
+                    return
+                }
+                usersRef.child(uid).addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(userSnapshot: DataSnapshot) {
+                        val user = userSnapshot.getValue(User::class.java)?.copy(id = uid)
+                        continuation.resume(user)
+                    }
+                    override fun onCancelled(error: DatabaseError) {
+                        continuation.resumeWithException(error.toException())
+                    }
+                })
             }
-
             override fun onCancelled(error: DatabaseError) {
                 continuation.resumeWithException(error.toException())
             }

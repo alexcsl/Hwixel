@@ -2,7 +2,7 @@ package edu.bluejack252.hwixel.data.repository
 
 import androidx.lifecycle.LiveData
 import edu.bluejack252.hwixel.data.model.AttendanceSession
-import edu.bluejack252.hwixel.data.source.remote.AttendanceFirebaseSource
+import edu.bluejack252.hwixel.data.source.remote.AttendanceRemoteSource
 
 interface AttendanceRepository {
     fun observeSessions(projectId: String): LiveData<List<AttendanceSession>>
@@ -12,7 +12,7 @@ interface AttendanceRepository {
 }
 
 class AttendanceRepositoryImpl(
-    private val firebaseSource: AttendanceFirebaseSource
+    private val firebaseSource: AttendanceRemoteSource
 ) : AttendanceRepository {
 
     override fun observeSessions(projectId: String): LiveData<List<AttendanceSession>> =

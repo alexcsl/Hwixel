@@ -63,6 +63,18 @@ class TaskBoardFragment : Fragment() {
         setupFab()
         setupFilter()
         viewModel.uiState.observe(viewLifecycleOwner, ::render)
+        viewModel.statusUpdateResult.observe(viewLifecycleOwner) { result ->
+            result ?: return@observe
+            if (result.isFailure) {
+                val msg = result.exceptionOrNull()?.localizedMessage
+                    ?.takeIf { it.isNotBlank() }
+                    ?: getString(R.string.error_generic)
+                com.google.android.material.snackbar.Snackbar
+                    .make(binding.root, msg, com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+                    .show()
+            }
+            viewModel.consumeStatusResult()
+        }
     }
 
     private fun setupListView() {

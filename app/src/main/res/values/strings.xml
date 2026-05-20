@@ -324,6 +324,7 @@
     <string name="eval_feedback_hint">Share constructive feedback…</string>
     <string name="eval_submit_button">Submit Evaluation</string>
     <string name="eval_submit_success">Evaluation submitted.</string>
+    <string name="eval_already_submitted_format">%1$s ✓ already submitted</string>
     <string name="eval_my_avg_label">Your average score</string>
     <string name="eval_my_avg_format">Your avg: %1$.1f / 5.0</string>
     <string name="eval_avg_format">%1$.1f</string>

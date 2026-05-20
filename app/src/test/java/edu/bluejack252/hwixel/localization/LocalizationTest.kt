@@ -10,7 +10,7 @@ import org.junit.Test
  * Verifies the correctness of the localization layer introduced in Phase 12.
  *
  * Tests cover:
- *  - Supported locale set matches the locales declared in res/xml/locales_config.xml
+ *  - Supported locale set (SUPPORTED_LANGUAGE_TAGS) contains exactly "en" and "id"
  *  - Unsupported locale tags are normalised to the default language
  *  - The default locale is English ("en")
  *  - Bahasa Indonesia ("id") is an accepted tag

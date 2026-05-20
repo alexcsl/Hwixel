@@ -52,22 +52,25 @@ class StringResourceCoverageTest {
             "res/xml/locales_config.xml must exist for Android 13+ per-app language support",
             localesConfigFile.exists()
         )
-        val content = localesConfigFile.readText()
+        val doc = newSecureFactory().newDocumentBuilder().parse(localesConfigFile)
+        doc.documentElement.normalize()
+        val localeNodes = doc.getElementsByTagName("locale")
+        val declaredNames = (0 until localeNodes.length).mapNotNull { i ->
+            localeNodes.item(i).attributes.getNamedItem("android:name")?.nodeValue
+        }.toSet()
         assertTrue(
-            "locales_config.xml must declare the English locale",
-            content.contains("android:name=\"en\"")
+            "locales_config.xml must declare the English locale (android:name=\"en\")",
+            declaredNames.contains("en")
         )
         assertTrue(
-            "locales_config.xml must declare the Indonesian locale",
-            content.contains("android:name=\"id\"")
+            "locales_config.xml must declare the Indonesian locale (android:name=\"id\")",
+            declaredNames.contains("id")
         )
     }
 
     private fun parseStringNames(file: File): Set<String> {
         if (!file.exists()) return emptySet()
-        val doc: Document = DocumentBuilderFactory.newInstance()
-            .newDocumentBuilder()
-            .parse(file)
+        val doc: Document = newSecureFactory().newDocumentBuilder().parse(file)
         doc.documentElement.normalize()
         val names = mutableSetOf<String>()
         val strings = doc.getElementsByTagName("string")
@@ -83,13 +86,46 @@ class StringResourceCoverageTest {
         return names
     }
 
+    /**
+     * Returns a [DocumentBuilderFactory] hardened against XXE injection by enabling
+     * secure processing and disabling DOCTYPE declarations and external entity expansion.
+     */
+    private fun newSecureFactory(): DocumentBuilderFactory =
+        DocumentBuilderFactory.newInstance().apply {
+            setFeature("http://javax.xml.XMLConstants/feature/secure-processing", true)
+            setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
+            isXIncludeAware = false
+            isExpandEntityReferences = false
+        }
+
+    /**
+     * Locates the app/src/main/res directory by:
+     * 1. Checking the `project.root` system property (set via Gradle test arguments in CI).
+     * 2. Walking up from the current working directory until the relative path resolves.
+     *
+     * This makes the test resilient to varying working directories across IDE, Gradle, and CI.
+     */
     private fun locateResDir(): File {
-        val candidates = listOf(
-            File("app/src/main/res"),
-            File("../app/src/main/res"),
-            File("../../app/src/main/res"),
+        val relPath = "app/src/main/res"
+
+        // 1. Honour an explicit root override passed via -Dproject.root=<path>
+        val sysProp = System.getProperty("project.root")
+        if (sysProp != null) {
+            val candidate = File(sysProp, relPath)
+            if (candidate.exists()) return candidate
+        }
+
+        // 2. Walk up from the current working directory
+        var dir: File? = File("").absoluteFile
+        while (dir != null) {
+            val candidate = File(dir, relPath)
+            if (candidate.exists()) return candidate
+            dir = dir.parentFile
+        }
+
+        error(
+            "Cannot locate $relPath. Run tests from any ancestor of the project root, " +
+                "or pass -Dproject.root=<path> as a JVM test argument."
         )
-        return candidates.firstOrNull { it.exists() }
-            ?: error("Cannot locate app/src/main/res. Run tests from the project root directory.")
     }
 }

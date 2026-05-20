@@ -7,13 +7,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.model.Task
+import edu.bluejack252.hwixel.data.model.User
 import edu.bluejack252.hwixel.data.repository.TaskRepository
+import edu.bluejack252.hwixel.data.repository.UserRepository
 import kotlinx.coroutines.launch
 
 class TaskDetailViewModel(
     private val projectId: String,
     private val taskId: String,
-    private val taskRepository: TaskRepository
+    private val taskRepository: TaskRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MediatorLiveData<TaskDetailUiState>()
@@ -26,22 +29,54 @@ class TaskDetailViewModel(
     val deleteResult: LiveData<Result<Unit>?> = _deleteResult
 
     private var currentTask: Task? = null
+    private var users: List<User> = emptyList()
 
     init {
         _uiState.value = TaskDetailUiState(isLoading = true)
         _uiState.addSource(taskRepository.observeTask(projectId, taskId)) { task ->
             currentTask = task
-            if (task != null) {
-                _uiState.value = TaskDetailUiState(
-                    task = task,
-                    attachments = task.attachments,
-                    subtasks = task.subtasks.values.sortedBy { it.id },
-                    comments = task.comments.values.sortedBy { it.timestamp },
-                    history = task.history.values.sortedByDescending { it.timestamp },
-                    isLoading = false
-                )
-            }
+            publishState()
         }
+        _uiState.addSource(userRepository.observeUsers()) { userList ->
+            users = userList
+            publishState()
+        }
+    }
+
+    private fun publishState() {
+        val task = currentTask ?: return
+        _uiState.value = TaskDetailUiState(
+            task = task,
+            assigneeNames = task.assignees.map(::displayName),
+            attachments = task.attachments,
+            subtasks = task.subtasks.values.sortedBy { it.id },
+            comments = task.comments.values.sortedBy { it.timestamp }.map { comment ->
+                CommentUi(
+                    id = comment.id,
+                    authorName = displayName(comment.authorId),
+                    content = comment.content,
+                    timestamp = comment.timestamp
+                )
+            },
+            history = task.history.values.sortedByDescending { it.timestamp }.map { entry ->
+                HistoryUi(
+                    id = entry.id,
+                    actorName = displayName(entry.actorId),
+                    action = entry.action,
+                    timestamp = entry.timestamp
+                )
+            },
+            isLoading = false
+        )
+    }
+
+    private fun displayName(userId: String): String {
+        return users.firstOrNull { it.id == userId }?.name?.takeIf { it.isNotBlank() }
+            ?: UNKNOWN_MEMBER_NAME
+    }
+
+    private companion object {
+        const val UNKNOWN_MEMBER_NAME = "Unknown member"
     }
 
     fun addComment(content: String, authorId: String) {
@@ -64,6 +99,14 @@ class TaskDetailViewModel(
     }
 
     fun toggleSubtask(subtaskId: String, isDone: Boolean) {
+        currentTask?.let { task ->
+            task.subtasks[subtaskId]?.let { subtask ->
+                currentTask = task.copy(
+                    subtasks = task.subtasks + (subtaskId to subtask.copy(isDone = isDone))
+                )
+                publishState()
+            }
+        }
         viewModelScope.launch {
             taskRepository.updateSubtask(projectId, taskId, subtaskId, isDone)
         }

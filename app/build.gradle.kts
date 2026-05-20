@@ -35,12 +35,12 @@ android {
         buildConfigField(
             "String",
             "GPT_BASE_URL",
-            "\"https://lb.jatevo.ai/v1\""
+            "\"${localProperties.getProperty("gpt.base.url", "https://lb.jatevo.ai/v1")}\""
         )
         buildConfigField(
             "String",
             "GPT_MODEL",
-            "\"gpt-5.5\""
+            "\"${localProperties.getProperty("gpt.model", "gpt-5.5")}\""
         )
     }
 

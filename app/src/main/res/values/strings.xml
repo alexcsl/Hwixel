@@ -50,8 +50,12 @@
     <string name="nav_dashboard">Dashboard</string>
     <string name="nav_notifications">Notifications</string>
     <string name="nav_profile">Profile</string>
-    <string name="notifications_placeholder">Notifications will be built in Phase 10.</string>
+    <string name="notifications_empty">No notifications yet.</string>
+    <string name="notification_invite_title">Project invitation</string>
     <string name="profile_placeholder">Profile and settings will be built in Phase 11.</string>
+    <string name="logout_button">Log out</string>
+    <string name="logout_confirm_title">Log out?</string>
+    <string name="logout_confirm_message">You will return to the login screen.</string>
 
     <!-- Project Hub -->
     <string name="project_hub_title">Project Hub</string>
@@ -82,6 +86,7 @@
     <string name="error_empty_project_name">Enter a project name.</string>
     <string name="project_created">Project created.</string>
     <string name="project_create_failed">Failed to create project.</string>
+    <string name="project_create_failed_format">Failed to create project: %1$s</string>
 
     <!-- Members -->
     <string name="members_title">Members</string>
@@ -97,6 +102,7 @@
     <string name="invite_success">Invitation sent.</string>
     <string name="invite_user_not_found">No user found with that email.</string>
     <string name="invite_failed">Failed to send invitation.</string>
+    <string name="invite_failed_format">Failed to send invitation: %1$s</string>
     <string name="btn_whatsapp">WhatsApp</string>
     <string name="btn_email">Email</string>
     <string name="role_team_lead">Team Lead</string>
@@ -198,7 +204,15 @@
     <string name="task_save_failed">Failed to save task.</string>
     <string name="select_members_title">Select Members</string>
     <string name="selected_members_format">%1$d member(s) selected</string>
+    <string name="selected_members_names_format">Selected: %1$s</string>
     <string name="no_members_available">No members available.</string>
+    <string name="unknown_member">Unknown member</string>
+    <string name="task_pick_deadline_time">Set deadline time</string>
+    <string name="task_deadline_time_format">Time: %1$02d:%2$02d</string>
+    <string name="task_time_dialog_title">Set deadline time</string>
+    <string name="task_hour_hint">Hour (0-23)</string>
+    <string name="task_minute_hint">Minute (0-59)</string>
+    <string name="error_invalid_deadline_time">Enter hour 0-23 and minute 0-59.</string>
 
     <!-- Attendance -->
     <string name="attendance_title">Attendance</string>

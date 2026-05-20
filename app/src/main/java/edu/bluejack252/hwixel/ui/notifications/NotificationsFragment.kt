@@ -4,29 +4,60 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
-import edu.bluejack252.hwixel.databinding.FragmentPlaceholderBinding
+import edu.bluejack252.hwixel.data.ServiceLocator
+import edu.bluejack252.hwixel.data.model.Notification
+import edu.bluejack252.hwixel.databinding.FragmentNotificationsBinding
 
 class NotificationsFragment : Fragment() {
-    private var _binding: FragmentPlaceholderBinding? = null
+    private var _binding: FragmentNotificationsBinding? = null
     private val binding get() = _binding!!
+    private val adapter = NotificationsAdapter(::onNotificationClicked)
+
+    private val viewModel: NotificationsViewModel by viewModels {
+        NotificationsViewModelFactory(ServiceLocator.getUserRepository(requireContext()))
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentPlaceholderBinding.inflate(inflater, container, false)
+        _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.placeholderTextView.setText(R.string.notifications_placeholder)
+        binding.notificationsRecyclerView.adapter = adapter
+        viewModel.notifications.observe(viewLifecycleOwner) { notifications ->
+            adapter.submitList(notifications)
+            binding.emptyNotificationsTextView.isVisible = notifications.isEmpty()
+        }
+        viewModel.load(FirebaseAuth.getInstance().currentUser?.uid.orEmpty())
+    }
+
+    private fun onNotificationClicked(notification: Notification) {
+        viewModel.markRead(notification.id)
+        if (notification.type == TYPE_INVITE && notification.referenceId.isNotBlank()) {
+            findNavController().navigate(
+                R.id.projectHubFragment,
+                bundleOf("projectId" to notification.referenceId)
+            )
+        }
     }
 
     override fun onDestroyView() {
         _binding = null
         super.onDestroyView()
+    }
+
+    private companion object {
+        const val TYPE_INVITE = "invite"
     }
 }

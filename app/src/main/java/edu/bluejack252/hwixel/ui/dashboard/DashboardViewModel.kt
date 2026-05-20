@@ -43,7 +43,7 @@ class DashboardViewModel(
         if (hasLoaded && currentUserId == userId) return
         hasLoaded = true
         currentUserId = userId
-        _uiState.addSource(projectRepository.observeProjects()) { value ->
+        _uiState.addSource(projectRepository.observeProjectsForUser(userId)) { value ->
             projects = value
             publishState()
         }
@@ -68,7 +68,7 @@ class DashboardViewModel(
         val now = _tick.value ?: System.currentTimeMillis()
         _uiState.value = DashboardUiState(
             projects = buildProjectItems(projects, currentUserId),
-            deadlines = buildDeadlineItems(projects, tasks, now),
+            deadlines = buildDeadlineItems(projects, tasks, now, currentUserId),
             pendingTaskCount = countPendingTasks(tasks, currentUserId)
         )
     }
@@ -77,8 +77,9 @@ class DashboardViewModel(
         return projects
             .filter { project ->
                 val member = project.members[userId]
-                project.members.isEmpty() || (member != null && member.status != Constants.MEMBER_STATUS_INACTIVE)
+                member != null && member.status != Constants.MEMBER_STATUS_INACTIVE
             }
+            .sortedBy { project -> project.name.lowercase() }
             .map { project ->
                 DashboardProjectUi(
                     id = project.id,
@@ -92,11 +93,22 @@ class DashboardViewModel(
     fun buildDeadlineItems(
         projects: List<Project>,
         tasks: List<Task>,
-        nowMillis: Long
+        nowMillis: Long,
+        userId: String = ""
     ): List<DashboardDeadlineUi> {
-        val projectNames = projects.associate { project -> project.id to project.name }
+        val activeProjects = projects.filter { project ->
+            val member = project.members[userId]
+            member != null && member.status != Constants.MEMBER_STATUS_INACTIVE
+        }
+        val projectNames = activeProjects.associate { project -> project.id to project.name }
+        val activeProjectIds = projectNames.keys
         return tasks
-            .filter { task -> task.deadline > 0L && task.deadline >= nowMillis }
+            .filter { task ->
+                task.projectId in activeProjectIds &&
+                    task.assignees.contains(userId) &&
+                    task.deadline > 0L &&
+                    task.deadline >= nowMillis
+            }
             .sortedBy { task -> task.deadline }
             .take(5)
             .map { task ->
@@ -136,6 +148,10 @@ class DashboardViewModel(
         creatorId: String
     ) {
         if (name.isBlank()) return
+        if (creatorId.isBlank()) {
+            _createProjectResult.value = Result.failure(IllegalStateException("You must be logged in to create a project."))
+            return
+        }
         viewModelScope.launch {
             val project = Project(
                 name = name,

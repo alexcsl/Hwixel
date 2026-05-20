@@ -35,7 +35,7 @@ class DashboardViewModel(
     private var hasLoaded = false
 
     init {
-        _uiState.value = DashboardUiState()
+        _uiState.value = DashboardUiState(isLoading = true)
         _uiState.addSource(_tick) { publishState() }
     }
 
@@ -69,7 +69,8 @@ class DashboardViewModel(
         _uiState.value = DashboardUiState(
             projects = buildProjectItems(projects, currentUserId),
             deadlines = buildDeadlineItems(projects, tasks, now, currentUserId),
-            pendingTaskCount = countPendingTasks(tasks, currentUserId)
+            pendingTaskCount = countPendingTasks(tasks, currentUserId),
+            isLoading = false
         )
     }
 

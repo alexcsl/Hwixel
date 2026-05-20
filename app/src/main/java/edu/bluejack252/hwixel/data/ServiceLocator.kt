@@ -70,4 +70,13 @@ object ServiceLocator {
             firebaseSource = AttendanceFirebaseSource()
         ).also { attendanceRepository = it }
     }
+
+    fun reset() {
+        authRepository = null
+        userRepository = null
+        projectRepository = null
+        taskRepository = null
+        teamHealthRepository = null
+        attendanceRepository = null
+    }
 }

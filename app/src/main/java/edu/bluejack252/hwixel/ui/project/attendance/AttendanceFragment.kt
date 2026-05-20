@@ -34,6 +34,7 @@ class AttendanceFragment : Fragment() {
 
     private val viewModel: AttendanceViewModel by viewModels {
         AttendanceViewModelFactory(
+            application = requireActivity().application,
             repository = ServiceLocator.getAttendanceRepository(),
             projectId = args.projectId
         )
@@ -142,7 +143,7 @@ class AttendanceFragment : Fragment() {
         view.findViewById<MaterialButton>(R.id.setReminderButton).setOnClickListener {
             val nextDate = allSessions.maxByOrNull { it.nextSessionDate }?.nextSessionDate ?: 0L
             if (nextDate > System.currentTimeMillis()) {
-                viewModel.scheduleReminder(requireContext(), projectName, nextDate)
+                viewModel.scheduleReminder(projectName, nextDate)
             } else {
                 Snackbar.make(view, getString(R.string.attendance_no_next_session), Snackbar.LENGTH_SHORT).show()
             }

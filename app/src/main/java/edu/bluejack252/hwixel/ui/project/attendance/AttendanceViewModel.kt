@@ -1,10 +1,10 @@
 package edu.bluejack252.hwixel.ui.project.attendance
 
-import android.content.Context
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
@@ -22,9 +22,10 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class AttendanceViewModel(
+    application: Application,
     private val repository: AttendanceRepository,
     private val projectId: String
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     private val _uiState = MutableLiveData<AttendanceUiState>(AttendanceUiState.Idle)
     val uiState: LiveData<AttendanceUiState> = _uiState
@@ -121,7 +122,7 @@ class AttendanceViewModel(
         }
     }
 
-    fun scheduleReminder(context: Context, projectName: String, nextSessionDate: Long) {
+    fun scheduleReminder(projectName: String, nextSessionDate: Long) {
         val delayMs = computeReminderDelayMs(System.currentTimeMillis(), nextSessionDate)
         if (delayMs <= 0) return
 
@@ -139,7 +140,7 @@ class AttendanceViewModel(
             .addTag("attendance_reminder_$projectId")
             .build()
 
-        WorkManager.getInstance(context).enqueueUniqueWork(
+        WorkManager.getInstance(getApplication()).enqueueUniqueWork(
             "attendance_reminder_$projectId",
             ExistingWorkPolicy.REPLACE,
             request

@@ -104,9 +104,9 @@ class ProjectHubFragment : Fragment() {
     }
 
     private fun render(state: ProjectHubUiState) {
-        val project = state.project ?: return
-        currentProject = project
-        renderHeader(project)
+        if (state.isLoading || state.project == null) return
+        currentProject = state.project
+        renderHeader(state.project)
         activityFeedAdapter.submitList(state.recentActivity)
     }
 

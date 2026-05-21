@@ -69,8 +69,6 @@ class TaskDetailFragment : Fragment() {
                 )
             )
         }
-        binding.attachmentsRecyclerView.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.attachmentsRecyclerView.adapter = attachmentAdapter
         binding.subtasksRecyclerView.adapter = subtaskAdapter
         binding.commentsRecyclerView.adapter = commentsAdapter

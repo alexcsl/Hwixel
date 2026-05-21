@@ -112,15 +112,10 @@ class AnalyticsFragment : Fragment() {
         dataSet.selectionShift = 10f
         binding.pieChart.data = PieData(dataSet)
         val selectedIndex = completedMembers.indexOfFirst { it.userId == selectedMemberId }
-        isUpdatingChartSelection = true
-        try {
-            if (selectedIndex >= 0) {
-                binding.pieChart.highlightValue(selectedIndex.toFloat(), 0, false)
-            } else {
-                binding.pieChart.highlightValues(null)
-            }
-        } finally {
-            isUpdatingChartSelection = false
+        if (selectedIndex >= 0) {
+            binding.pieChart.highlightValue(selectedIndex.toFloat(), 0)
+        } else {
+            binding.pieChart.highlightValues(null)
         }
         binding.pieChart.invalidate()
     }

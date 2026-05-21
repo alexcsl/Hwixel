@@ -5,6 +5,8 @@ import edu.bluejack252.hwixel.data.repository.AttendanceRepository
 import edu.bluejack252.hwixel.data.repository.AttendanceRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.EvalRepository
 import edu.bluejack252.hwixel.data.repository.EvalRepositoryImpl
+import edu.bluejack252.hwixel.data.repository.FileRepository
+import edu.bluejack252.hwixel.data.repository.FileRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.AuthRepository
 import edu.bluejack252.hwixel.data.repository.AuthRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
@@ -18,6 +20,7 @@ import edu.bluejack252.hwixel.data.repository.UserRepositoryImpl
 import edu.bluejack252.hwixel.data.source.local.HwixelDatabase
 import edu.bluejack252.hwixel.data.source.remote.AttendanceFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.EvalFirebaseSource
+import edu.bluejack252.hwixel.data.source.remote.FileFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.AuthFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.GptApiSource
 import edu.bluejack252.hwixel.data.source.remote.ProjectFirebaseSource
@@ -32,6 +35,7 @@ object ServiceLocator {
     private var teamHealthRepository: TeamHealthRepository? = null
     private var attendanceRepository: AttendanceRepository? = null
     private var evalRepository: EvalRepository? = null
+    private var fileRepository: FileRepository? = null
 
     fun getAuthRepository(context: Context): AuthRepository {
         return authRepository ?: AuthRepositoryImpl(
@@ -81,13 +85,9 @@ object ServiceLocator {
         ).also { evalRepository = it }
     }
 
-    fun reset() {
-        authRepository = null
-        userRepository = null
-        projectRepository = null
-        taskRepository = null
-        teamHealthRepository = null
-        attendanceRepository = null
-        evalRepository = null
+    fun getFileRepository(): FileRepository {
+        return fileRepository ?: FileRepositoryImpl(
+            firebaseSource = FileFirebaseSource()
+        ).also { fileRepository = it }
     }
 }

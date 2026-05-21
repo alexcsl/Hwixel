@@ -171,6 +171,16 @@
                         android:text="@string/eval_title"
                         android:textSize="12sp" />
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/filesButton"
+                        style="@style/Widget.HWiXeL.Button.Ghost"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/file_repo_title"
+                        android:textSize="12sp" />
+
                 </LinearLayout>
 
                 <!-- Recent Activity -->

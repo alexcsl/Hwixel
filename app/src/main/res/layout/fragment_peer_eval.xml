@@ -242,11 +242,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
-                            android:orientation="vertical">
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
 
                             <LinearLayout
-                                android:layout_width="match_parent"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="1"
                                 android:orientation="vertical">
 
                                 <TextView
@@ -258,7 +260,7 @@
                                     android:fontFamily="sans-serif-medium" />
 
                                 <TextView
-                                    android:layout_width="match_parent"
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/eval_communication_desc"
                                     android:textColor="@color/text_hint"
@@ -267,17 +269,12 @@
 
                             <RatingBar
                                 android:id="@+id/ratingCommunication"
-                                style="@style/Widget.AppCompat.RatingBar"
+                                style="@style/Widget.AppCompat.RatingBar.Small"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_horizontal"
-                                android:layout_marginTop="4dp"
-                                android:isIndicator="false"
                                 android:numStars="5"
                                 android:stepSize="1"
-                                android:rating="0"
-                                android:scaleX="0.58"
-                                android:scaleY="0.58"
+                                android:rating="3"
                                 android:progressTint="@color/brand_amber"
                                 android:secondaryProgressTint="@color/glass_fill" />
                         </LinearLayout>
@@ -287,11 +284,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="14dp"
-                            android:orientation="vertical">
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
 
                             <LinearLayout
-                                android:layout_width="match_parent"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="1"
                                 android:orientation="vertical">
 
                                 <TextView
@@ -303,7 +302,7 @@
                                     android:fontFamily="sans-serif-medium" />
 
                                 <TextView
-                                    android:layout_width="match_parent"
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/eval_quality_desc"
                                     android:textColor="@color/text_hint"
@@ -312,17 +311,12 @@
 
                             <RatingBar
                                 android:id="@+id/ratingQuality"
-                                style="@style/Widget.AppCompat.RatingBar"
+                                style="@style/Widget.AppCompat.RatingBar.Small"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_horizontal"
-                                android:layout_marginTop="4dp"
-                                android:isIndicator="false"
                                 android:numStars="5"
                                 android:stepSize="1"
-                                android:rating="0"
-                                android:scaleX="0.58"
-                                android:scaleY="0.58"
+                                android:rating="3"
                                 android:progressTint="@color/brand_amber"
                                 android:secondaryProgressTint="@color/glass_fill" />
                         </LinearLayout>
@@ -332,11 +326,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="14dp"
-                            android:orientation="vertical">
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
 
                             <LinearLayout
-                                android:layout_width="match_parent"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="1"
                                 android:orientation="vertical">
 
                                 <TextView
@@ -348,7 +344,7 @@
                                     android:fontFamily="sans-serif-medium" />
 
                                 <TextView
-                                    android:layout_width="match_parent"
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/eval_reliability_desc"
                                     android:textColor="@color/text_hint"
@@ -357,17 +353,12 @@
 
                             <RatingBar
                                 android:id="@+id/ratingReliability"
-                                style="@style/Widget.AppCompat.RatingBar"
+                                style="@style/Widget.AppCompat.RatingBar.Small"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_horizontal"
-                                android:layout_marginTop="4dp"
-                                android:isIndicator="false"
                                 android:numStars="5"
                                 android:stepSize="1"
-                                android:rating="0"
-                                android:scaleX="0.58"
-                                android:scaleY="0.58"
+                                android:rating="3"
                                 android:progressTint="@color/brand_amber"
                                 android:secondaryProgressTint="@color/glass_fill" />
                         </LinearLayout>
@@ -377,11 +368,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="14dp"
-                            android:orientation="vertical">
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
 
                             <LinearLayout
-                                android:layout_width="match_parent"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="1"
                                 android:orientation="vertical">
 
                                 <TextView
@@ -393,7 +386,7 @@
                                     android:fontFamily="sans-serif-medium" />
 
                                 <TextView
-                                    android:layout_width="match_parent"
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/eval_effort_desc"
                                     android:textColor="@color/text_hint"
@@ -402,17 +395,12 @@
 
                             <RatingBar
                                 android:id="@+id/ratingEffort"
-                                style="@style/Widget.AppCompat.RatingBar"
+                                style="@style/Widget.AppCompat.RatingBar.Small"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_horizontal"
-                                android:layout_marginTop="4dp"
-                                android:isIndicator="false"
                                 android:numStars="5"
                                 android:stepSize="1"
-                                android:rating="0"
-                                android:scaleX="0.58"
-                                android:scaleY="0.58"
+                                android:rating="3"
                                 android:progressTint="@color/brand_amber"
                                 android:secondaryProgressTint="@color/glass_fill" />
                         </LinearLayout>

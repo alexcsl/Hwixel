@@ -209,12 +209,8 @@ class CreateEditTaskFragment : Fragment() {
         if (selectedAssigneeIds.isEmpty()) {
             binding.assigneesButton.text = getString(R.string.task_assign_members)
         } else {
-            val selectedNames = selectedAssigneeIds.map { selectedId ->
-                availableMembers.firstOrNull { it.userId == selectedId }?.name
-                    ?: getString(R.string.unknown_member)
-            }
             binding.assigneesButton.text = getString(
-                R.string.selected_members_names_format, selectedNames.joinToString(", ")
+                R.string.selected_members_format, selectedAssigneeIds.size
             )
         }
     }

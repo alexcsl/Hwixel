@@ -27,8 +27,8 @@ class HistoryAdapter : ListAdapter<HistoryUi, HistoryAdapter.HistoryViewHolder>(
     ) : RecyclerView.ViewHolder(binding.root) {
         private val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
 
-        fun bind(entry: HistoryUi) {
-            binding.actionTextView.text = "${entry.actorName}: ${entry.action}"
+        fun bind(entry: HistoryEntry) {
+            binding.actionTextView.text = "${entry.actorId}: ${entry.action}"
             binding.historyTimestampTextView.text = dateFormat.format(Date(entry.timestamp))
         }
     }

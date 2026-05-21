@@ -98,6 +98,11 @@ class ProjectHubFragment : Fragment() {
                 )
             findNavController().navigate(action)
         }
+        binding.filesButton.setOnClickListener {
+            val action = ProjectHubFragmentDirections
+                .actionProjectHubFragmentToFileRepoFragment(projectId = args.projectId)
+            findNavController().navigate(action)
+        }
     }
 
     private fun setupViewPager() {

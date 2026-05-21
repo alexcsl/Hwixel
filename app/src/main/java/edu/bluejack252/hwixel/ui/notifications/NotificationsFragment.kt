@@ -52,9 +52,28 @@ class NotificationsFragment : Fragment() {
         }
     }
 
-    override fun onDestroyView() {
-        _binding = null
-        super.onDestroyView()
+    private fun handleNotifTap(notif: Notification) {
+        viewModel.markRead(notif.id)
+        when (notif.type) {
+            "task_assigned", "mention", "deadline" -> {
+                val parts = notif.referenceId.split("|")
+                if (parts.size == 2) {
+                    val action = NotificationsFragmentDirections
+                        .actionNotificationsFragmentToTaskDetailFragment(
+                            projectId = parts[0],
+                            taskId = parts[1]
+                        )
+                    findNavController().navigate(action)
+                }
+            }
+            "eval_open", "eval_close", "invite" -> {
+                val action = NotificationsFragmentDirections
+                    .actionNotificationsFragmentToProjectHubFragment(
+                        projectId = notif.referenceId
+                    )
+                findNavController().navigate(action)
+            }
+        }
     }
 
     private companion object {

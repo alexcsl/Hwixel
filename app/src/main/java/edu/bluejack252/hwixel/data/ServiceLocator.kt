@@ -7,6 +7,8 @@ import edu.bluejack252.hwixel.data.repository.EvalRepository
 import edu.bluejack252.hwixel.data.repository.EvalRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.FileRepository
 import edu.bluejack252.hwixel.data.repository.FileRepositoryImpl
+import edu.bluejack252.hwixel.data.repository.NotificationRepository
+import edu.bluejack252.hwixel.data.repository.NotificationRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.AuthRepository
 import edu.bluejack252.hwixel.data.repository.AuthRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
@@ -22,6 +24,7 @@ import edu.bluejack252.hwixel.data.source.remote.AttachmentUploadSource
 import edu.bluejack252.hwixel.data.source.remote.AttendanceFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.EvalFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.FileFirebaseSource
+import edu.bluejack252.hwixel.data.source.remote.NotificationFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.AuthFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.GptApiSource
 import edu.bluejack252.hwixel.data.source.remote.ProjectFirebaseSource
@@ -66,7 +69,8 @@ object ServiceLocator {
         return taskRepository ?: TaskRepositoryImpl(
             firebaseSource = TaskFirebaseSource(),
             localDao = HwixelDatabase.getInstance(context).taskDao(),
-            projectSource = ProjectFirebaseSource()
+            projectSource = ProjectFirebaseSource(),
+            notifSource = NotificationFirebaseSource()
         ).also { taskRepository = it }
     }
 

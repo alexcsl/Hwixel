@@ -6,6 +6,7 @@ import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.model.HistoryEntry
 import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.data.source.local.TaskDao
+import edu.bluejack252.hwixel.data.source.remote.NotificationFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.ProjectRemoteSource
 import edu.bluejack252.hwixel.data.source.remote.TaskRemoteSource
 import edu.bluejack252.hwixel.util.ScoreCalculator
@@ -36,7 +37,8 @@ interface TaskRepository {
 class TaskRepositoryImpl(
     private val firebaseSource: TaskRemoteSource,
     private val localDao: TaskDao,
-    private val projectSource: ProjectRemoteSource? = null
+    private val projectSource: ProjectRemoteSource? = null,
+    private val notifSource: NotificationFirebaseSource? = null
 ) : TaskRepository {
 
     override fun observeAllTasks(): LiveData<List<Task>> {
@@ -110,6 +112,16 @@ class TaskRepositoryImpl(
         comment: Comment
     ): Result<Unit> = runCatching {
         firebaseSource.addComment(projectId, taskId, comment)
+        notifSource?.let { src ->
+            val ref = "$projectId|$taskId"
+            val mentionRegex = Regex("@([A-Za-z0-9_-]{20,})")
+            mentionRegex.findAll(comment.content).forEach { match ->
+                val mentionedUid = match.groupValues[1]
+                if (mentionedUid != comment.authorId) {
+                    runCatching { src.writeNotification(mentionedUid, "mention", "You were mentioned in a comment", ref) }
+                }
+            }
+        }
     }
 
     override suspend fun updateSubtask(

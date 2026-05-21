@@ -302,6 +302,7 @@
     <string name="eval_close_period">Close Period</string>
     <string name="eval_period_updated">Evaluation period updated.</string>
     <string name="eval_period_created">Evaluation period created.</string>
+    <string name="eval_already_submitted_format">%1$s ✓ already submitted</string>
     <string name="eval_create_period">Create Evaluation Period</string>
     <string name="eval_no_period_title">No evaluation period yet</string>
     <string name="eval_no_period_subtitle">Create an evaluation period to let team members review each other.</string>

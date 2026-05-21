@@ -41,6 +41,7 @@ object ServiceLocator {
     private var attendanceRepository: AttendanceRepository? = null
     private var evalRepository: EvalRepository? = null
     private var fileRepository: FileRepository? = null
+    private var notificationRepository: NotificationRepository? = null
     private var attachmentUploadSource: AttachmentUploadSource? = null
 
     fun getAuthRepository(context: Context): AuthRepository {
@@ -70,8 +71,15 @@ object ServiceLocator {
             firebaseSource = TaskFirebaseSource(),
             localDao = HwixelDatabase.getInstance(context).taskDao(),
             projectSource = ProjectFirebaseSource(),
-            notifSource = NotificationFirebaseSource()
+            notifSource = NotificationFirebaseSource(),
+            appContext = context.applicationContext
         ).also { taskRepository = it }
+    }
+
+    fun getNotificationRepository(): NotificationRepository {
+        return notificationRepository ?: NotificationRepositoryImpl(
+            source = NotificationFirebaseSource()
+        ).also { notificationRepository = it }
     }
 
     fun getTeamHealthRepository(): TeamHealthRepository {
@@ -112,6 +120,7 @@ object ServiceLocator {
         attendanceRepository = null
         evalRepository = null
         fileRepository = null
+        notificationRepository = null
         attachmentUploadSource = null
     }
 }

@@ -36,7 +36,7 @@ interface TaskRemoteSource {
     fun observeTasks(projectId: String): LiveData<List<Task>>
     fun observeTask(projectId: String, taskId: String): LiveData<Task?>
     suspend fun fetchTasksOnce(projectId: String): List<Task>
-    suspend fun createTask(task: Task)
+    suspend fun createTask(task: Task): Task
     suspend fun updateTask(task: Task)
     suspend fun updateTaskStatus(projectId: String, taskId: String, status: String)
     suspend fun addHistoryEntry(projectId: String, taskId: String, entry: HistoryEntry)

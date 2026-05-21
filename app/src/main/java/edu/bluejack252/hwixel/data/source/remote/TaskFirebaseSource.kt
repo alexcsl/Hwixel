@@ -85,10 +85,12 @@ open class TaskFirebaseSource(
             })
         }
 
-    override suspend fun createTask(task: Task) {
+    override suspend fun createTask(task: Task): Task {
         val projectTasksRef = tasksRef.child(task.projectId)
         val key = task.id.ifBlank { projectTasksRef.push().key.orEmpty() }
-        projectTasksRef.child(key).setValue(task.copy(id = key)).awaitResult()
+        val created = task.copy(id = key)
+        projectTasksRef.child(key).setValue(created).awaitResult()
+        return created
     }
 
     override suspend fun updateTask(task: Task) {

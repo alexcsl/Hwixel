@@ -10,10 +10,14 @@ import com.google.firebase.messaging.RemoteMessage
 import edu.bluejack252.hwixel.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class HwixelMessagingService : FirebaseMessagingService() {
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val notificationSource = NotificationFirebaseSource()
 
     companion object {
         private const val CHANNEL_ID = "hwixel_push"
@@ -22,7 +26,7 @@ class HwixelMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        CoroutineScope(Dispatchers.IO).launch {
+        serviceScope.launch {
             runCatching {
                 com.google.firebase.database.FirebaseDatabase.getInstance()
                     .getReference("users/$uid/fcmToken").setValue(token).await()
@@ -36,9 +40,9 @@ class HwixelMessagingService : FirebaseMessagingService() {
         val message = remoteMessage.data["message"] ?: remoteMessage.notification?.body ?: return
         val referenceId = remoteMessage.data["referenceId"] ?: ""
 
-        CoroutineScope(Dispatchers.IO).launch {
+        serviceScope.launch {
             runCatching {
-                NotificationFirebaseSource().writeNotification(uid, type, message, referenceId)
+                notificationSource.writeNotification(uid, type, message, referenceId)
             }
         }
 
@@ -66,5 +70,9 @@ class HwixelMessagingService : FirebaseMessagingService() {
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
     }
-}
 
+    override fun onDestroy() {
+        serviceScope.cancel()
+        super.onDestroy()
+    }
+}

@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import com.google.firebase.database.FirebaseDatabase
 import edu.bluejack252.hwixel.data.model.EvaluationSubmission
 import edu.bluejack252.hwixel.data.source.remote.EvalFirebaseSource
-import edu.bluejack252.hwixel.data.source.remote.NotificationFirebaseSource
 import kotlinx.coroutines.tasks.await
 
 interface EvalRepository {
@@ -20,8 +19,7 @@ interface EvalRepository {
 }
 
 class EvalRepositoryImpl(
-    private val firebaseSource: EvalFirebaseSource,
-    private val notifSource: NotificationFirebaseSource = NotificationFirebaseSource()
+    private val firebaseSource: EvalFirebaseSource
 ) : EvalRepository {
 
     private val usersRef = FirebaseDatabase.getInstance().reference.child("users")
@@ -41,20 +39,8 @@ class EvalRepositoryImpl(
     override suspend fun submitEvaluation(submission: EvaluationSubmission) =
         firebaseSource.submitEvaluation(submission)
 
-    override suspend fun setPeriodOpen(projectId: String, periodId: String, isOpen: Boolean): Result<Unit> {
-        val result = firebaseSource.setPeriodOpen(projectId, periodId, isOpen)
-        if (result.isSuccess) {
-            runCatching {
-                val type = if (isOpen) "eval_open" else "eval_close"
-                val msg = if (isOpen) "Peer evaluation period is now open" else "Peer evaluation period has closed"
-                val memberIds = notifSource.fetchProjectMemberIds(projectId)
-                memberIds.forEach { uid ->
-                    runCatching { notifSource.writeNotification(uid, type, msg, projectId) }
-                }
-            }
-        }
-        return result
-    }
+    override suspend fun setPeriodOpen(projectId: String, periodId: String, isOpen: Boolean) =
+        firebaseSource.setPeriodOpen(projectId, periodId, isOpen)
 
     override suspend fun createPeriod(projectId: String) =
         firebaseSource.createPeriod(projectId)

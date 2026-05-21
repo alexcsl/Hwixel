@@ -74,7 +74,7 @@
       "$userId": {
         ".read": "$userId === auth.uid",
         "$notifId": {
-          ".write": "auth != null && ($userId === auth.uid || newData.child('type').val() === 'invite')"
+          ".write": "auth != null && ($userId === auth.uid || newData.child('type').val() === 'invite' || newData.child('type').val() === 'task_assigned' || newData.child('type').val() === 'mention' || newData.child('type').val() === 'deadline' || newData.child('type').val() === 'eval_open' || newData.child('type').val() === 'eval_close')"
         }
       }
     }

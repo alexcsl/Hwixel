@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -18,10 +17,10 @@ import edu.bluejack252.hwixel.databinding.FragmentNotificationsBinding
 class NotificationsFragment : Fragment() {
     private var _binding: FragmentNotificationsBinding? = null
     private val binding get() = _binding!!
-    private val adapter = NotificationsAdapter(::onNotificationClicked)
+    private val adapter = NotificationsAdapter(::handleNotifTap)
 
     private val viewModel: NotificationsViewModel by viewModels {
-        NotificationsViewModelFactory(ServiceLocator.getUserRepository(requireContext()))
+        NotificationsViewModelFactory(ServiceLocator.getNotificationRepository())
     }
 
     override fun onCreateView(
@@ -35,21 +34,13 @@ class NotificationsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.notificationsRecyclerView.adapter = adapter
+        binding.markAllReadButton.setOnClickListener { viewModel.markAllRead() }
         viewModel.notifications.observe(viewLifecycleOwner) { notifications ->
             adapter.submitList(notifications)
             binding.emptyNotificationsTextView.isVisible = notifications.isEmpty()
+            binding.markAllReadButton.isVisible = notifications.any { !it.isRead }
         }
         viewModel.load(FirebaseAuth.getInstance().currentUser?.uid.orEmpty())
-    }
-
-    private fun onNotificationClicked(notification: Notification) {
-        viewModel.markRead(notification.id)
-        if (notification.type == TYPE_INVITE && notification.referenceId.isNotBlank()) {
-            findNavController().navigate(
-                R.id.projectHubFragment,
-                bundleOf("projectId" to notification.referenceId)
-            )
-        }
     }
 
     private fun handleNotifTap(notif: Notification) {
@@ -74,9 +65,5 @@ class NotificationsFragment : Fragment() {
                 findNavController().navigate(action)
             }
         }
-    }
-
-    private companion object {
-        const val TYPE_INVITE = "invite"
     }
 }

@@ -10,6 +10,7 @@ import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.data.source.local.TaskDao
 import edu.bluejack252.hwixel.data.source.local.TaskEntity
 import edu.bluejack252.hwixel.data.source.remote.ProjectRemoteSource
+import edu.bluejack252.hwixel.data.source.remote.NotificationFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.TaskRemoteSource
 import edu.bluejack252.hwixel.util.constants.Constants
 import kotlinx.coroutines.test.runTest
@@ -61,6 +62,26 @@ class TaskRepositoryTest {
     }
 
     @Test
+    fun createTaskNotifiesAssignedUsers() = runTest {
+        val notificationSource = FakeNotificationSource()
+        val repo = TaskRepositoryImpl(firebaseSource, localDao, projectSource, notificationSource)
+        val task = Task(
+            id = "task-1",
+            projectId = "project-1",
+            title = "Prototype",
+            assignees = listOf("u1", "u2")
+        )
+
+        val result = repo.createTask(task)
+
+        assertTrue(result.isSuccess)
+        assertEquals(
+            listOf("u1" to "project-1|task-1", "u2" to "project-1|task-1"),
+            notificationSource.writes.map { it.userId to it.referenceId }
+        )
+    }
+
+    @Test
     fun statusChangeAwayFromDoneRecomputesCompletionPercentage() = runTest {
         firebaseSource.tasksForProject = listOf(
             Task(id = "task-1", projectId = "project-1", status = Constants.STATUS_TODO),
@@ -93,8 +114,9 @@ class TaskRepositoryTest {
             return tasksForProject.filter { it.projectId == projectId }
         }
 
-        override suspend fun createTask(task: Task) {
+        override suspend fun createTask(task: Task): Task {
             createdTask = task
+            return task
         }
 
         override suspend fun updateTask(task: Task) {
@@ -111,6 +133,26 @@ class TaskRepositoryTest {
 
         override suspend fun deleteTask(projectId: String, taskId: String) = Unit
     }
+
+    private class FakeNotificationSource : NotificationFirebaseSource(null) {
+        val writes = mutableListOf<Write>()
+
+        override suspend fun writeNotification(
+            userId: String,
+            type: String,
+            message: String,
+            referenceId: String
+        ) {
+            writes.add(Write(userId, type, message, referenceId))
+        }
+    }
+
+    private data class Write(
+        val userId: String,
+        val type: String,
+        val message: String,
+        val referenceId: String
+    )
 
     private class FakeProjectRemoteSource : ProjectRemoteSource {
         var updatedCompletionPercentage: Float? = null

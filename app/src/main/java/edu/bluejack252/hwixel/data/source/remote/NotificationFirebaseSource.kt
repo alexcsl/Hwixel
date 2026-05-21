@@ -4,17 +4,18 @@ import androidx.lifecycle.LiveData
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.Notification
 import kotlinx.coroutines.tasks.await
 
-class NotificationFirebaseSource {
+open class NotificationFirebaseSource(
+    private val db: DatabaseReference? = FirebaseDatabase.getInstance().reference
+) {
 
-    private val db = FirebaseDatabase.getInstance().reference
-
-    fun observeNotifications(userId: String): LiveData<List<Notification>> {
+    open fun observeNotifications(userId: String): LiveData<List<Notification>> {
         return object : LiveData<List<Notification>>() {
-            private val ref = db.child("notifications").child(userId)
+            private val ref = requireDb().child("notifications").child(userId)
             private var listener: ValueEventListener? = null
 
             override fun onActive() {
@@ -52,13 +53,13 @@ class NotificationFirebaseSource {
         }
     }
 
-    suspend fun writeNotification(
+    open suspend fun writeNotification(
         userId: String,
         type: String,
         message: String,
         referenceId: String
     ) {
-        val ref = db.child("notifications").child(userId).push()
+        val ref = requireDb().child("notifications").child(userId).push()
         val data = mapOf(
             "type" to type,
             "message" to message,
@@ -69,24 +70,28 @@ class NotificationFirebaseSource {
         ref.setValue(data).await()
     }
 
-    suspend fun markRead(userId: String, notifId: String) {
-        db.child("notifications").child(userId).child(notifId).child("isRead").setValue(true).await()
+    open suspend fun markRead(userId: String, notifId: String) {
+        requireDb().child("notifications").child(userId).child(notifId).child("isRead").setValue(true).await()
     }
 
-    suspend fun markAllRead(userId: String) {
-        val snapshot = db.child("notifications").child(userId).get().await()
+    open suspend fun markAllRead(userId: String) {
+        val snapshot = requireDb().child("notifications").child(userId).get().await()
         val updates = mutableMapOf<String, Any>()
         snapshot.children.forEach { child ->
             val key = child.key ?: return@forEach
             updates["$key/isRead"] = true
         }
         if (updates.isNotEmpty()) {
-            db.child("notifications").child(userId).updateChildren(updates).await()
+            requireDb().child("notifications").child(userId).updateChildren(updates).await()
         }
     }
 
-    suspend fun fetchProjectMemberIds(projectId: String): List<String> {
-        val snapshot = db.child("projects").child(projectId).child("members").get().await()
+    open suspend fun fetchProjectMemberIds(projectId: String): List<String> {
+        val snapshot = requireDb().child("projects").child(projectId).child("members").get().await()
         return snapshot.children.mapNotNull { it.key }
+    }
+
+    private fun requireDb(): DatabaseReference {
+        return requireNotNull(db) { "Firebase database is not configured." }
     }
 }

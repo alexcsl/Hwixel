@@ -136,7 +136,7 @@ open class TaskFirebaseSource(
             status = child("status").safeString(),
             priority = child("priority").safeString(),
             deadline = child("deadline").safeLong(),
-            assignees = child("assignees").children.mapNotNull { it.safeString().takeIf(String::isNotBlank) },
+            assignees = child("assignees").toStringList(),
             attachments = child("attachments").children.mapNotNull { attachmentSnapshot ->
                 val attachmentId = attachmentSnapshot.child("id").safeString().takeIf(String::isNotBlank)
                     ?: attachmentSnapshot.key.orEmpty()
@@ -187,6 +187,15 @@ open class TaskFirebaseSource(
         return when (val raw = value) {
             is String -> raw
             else -> ""
+        }
+    }
+
+    private fun DataSnapshot.toStringList(): List<String> {
+        val raw = value
+        if (raw is String) return listOf(raw).filter { it.isNotBlank() }
+        return children.mapNotNull { child ->
+            child.safeString().takeIf(String::isNotBlank)
+                ?: child.key?.takeIf { child.safeBoolean() }
         }
     }
 

@@ -22,7 +22,7 @@ class EvalRepositoryImpl(
     private val firebaseSource: EvalFirebaseSource
 ) : EvalRepository {
 
-    private val usersRef = FirebaseDatabase.getInstance().reference.child("users")
+    private val db = FirebaseDatabase.getInstance().reference
 
     override fun observePeriodOpen(projectId: String, periodId: String) =
         firebaseSource.observePeriodOpen(projectId, periodId)
@@ -49,6 +49,12 @@ class EvalRepositoryImpl(
         runCatching { firebaseSource.fetchAllReceivedSubmissions(projectId, evaluateeId) }
 
     override suspend fun updateAveragePeerRating(userId: String, average: Float): Result<Unit> = runCatching {
-        usersRef.child(userId).child("averagePeerRating").setValue(average).await()
+        val roundedAverage = average.toDouble()
+        db.updateChildren(
+            mapOf(
+                "users/$userId/averagePeerRating" to roundedAverage,
+                "peerRatings/$userId/averagePeerRating" to roundedAverage
+            )
+        ).await()
     }
 }

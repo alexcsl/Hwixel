@@ -21,8 +21,8 @@ class PeerEvalViewModel(
     private val _uiState = MutableLiveData<PeerEvalUiState>(PeerEvalUiState.Idle)
     val uiState: LiveData<PeerEvalUiState> = _uiState
 
-    private val _periods = MutableLiveData<List<String>>(emptyList())
-
+    private val _periods = MediatorLiveData<List<String>>().apply { value = emptyList() }
+    val periods: LiveData<List<String>> = _periods
     private val _isPeriodOpen = MutableLiveData<Boolean>(false)
     val isPeriodOpen: LiveData<Boolean> = _isPeriodOpen
 
@@ -41,16 +41,13 @@ class PeerEvalViewModel(
     var activePeriodId: String = ""
         private set
 
-    private val periodsMediator = MediatorLiveData<List<String>>()
-    val periods: LiveData<List<String>> = periodsMediator
     private val periodsSource = repository.observePeriods(projectId)
     private var periodOpenSource: LiveData<Boolean>? = null
     private var submittedSource: LiveData<Map<String, EvaluationSubmission>>? = null
     private var receivedSource: LiveData<List<EvaluationSubmission>>? = null
 
     init {
-        periodsMediator.addSource(periodsSource) { ids ->
-            periodsMediator.value = ids
+        _periods.addSource(periodsSource) { ids ->
             _periods.value = ids
             val latest = ids.lastOrNull()
             if (latest != null && latest != activePeriodId) {
@@ -61,24 +58,28 @@ class PeerEvalViewModel(
     }
 
     private fun subscribeToPeriod(periodId: String) {
-        periodOpenSource?.let { periodsMediator.removeSource(it) }
-        submittedSource?.let { periodsMediator.removeSource(it) }
-        receivedSource?.let { periodsMediator.removeSource(it) }
+        periodOpenSource?.let { _periods.removeSource(it) }
+        submittedSource?.let { _periods.removeSource(it) }
+        receivedSource?.let { _periods.removeSource(it) }
 
         val openSrc = repository.observePeriodOpen(projectId, periodId)
         periodOpenSource = openSrc
-        periodsMediator.addSource(openSrc) { open -> _isPeriodOpen.value = open }
+        _periods.addSource(openSrc) { open -> _isPeriodOpen.value = open }
 
         val submittedSrc = repository.observeSubmittedByMe(projectId, periodId, currentUserId)
         submittedSource = submittedSrc
-        periodsMediator.addSource(submittedSrc) { map -> _submittedByMe.value = map }
+        _periods.addSource(submittedSrc) { map -> _submittedByMe.value = map }
 
         val receivedSrc = repository.observeReceivedEvals(projectId, periodId, currentUserId)
         receivedSource = receivedSrc
-        periodsMediator.addSource(receivedSrc) { list -> _receivedEvals.value = list }
+        _periods.addSource(receivedSrc) { list -> _receivedEvals.value = list }
     }
 
     fun createPeriod() {
+        if (currentUserRole != Constants.ROLE_TEAM_LEAD) {
+            _uiState.value = PeerEvalUiState.Error("lead_only")
+            return
+        }
         viewModelScope.launch {
             _uiState.value = PeerEvalUiState.Loading
             repository.createPeriod(projectId)
@@ -140,39 +141,44 @@ class PeerEvalViewModel(
             repository.submitEvaluation(submission)
                 .onSuccess {
                     recomputeAverageRating(evaluateeId)
-                    _uiState.value = PeerEvalUiState.SubmitSuccess
+                        .onSuccess { _uiState.value = PeerEvalUiState.SubmitSuccess }
+                        .onFailure { _uiState.value = PeerEvalUiState.Error(it.message ?: "") }
                 }
                 .onFailure { _uiState.value = PeerEvalUiState.Error(it.message ?: "") }
         }
     }
 
-    private suspend fun recomputeAverageRating(evaluateeId: String) {
-        repository.fetchAllReceivedSubmissions(projectId, evaluateeId)
-            .onSuccess { submissions ->
-                if (submissions.isNotEmpty()) {
+    private suspend fun recomputeAverageRating(evaluateeId: String): Result<Unit> {
+        return repository.fetchAllReceivedSubmissions(projectId, evaluateeId)
+            .fold(
+                onSuccess = { submissions ->
+                    if (submissions.isEmpty()) return Result.success(Unit)
                     val rawAvg = submissions.map { sub ->
                         (sub.communication + sub.quality + sub.reliability + sub.effort) / 4f
                     }.average().toFloat()
-                    val avg = round(rawAvg * 10f) / 10f
-                    repository.updateAveragePeerRating(evaluateeId, avg)
-                }
+                    repository.updateAveragePeerRating(evaluateeId, roundToOneDecimal(rawAvg))
+                },
+                onFailure = { Result.failure(it) }
+            )
             }
-    }
 
     fun computeMyAverageReceived(): Float {
         val evals = _receivedEvals.value ?: return 0f
         if (evals.isEmpty()) return 0f
-        return evals.map { (it.communication + it.quality + it.reliability + it.effort) / 4f }.average().toFloat()
+        val rawAvg = evals.map { (it.communication + it.quality + it.reliability + it.effort) / 4f }.average().toFloat()
+        return roundToOneDecimal(rawAvg)
     }
 
     fun hasAlreadySubmittedFor(evaluateeId: String): Boolean =
         _submittedByMe.value?.containsKey(evaluateeId) == true
 
+    private fun roundToOneDecimal(value: Float): Float = round(value * 10f) / 10f
+
     override fun onCleared() {
         super.onCleared()
-        periodOpenSource?.let { periodsMediator.removeSource(it) }
-        submittedSource?.let { periodsMediator.removeSource(it) }
-        receivedSource?.let { periodsMediator.removeSource(it) }
-        periodsMediator.removeSource(periodsSource)
+        periodOpenSource?.let { _periods.removeSource(it) }
+        submittedSource?.let { _periods.removeSource(it) }
+        receivedSource?.let { _periods.removeSource(it) }
+        _periods.removeSource(periodsSource)
     }
 }

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.model.EvaluationSubmission
+import kotlin.math.round
 
 class ReceivedEvalAdapter(
     private val memberNames: () -> Map<String, String>
@@ -44,14 +45,14 @@ class ReceivedEvalAdapter(
         // Show "Anonymous" per academic norms, but allow name if desired
         holder.fromLabel.text = ctx.getString(R.string.eval_from_anonymous)
 
-        val avg = (sub.communication + sub.quality + sub.reliability + sub.effort) / 4f
+        val avg = round(((sub.communication + sub.quality + sub.reliability + sub.effort) / 4f) * 10f) / 10f
         holder.avgScore.text = ctx.getString(R.string.eval_avg_format, avg)
         holder.ratingBar.rating = avg
         holder.feedbackText.text = sub.feedback.ifBlank { ctx.getString(R.string.eval_no_feedback) }
 
-        holder.commScore.text = ctx.getString(R.string.eval_score_format, sub.communication)
-        holder.qualScore.text = ctx.getString(R.string.eval_score_format, sub.quality)
-        holder.relScore.text = ctx.getString(R.string.eval_score_format, sub.reliability)
-        holder.effortScore.text = ctx.getString(R.string.eval_score_format, sub.effort)
+        holder.commScore.text = ctx.getString(R.string.eval_score_format, sub.communication.toFloat())
+        holder.qualScore.text = ctx.getString(R.string.eval_score_format, sub.quality.toFloat())
+        holder.relScore.text = ctx.getString(R.string.eval_score_format, sub.reliability.toFloat())
+        holder.effortScore.text = ctx.getString(R.string.eval_score_format, sub.effort.toFloat())
     }
 }

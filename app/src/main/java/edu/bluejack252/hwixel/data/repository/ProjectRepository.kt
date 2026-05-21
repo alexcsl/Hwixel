@@ -29,7 +29,7 @@ class ProjectRepositoryImpl(
     }
 
     override fun observeProjectsForUser(userId: String): LiveData<List<Project>> {
-        return firebaseSource.observeProjects()
+        return firebaseSource.observeProjectsForUser(userId)
     }
 
     override fun observeProject(projectId: String): LiveData<Project?> {

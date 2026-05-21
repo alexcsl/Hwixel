@@ -18,35 +18,23 @@
             android:background="@color/bg_surface"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingStart="8dp"
-            android:paddingTop="48dp"
-            android:paddingEnd="8dp"
+            android:paddingStart="16dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="12dp"
             android:paddingBottom="8dp">
-
-            <!-- Back button -->
-            <ImageButton
-                android:id="@+id/backButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_glass_card"
-                android:contentDescription="@string/btn_close"
-                android:padding="8dp"
-                android:src="@drawable/ic_back"
-                app:tint="@color/text_primary" />
 
             <!-- Title -->
             <TextView
                 android:id="@+id/taskBoardTitle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:fontFamily="sans-serif-medium"
                 android:maxLines="1"
                 android:text="@string/task_board_title"
                 android:textColor="@color/text_primary"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
             <!-- Toggle group: Kanban | List -->
             <com.google.android.material.button.MaterialButtonToggleGroup

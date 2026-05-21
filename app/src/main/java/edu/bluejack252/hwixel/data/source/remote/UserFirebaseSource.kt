@@ -68,30 +68,61 @@ open class UserFirebaseSource(
     override suspend fun upsertUser(user: User) {
         usersRef.child(user.id).setValue(user).awaitResult()
         val emailKey = user.email.trim().lowercase().replace(".", ",")
-        usersByEmailRef.child(emailKey).setValue(user.id).awaitResult()
+        runCatching {
+            usersByEmailRef.child(emailKey).setValue(user.id).awaitResult()
+        }
     }
 
     override suspend fun findByEmail(email: String): User? = suspendCoroutine { continuation ->
-        val emailKey = email.trim().lowercase().replace(".", ",")
+        val normalized = email.trim().lowercase()
+        val emailKey = normalized.replace(".", ",")
+        var resumed = false
+        fun resumeOnce(value: User?) {
+            if (!resumed) {
+                resumed = true
+                continuation.resume(value)
+            }
+        }
+        fun resumeOnceWithException(t: Throwable) {
+            if (!resumed) {
+                resumed = true
+                continuation.resumeWithException(t)
+            }
+        }
+        fun scanFallback() {
+            usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snap: DataSnapshot) {
+                    val match = snap.children.firstOrNull { child ->
+                        val emailVal = child.child("email").getValue(String::class.java).orEmpty()
+                        emailVal.trim().lowercase() == normalized
+                    }
+                    val user = match?.getValue(User::class.java)?.copy(id = match.key.orEmpty())
+                    resumeOnce(user)
+                }
+                override fun onCancelled(error: DatabaseError) {
+                    resumeOnceWithException(error.toException())
+                }
+            })
+        }
         usersByEmailRef.child(emailKey).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val uid = snapshot.getValue(String::class.java)
                 if (uid == null) {
-                    continuation.resume(null)
+                    scanFallback()
                     return
                 }
                 usersRef.child(uid).addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(userSnapshot: DataSnapshot) {
                         val user = userSnapshot.getValue(User::class.java)?.copy(id = uid)
-                        continuation.resume(user)
+                        if (user == null) scanFallback() else resumeOnce(user)
                     }
                     override fun onCancelled(error: DatabaseError) {
-                        continuation.resumeWithException(error.toException())
+                        scanFallback()
                     }
                 })
             }
             override fun onCancelled(error: DatabaseError) {
-                continuation.resumeWithException(error.toException())
+                scanFallback()
             }
         })
     }

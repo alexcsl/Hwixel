@@ -65,15 +65,19 @@ class DashboardViewModelTest {
     }
 
     @Test
-    fun pendingTasksCountOnlyTodoAndInProgressAssignedToCurrentUser() {
+    fun pendingTasksCountTodoAndInProgressAssignedToCurrentUserInActiveProjects() {
+        val projects = listOf(
+            Project(id = "p1", members = mapOf("u1" to ProjectMember("u1", status = Constants.MEMBER_STATUS_ACTIVE))),
+            Project(id = "p2", members = mapOf("u2" to ProjectMember("u2", status = Constants.MEMBER_STATUS_ACTIVE)))
+        )
         val tasks = listOf(
-            Task(id = "1", status = Constants.STATUS_TODO, assignees = listOf("u1")),
-            Task(id = "2", status = Constants.STATUS_IN_PROGRESS, assignees = listOf("u1", "u2")),
-            Task(id = "3", status = Constants.STATUS_REVIEW, assignees = listOf("u1")),
-            Task(id = "4", status = Constants.STATUS_TODO, assignees = listOf("u2"))
+            Task(id = "1", projectId = "p1", status = Constants.STATUS_TODO, assignees = listOf("u1")),
+            Task(id = "2", projectId = "p1", status = Constants.STATUS_IN_PROGRESS, assignees = listOf("u2")),
+            Task(id = "3", projectId = "p1", status = Constants.STATUS_REVIEW, assignees = listOf("u1")),
+            Task(id = "4", projectId = "p2", status = Constants.STATUS_TODO, assignees = listOf("u1"))
         )
 
-        assertEquals(2, viewModel.countPendingTasks(tasks, "u1"))
+        assertEquals(1, viewModel.countPendingTasks(projects, tasks, "u1"))
     }
 
     @Test

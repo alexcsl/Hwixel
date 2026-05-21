@@ -19,6 +19,7 @@ import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.databinding.FragmentAnalyticsBinding
 import edu.bluejack252.hwixel.ui.project.hub.ProjectPagerAdapter
+import edu.bluejack252.hwixel.ui.project.hub.fillViewPagerPage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -28,6 +29,7 @@ class AnalyticsFragment : Fragment() {
     private var _binding: FragmentAnalyticsBinding? = null
     private val binding get() = _binding!!
     private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+    private var isUpdatingChartSelection = false
 
     private val memberAdapter = AnalyticsMemberAdapter { member ->
         viewModel.selectMember(member.userId)
@@ -49,7 +51,7 @@ class AnalyticsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentAnalyticsBinding.inflate(inflater, container, false)
-        return binding.root
+        return binding.root.fillViewPagerPage()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,11 +70,13 @@ class AnalyticsFragment : Fragment() {
         binding.pieChart.setNoDataText(getString(R.string.analytics_no_completed_tasks))
         binding.pieChart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             override fun onValueSelected(e: com.github.mikephil.charting.data.Entry?, h: Highlight?) {
+                if (isUpdatingChartSelection) return
                 val member = e?.data as? MemberAnalyticsUi ?: return
                 viewModel.selectMember(member.userId)
             }
 
             override fun onNothingSelected() {
+                if (isUpdatingChartSelection) return
                 viewModel.selectMember(null)
             }
         })

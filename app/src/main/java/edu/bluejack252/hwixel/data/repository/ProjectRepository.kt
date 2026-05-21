@@ -1,8 +1,6 @@
 package edu.bluejack252.hwixel.data.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.map
-import edu.bluejack252.hwixel.data.mapper.toDomain
 import edu.bluejack252.hwixel.data.mapper.toEntity
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
@@ -11,6 +9,7 @@ import edu.bluejack252.hwixel.data.source.remote.ProjectRemoteSource
 
 interface ProjectRepository {
     fun observeProjects(): LiveData<List<Project>>
+    fun observeProjectsForUser(userId: String): LiveData<List<Project>> = observeProjects()
     fun observeProject(projectId: String): LiveData<Project?>
     suspend fun createProject(project: Project): Result<Unit>
     suspend fun updateProject(project: Project): Result<Unit>
@@ -26,7 +25,11 @@ class ProjectRepositoryImpl(
 ) : ProjectRepository {
 
     override fun observeProjects(): LiveData<List<Project>> {
-        return localDao.observeAll().map { entities -> entities.map { it.toDomain() } }
+        return firebaseSource.observeProjects()
+    }
+
+    override fun observeProjectsForUser(userId: String): LiveData<List<Project>> {
+        return firebaseSource.observeProjectsForUser(userId)
     }
 
     override fun observeProject(projectId: String): LiveData<Project?> {
@@ -34,8 +37,8 @@ class ProjectRepositoryImpl(
     }
 
     override suspend fun createProject(project: Project): Result<Unit> = runCatching {
-        firebaseSource.createProject(project)
-        localDao.upsert(project.toEntity())
+        val createdProject = firebaseSource.createProject(project)
+        localDao.upsert(createdProject.toEntity())
     }
 
     override suspend fun updateProject(project: Project): Result<Unit> = runCatching {
@@ -73,4 +76,5 @@ class ProjectRepositoryImpl(
     ): Result<Unit> = runCatching {
         firebaseSource.updateMemberScore(projectId, userId, score)
     }
+
 }

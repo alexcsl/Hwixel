@@ -1,0 +1,73 @@
+{
+  "rules": {
+    "users": {
+      ".read": "auth != null",
+      "$userId": {
+        ".write": "$userId === auth.uid || (newData.child('id').val() === data.child('id').val() && newData.child('name').val() === data.child('name').val() && newData.child('studentId').val() === data.child('studentId').val() && newData.child('email').val() === data.child('email').val() && newData.child('phone').val() === data.child('phone').val() && newData.child('avatarUrl').val() === data.child('avatarUrl').val() && newData.child('totalProjectsCompleted').val() === data.child('totalProjectsCompleted').val() && newData.child('badges').val() === data.child('badges').val() && newData.child('averagePeerRating').isNumber())"
+      }
+    },
+    "projects": {
+      ".read": "auth != null",
+      "$projectId": {
+        ".write": "auth != null && ((!data.exists() && newData.child('members').child(auth.uid).child('role').val() === 'Team Lead') || (data.exists() && data.child('members').child(auth.uid).child('role').val() === 'Team Lead'))",
+        "completionPercentage": {
+          ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()"
+        },
+        "members": {
+          "$memberId": {
+            ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).child('role').val() === 'Team Lead'",
+            "contributionScore": {
+              ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()"
+            }
+          }
+        }
+      }
+    },
+    "tasks": {
+      ".read": "auth != null",
+      "$projectId": {
+        ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()"
+      }
+    },
+    "userProjects": {
+      "$userId": {
+        ".read": "$userId === auth.uid",
+        "$projectId": {
+          ".write": "auth != null && ($userId === auth.uid || root.child('projects').child($projectId).child('members').child(auth.uid).exists())"
+        }
+      }
+    },
+    "usersByEmail": {
+      ".read": "auth != null",
+      "$emailKey": {
+        ".write": "auth != null && newData.val() === auth.uid"
+      }
+    },
+    "attendance": {
+      "$projectId": {
+        ".read": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()",
+        ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).child('role').val() === 'Team Lead'"
+      }
+    },
+    "evaluations": {
+      "$projectId": {
+        ".read": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()",
+        ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()"
+      }
+    },
+    "peerRatings": {
+      "$userId": {
+        ".read": "auth != null",
+        ".write": "auth != null && newData.child('averagePeerRating').isNumber()"
+      }
+    },
+    "notifications": {
+      "$userId": {
+        ".read": "$userId === auth.uid",
+        "$notifId": {
+          ".write": "auth != null && ($userId === auth.uid || newData.child('type').val() === 'invite')"
+        }
+      }
+    }
+  }
+}

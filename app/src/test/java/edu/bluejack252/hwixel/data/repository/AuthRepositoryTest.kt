@@ -74,5 +74,7 @@ class AuthRepositoryTest {
         override suspend fun upsert(user: UserEntity) {
             upsertedUser = user
         }
+
+        override suspend fun delete(user: UserEntity) = Unit
     }
 }

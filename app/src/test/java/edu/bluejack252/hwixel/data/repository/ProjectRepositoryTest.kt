@@ -47,8 +47,9 @@ class ProjectRepositoryTest {
         override fun observeProjects(): LiveData<List<Project>> = MutableLiveData(emptyList())
         override fun observeProject(projectId: String): LiveData<Project?> = MutableLiveData(null)
 
-        override suspend fun createProject(project: Project) {
+        override suspend fun createProject(project: Project): Project {
             createdProject = project
+            return project
         }
 
         override suspend fun updateProject(project: Project) {
@@ -70,6 +71,8 @@ class ProjectRepositoryTest {
         var upsertedProject: ProjectEntity? = null
 
         override fun observeAll(): LiveData<List<ProjectEntity>> = MutableLiveData(emptyList())
+
+        override suspend fun getById(id: String): ProjectEntity? = null
 
         override suspend fun upsert(project: ProjectEntity) {
             upsertedProject = project

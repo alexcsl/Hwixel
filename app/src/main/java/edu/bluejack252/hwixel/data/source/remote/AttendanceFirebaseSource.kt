@@ -9,41 +9,52 @@ import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.AttendanceSession
 import kotlinx.coroutines.tasks.await
 
-class AttendanceFirebaseSource {
+class AttendanceFirebaseSource : AttendanceRemoteSource {
 
     private val db = FirebaseDatabase.getInstance().reference
 
-    fun observeSessions(projectId: String): LiveData<List<AttendanceSession>> {
-        val liveData = MutableLiveData<List<AttendanceSession>>()
-        db.child("attendance").child(projectId)
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val sessions = snapshot.children.mapNotNull { child ->
-                        val id = child.key ?: return@mapNotNull null
-                        val date = child.child("date").getValue(Long::class.java) ?: 0L
-                        val nextSessionDate = child.child("nextSessionDate").getValue(Long::class.java) ?: 0L
-                        val records = child.child("records").children.associate { rec ->
-                            rec.key!! to (rec.getValue(Boolean::class.java) ?: false)
-                        }
-                        AttendanceSession(
-                            id = id,
-                            projectId = projectId,
-                            date = date,
-                            nextSessionDate = nextSessionDate,
-                            records = records
-                        )
-                    }.sortedByDescending { it.date }
-                    liveData.postValue(sessions)
-                }
+    override fun observeSessions(projectId: String): LiveData<List<AttendanceSession>> {
+        val ref = db.child("attendance").child(projectId)
+        return object : MutableLiveData<List<AttendanceSession>>() {
+            private var listener: ValueEventListener? = null
 
-                override fun onCancelled(error: DatabaseError) {
-                    liveData.postValue(emptyList())
+            override fun onActive() {
+                val l = object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val sessions = snapshot.children.mapNotNull { child ->
+                            val id = child.key ?: return@mapNotNull null
+                            val date = child.child("date").getValue(Long::class.java) ?: 0L
+                            val nextSessionDate = child.child("nextSessionDate").getValue(Long::class.java) ?: 0L
+                            val records = child.child("records").children.associate { rec ->
+                                rec.key!! to (rec.getValue(Boolean::class.java) ?: false)
+                            }
+                            AttendanceSession(
+                                id = id,
+                                projectId = projectId,
+                                date = date,
+                                nextSessionDate = nextSessionDate,
+                                records = records
+                            )
+                        }.sortedByDescending { it.date }
+                        postValue(sessions)
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        postValue(emptyList())
+                    }
                 }
-            })
-        return liveData
+                listener = l
+                ref.addValueEventListener(l)
+            }
+
+            override fun onInactive() {
+                listener?.let { ref.removeEventListener(it) }
+                listener = null
+            }
+        }
     }
 
-    suspend fun createSession(
+    override suspend fun createSession(
         projectId: String,
         date: Long,
         nextSessionDate: Long
@@ -58,7 +69,7 @@ class AttendanceFirebaseSource {
         sessionId
     }
 
-    suspend fun markAttendance(
+    override suspend fun markAttendance(
         projectId: String,
         sessionId: String,
         userId: String,
@@ -73,7 +84,7 @@ class AttendanceFirebaseSource {
             .await()
     }
 
-    suspend fun setNextSessionDate(
+    override suspend fun setNextSessionDate(
         projectId: String,
         sessionId: String,
         nextDate: Long

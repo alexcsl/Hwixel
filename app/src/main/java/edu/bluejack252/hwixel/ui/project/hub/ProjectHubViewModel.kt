@@ -58,7 +58,8 @@ class ProjectHubViewModel(
             project = currentProject,
             recentActivity = history.map { entry ->
                 ActivityUi(
-                    actorName = users.firstOrNull { it.id == entry.actorId }?.name ?: entry.actorId,
+                    actorName = users.firstOrNull { it.id == entry.actorId }?.name?.takeIf { it.isNotBlank() }
+                        ?: UNKNOWN_MEMBER_NAME,
                     action = entry.action,
                     timestamp = entry.timestamp
                 )
@@ -75,6 +76,10 @@ class ProjectHubViewModel(
         creatorId: String
     ) {
         if (name.isBlank()) return
+        if (creatorId.isBlank()) {
+            _createProjectResult.value = Result.failure(IllegalStateException("You must be logged in to create a project."))
+            return
+        }
         viewModelScope.launch {
             val project = Project(
                 name = name,

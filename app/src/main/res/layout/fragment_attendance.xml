@@ -138,13 +138,17 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/addSessionButton"
-                    style="@style/Widget.HWiXeL.Button.Primary"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
+                    android:layout_height="44dp"
+                    android:minWidth="132dp"
+                    android:backgroundTint="@color/brand_violet"
                     android:text="@string/attendance_add_session"
-                    android:textSize="12sp"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
                     app:icon="@drawable/ic_add"
-                    app:iconSize="14dp" />
+                    app:iconSize="16dp"
+                    app:iconTint="@color/white" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView

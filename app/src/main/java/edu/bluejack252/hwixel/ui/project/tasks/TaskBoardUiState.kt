@@ -5,6 +5,7 @@ import edu.bluejack252.hwixel.data.model.Task
 data class TaskBoardUiState(
     val tasks: List<Task> = emptyList(),
     val filteredTasks: List<Task> = emptyList(),
+    val memberNames: Map<String, String> = emptyMap(),
     val filter: TaskFilter = TaskFilter(),
     val viewMode: ViewMode = ViewMode.LIST,
     val isLoading: Boolean = false,

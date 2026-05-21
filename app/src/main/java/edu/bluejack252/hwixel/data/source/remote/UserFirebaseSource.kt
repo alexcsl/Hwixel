@@ -6,6 +6,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import edu.bluejack252.hwixel.data.model.Notification
 import edu.bluejack252.hwixel.data.model.User
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -16,6 +17,7 @@ open class UserFirebaseSource(
 ) : UserRemoteSource {
     private val usersRef = database.reference.child("users")
     private val notificationsRef = database.reference.child("notifications")
+    private val usersByEmailRef = database.reference.child("usersByEmail")
 
     override fun observeUsers(): LiveData<List<User>> {
         val liveData = MutableLiveData<List<User>>()
@@ -47,26 +49,89 @@ open class UserFirebaseSource(
         return liveData
     }
 
-    override suspend fun upsertUser(user: User) {
-        usersRef.child(user.id).setValue(user).awaitResult()
-    }
-
-    override suspend fun findByEmail(email: String): User? = suspendCoroutine { continuation ->
-        usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+    override fun observeNotifications(userId: String): LiveData<List<Notification>> {
+        val liveData = MutableLiveData<List<Notification>>()
+        notificationsRef.child(userId).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val user = snapshot.children.mapNotNull { child ->
-                    child.getValue(User::class.java)?.copy(id = child.key.orEmpty())
-                }.firstOrNull { it.email == email }
-                continuation.resume(user)
+                liveData.value = snapshot.children.mapNotNull { child ->
+                    child.getValue(Notification::class.java)?.copy(id = child.key.orEmpty())
+                }.sortedByDescending { notification -> notification.timestamp }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                continuation.resumeWithException(error.toException())
+                liveData.value = emptyList()
+            }
+        })
+        return liveData
+    }
+
+    override suspend fun upsertUser(user: User) {
+        usersRef.child(user.id).setValue(user).awaitResult()
+        val emailKey = user.email.trim().lowercase().replace(".", ",")
+        runCatching {
+            usersByEmailRef.child(emailKey).setValue(user.id).awaitResult()
+        }
+    }
+
+    override suspend fun findByEmail(email: String): User? = suspendCoroutine { continuation ->
+        val normalized = email.trim().lowercase()
+        val emailKey = normalized.replace(".", ",")
+        var resumed = false
+        fun resumeOnce(value: User?) {
+            if (!resumed) {
+                resumed = true
+                continuation.resume(value)
+            }
+        }
+        fun resumeOnceWithException(t: Throwable) {
+            if (!resumed) {
+                resumed = true
+                continuation.resumeWithException(t)
+            }
+        }
+        fun scanFallback() {
+            usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snap: DataSnapshot) {
+                    val match = snap.children.firstOrNull { child ->
+                        val emailVal = child.child("email").getValue(String::class.java).orEmpty()
+                        emailVal.trim().lowercase() == normalized
+                    }
+                    val user = match?.getValue(User::class.java)?.copy(id = match.key.orEmpty())
+                    resumeOnce(user)
+                }
+                override fun onCancelled(error: DatabaseError) {
+                    resumeOnceWithException(error.toException())
+                }
+            })
+        }
+        usersByEmailRef.child(emailKey).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val uid = snapshot.getValue(String::class.java)
+                if (uid == null) {
+                    scanFallback()
+                    return
+                }
+                usersRef.child(uid).addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(userSnapshot: DataSnapshot) {
+                        val user = userSnapshot.getValue(User::class.java)?.copy(id = uid)
+                        if (user == null) scanFallback() else resumeOnce(user)
+                    }
+                    override fun onCancelled(error: DatabaseError) {
+                        scanFallback()
+                    }
+                })
+            }
+            override fun onCancelled(error: DatabaseError) {
+                scanFallback()
             }
         })
     }
 
     override suspend fun writeNotification(userId: String, notifId: String, payload: Map<String, Any>) {
         notificationsRef.child(userId).child(notifId).setValue(payload).awaitResult()
+    }
+
+    override suspend fun markNotificationRead(userId: String, notifId: String) {
+        notificationsRef.child(userId).child(notifId).child("isRead").setValue(true).awaitResult()
     }
 }

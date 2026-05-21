@@ -1,86 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:fillViewport="true"
+    android:overScrollMode="never">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_header_gradient"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="8dp"
-        android:paddingTop="48dp"
-        android:paddingEnd="8dp"
-        android:paddingBottom="16dp">
+        android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/backButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/back_button_description"
-            android:src="@drawable/ic_arrow_back"
-            app:tint="@color/text_primary" />
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_header_gradient"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingTop="12dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="12dp">
 
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/members_title"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/inviteMemberButton"
+                style="@style/Widget.HWiXeL.Button.Ghost"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="@string/invite_button"
+                android:textSize="12sp"
+                app:icon="@drawable/ic_person_add"
+                app:iconGravity="start"
+                app:iconSize="16dp" />
+
+        </LinearLayout>
+
+        <!-- Loading Progress Bar -->
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/loadingProgressBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:indicatorColor="@color/brand_violet"
+            app:trackColor="@android:color/transparent"
+            tools:visibility="visible" />
+
+        <!-- Empty State -->
         <TextView
-            android:layout_width="0dp"
+            android:id="@+id/emptyMembersTextView"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/members_title"
-            android:textColor="@color/text_primary"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:gravity="center"
+            android:padding="32dp"
+            android:text="@string/empty_members_text"
+            android:textColor="@color/text_hint"
+            android:textSize="15sp"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/inviteMemberButton"
-            style="@style/Widget.HWiXeL.Button.Ghost"
-            android:layout_width="wrap_content"
+        <!-- Members List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/membersRecyclerView"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/invite_button"
-            app:icon="@drawable/ic_person_add"
-            app:iconGravity="start" />
+            android:nestedScrollingEnabled="false"
+            android:padding="16dp"
+            android:clipToPadding="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_member_card" />
 
     </LinearLayout>
 
-    <!-- Loading Progress Bar -->
-    <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/loadingProgressBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:indicatorColor="@color/brand_violet"
-        app:trackColor="@android:color/transparent"
-        tools:visibility="visible" />
-
-    <!-- Empty State -->
-    <TextView
-        android:id="@+id/emptyMembersTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="32dp"
-        android:text="@string/empty_members_text"
-        android:textColor="@color/text_hint"
-        android:textSize="15sp"
-        android:visibility="gone"
-        tools:visibility="visible" />
-
-    <!-- Members List -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/membersRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:nestedScrollingEnabled="false"
-        android:padding="16dp"
-        android:clipToPadding="false"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_member_card" />
-
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>

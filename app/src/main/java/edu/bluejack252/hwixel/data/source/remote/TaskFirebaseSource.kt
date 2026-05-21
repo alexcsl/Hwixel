@@ -6,8 +6,10 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import edu.bluejack252.hwixel.data.model.Attachment
 import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.model.HistoryEntry
+import edu.bluejack252.hwixel.data.model.Subtask
 import edu.bluejack252.hwixel.data.model.Task
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -25,10 +27,7 @@ open class TaskFirebaseSource(
                 liveData.value = snapshot.children.flatMap { projectSnapshot ->
                     val projectId = projectSnapshot.key.orEmpty()
                     projectSnapshot.children.mapNotNull { taskSnapshot ->
-                        taskSnapshot.getValue(Task::class.java)?.copy(
-                            id = taskSnapshot.key.orEmpty(),
-                            projectId = projectId
-                        )
+                        taskSnapshot.toTaskOrNull(projectId)
                     }
                 }
             }
@@ -45,10 +44,7 @@ open class TaskFirebaseSource(
         tasksRef.child(projectId).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 liveData.value = snapshot.children.mapNotNull { child ->
-                    child.getValue(Task::class.java)?.copy(
-                        id = child.key.orEmpty(),
-                        projectId = projectId
-                    )
+                    child.toTaskOrNull(projectId)
                 }
             }
 
@@ -63,10 +59,7 @@ open class TaskFirebaseSource(
         val liveData = MutableLiveData<Task?>()
         tasksRef.child(projectId).child(taskId).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                liveData.value = snapshot.getValue(Task::class.java)?.copy(
-                    id = snapshot.key.orEmpty(),
-                    projectId = projectId
-                )
+                liveData.value = snapshot.toTaskOrNull(projectId)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -81,10 +74,7 @@ open class TaskFirebaseSource(
             tasksRef.child(projectId).addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val tasks = snapshot.children.mapNotNull { child ->
-                        child.getValue(Task::class.java)?.copy(
-                            id = child.key.orEmpty(),
-                            projectId = projectId
-                        )
+                        child.toTaskOrNull(projectId)
                     }
                     continuation.resume(tasks)
                 }
@@ -133,5 +123,96 @@ open class TaskFirebaseSource(
 
     override suspend fun deleteTask(projectId: String, taskId: String) {
         tasksRef.child(projectId).child(taskId).removeValue().awaitResult()
+    }
+
+    private fun DataSnapshot.toTaskOrNull(projectId: String): Task? {
+        if (value !is Map<*, *>) return null
+        val taskId = key.orEmpty()
+        return Task(
+            id = taskId,
+            projectId = projectId,
+            title = child("title").safeString(),
+            description = child("description").safeString(),
+            status = child("status").safeString(),
+            priority = child("priority").safeString(),
+            deadline = child("deadline").safeLong(),
+            assignees = child("assignees").toStringList(),
+            attachments = child("attachments").children.mapNotNull { attachmentSnapshot ->
+                val attachmentId = attachmentSnapshot.child("id").safeString().takeIf(String::isNotBlank)
+                    ?: attachmentSnapshot.key.orEmpty()
+                if (attachmentId.isBlank()) return@mapNotNull null
+                Attachment(
+                    id = attachmentId,
+                    label = attachmentSnapshot.child("label").safeString(),
+                    url = attachmentSnapshot.child("url").safeString(),
+                    type = attachmentSnapshot.child("type").safeString()
+                )
+            },
+            comments = child("comments").children.mapNotNull { commentSnapshot ->
+                val commentId = commentSnapshot.child("id").safeString().takeIf(String::isNotBlank)
+                    ?: commentSnapshot.key.orEmpty()
+                if (commentId.isBlank()) return@mapNotNull null
+                commentId to Comment(
+                    id = commentId,
+                    authorId = commentSnapshot.child("authorId").safeString(),
+                    content = commentSnapshot.child("content").safeString(),
+                    timestamp = commentSnapshot.child("timestamp").safeLong()
+                )
+            }.toMap(),
+            subtasks = child("subtasks").children.mapNotNull { subtaskSnapshot ->
+                val subtaskId = subtaskSnapshot.child("id").safeString().takeIf(String::isNotBlank)
+                    ?: subtaskSnapshot.key.orEmpty()
+                if (subtaskId.isBlank()) return@mapNotNull null
+                subtaskId to Subtask(
+                    id = subtaskId,
+                    title = subtaskSnapshot.child("title").safeString(),
+                    isDone = subtaskSnapshot.child("isDone").safeBoolean()
+                )
+            }.toMap(),
+            history = child("history").children.mapNotNull { historySnapshot ->
+                val historyId = historySnapshot.child("id").safeString().takeIf(String::isNotBlank)
+                    ?: historySnapshot.key.orEmpty()
+                if (historyId.isBlank()) return@mapNotNull null
+                historyId to HistoryEntry(
+                    id = historyId,
+                    actorId = historySnapshot.child("actorId").safeString(),
+                    action = historySnapshot.child("action").safeString(),
+                    timestamp = historySnapshot.child("timestamp").safeLong()
+                )
+            }.toMap()
+        )
+    }
+
+    private fun DataSnapshot.safeString(): String {
+        return when (val raw = value) {
+            is String -> raw
+            else -> ""
+        }
+    }
+
+    private fun DataSnapshot.toStringList(): List<String> {
+        val raw = value
+        if (raw is String) return listOf(raw).filter { it.isNotBlank() }
+        return children.mapNotNull { child ->
+            child.safeString().takeIf(String::isNotBlank)
+                ?: child.key?.takeIf { child.safeBoolean() }
+        }
+    }
+
+    private fun DataSnapshot.safeLong(): Long {
+        return when (val raw = value) {
+            is Number -> raw.toLong()
+            is String -> raw.toLongOrNull() ?: 0L
+            else -> 0L
+        }
+    }
+
+    private fun DataSnapshot.safeBoolean(): Boolean {
+        return when (val raw = value) {
+            is Boolean -> raw
+            is String -> raw.equals("true", ignoreCase = true)
+            is Number -> raw.toInt() != 0
+            else -> false
+        }
     }
 }

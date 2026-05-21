@@ -126,9 +126,19 @@
                     style="@style/Widget.HWiXeL.Button.Ghost"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="8dp"
                     android:text="@string/pick_deadline_label"
                     app:icon="@drawable/ic_calendar"
+                    app:iconGravity="start" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/deadlineTimeButton"
+                    style="@style/Widget.HWiXeL.Button.Ghost"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:text="@string/task_pick_deadline_time"
+                    app:icon="@drawable/ic_clock"
                     app:iconGravity="start" />
 
                 <!-- Priority Label -->

@@ -6,13 +6,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.bluejack252.hwixel.data.model.Task
+import edu.bluejack252.hwixel.data.model.User
 import edu.bluejack252.hwixel.data.repository.TaskRepository
+import edu.bluejack252.hwixel.data.repository.UserRepository
 import edu.bluejack252.hwixel.util.constants.Constants
 import kotlinx.coroutines.launch
 
 class TaskBoardViewModel(
     private val projectId: String,
-    private val taskRepository: TaskRepository
+    private val taskRepository: TaskRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MediatorLiveData<TaskBoardUiState>()
@@ -22,6 +25,7 @@ class TaskBoardViewModel(
     val statusUpdateResult: LiveData<Result<Unit>?> = _statusUpdateResult
 
     private var allTasks: List<Task> = emptyList()
+    private var users: List<User> = emptyList()
     private var currentFilter = TaskFilter()
     private var currentViewMode = ViewMode.LIST
 
@@ -29,6 +33,10 @@ class TaskBoardViewModel(
         _uiState.value = TaskBoardUiState(isLoading = true)
         _uiState.addSource(taskRepository.observeTasks(projectId)) { tasks ->
             allTasks = tasks
+            publishState()
+        }
+        _uiState.addSource(userRepository.observeUsers()) { userList ->
+            users = userList
             publishState()
         }
     }
@@ -46,10 +54,21 @@ class TaskBoardViewModel(
         _uiState.value = TaskBoardUiState(
             tasks = allTasks,
             filteredTasks = applyFilter(allTasks, currentFilter),
+            memberNames = buildMemberNames(),
             filter = currentFilter,
             viewMode = currentViewMode,
             isLoading = false
         )
+    }
+
+    private fun buildMemberNames(): Map<String, String> {
+        return allTasks
+            .flatMap { it.assignees }
+            .distinct()
+            .associateWith { userId ->
+                users.firstOrNull { it.id == userId }?.name?.takeIf { it.isNotBlank() }
+                    ?: UNKNOWN_MEMBER_NAME
+            }
     }
 
     fun setFilter(filter: TaskFilter) {
@@ -93,4 +112,8 @@ class TaskBoardViewModel(
         Constants.STATUS_REVIEW,
         Constants.STATUS_DONE
     )
+
+    private companion object {
+        const val UNKNOWN_MEMBER_NAME = "Unknown member"
+    }
 }

@@ -5,13 +5,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import edu.bluejack252.hwixel.data.model.HistoryEntry
 import edu.bluejack252.hwixel.databinding.ItemHistoryEntryBinding
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class HistoryAdapter : ListAdapter<HistoryEntry, HistoryAdapter.HistoryViewHolder>(DiffCallback) {
+class HistoryAdapter : ListAdapter<HistoryUi, HistoryAdapter.HistoryViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
         return HistoryViewHolder(
@@ -34,10 +33,10 @@ class HistoryAdapter : ListAdapter<HistoryEntry, HistoryAdapter.HistoryViewHolde
         }
     }
 
-    private object DiffCallback : DiffUtil.ItemCallback<HistoryEntry>() {
-        override fun areItemsTheSame(oldItem: HistoryEntry, newItem: HistoryEntry) =
+    private object DiffCallback : DiffUtil.ItemCallback<HistoryUi>() {
+        override fun areItemsTheSame(oldItem: HistoryUi, newItem: HistoryUi) =
             oldItem.id == newItem.id
-        override fun areContentsTheSame(oldItem: HistoryEntry, newItem: HistoryEntry) =
+        override fun areContentsTheSame(oldItem: HistoryUi, newItem: HistoryUi) =
             oldItem == newItem
     }
 }

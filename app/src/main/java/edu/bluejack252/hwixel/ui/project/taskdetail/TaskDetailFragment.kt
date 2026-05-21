@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
@@ -43,7 +44,8 @@ class TaskDetailFragment : Fragment() {
         TaskDetailViewModelFactory(
             projectId = args.projectId,
             taskId = args.taskId,
-            taskRepository = ServiceLocator.getTaskRepository(requireContext())
+            taskRepository = ServiceLocator.getTaskRepository(requireContext()),
+            userRepository = ServiceLocator.getUserRepository(requireContext())
         )
     }
 
@@ -87,6 +89,11 @@ class TaskDetailFragment : Fragment() {
             result ?: return@observe
             if (result.isSuccess) {
                 Snackbar.make(binding.root, R.string.comment_added, Snackbar.LENGTH_SHORT).show()
+            } else {
+                val msg = result.exceptionOrNull()?.localizedMessage
+                    ?.takeIf { it.isNotBlank() }
+                    ?: getString(R.string.error_generic)
+                Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG).show()
             }
             viewModel.consumeCommentResult()
         }
@@ -121,8 +128,12 @@ class TaskDetailFragment : Fragment() {
     }
 
     private fun render(state: TaskDetailUiState) {
+        binding.loadingIndicator.isVisible = state.isLoading
+        binding.titleContainer.isVisible = !state.isLoading
+        binding.bodyContainer.isVisible = !state.isLoading
+        if (state.isLoading) return
         val task = state.task ?: return
-        renderTask(task)
+        renderTask(task, state.assigneeNames)
         attachmentAdapter.submitList(state.attachments)
         subtaskAdapter.submitList(state.subtasks)
         commentsAdapter.submitList(state.comments)
@@ -130,7 +141,7 @@ class TaskDetailFragment : Fragment() {
         binding.subtaskOverallProgress.isVisible = state.subtasks.isNotEmpty()
     }
 
-    private fun renderTask(task: Task) {
+    private fun renderTask(task: Task, assigneeNames: List<String>) {
         binding.taskTitleTextView.text = task.title
         binding.statusChip.text = task.status.replace("_", " ").replaceFirstChar { it.uppercase() }
         binding.priorityChip.text = task.priority.replaceFirstChar { it.uppercase() }
@@ -143,6 +154,10 @@ class TaskDetailFragment : Fragment() {
             if (task.deadline < System.currentTimeMillis() && task.status != Constants.STATUS_DONE) {
                 binding.deadlineTextView.setTextColor(
                     requireContext().getColor(android.R.color.holo_red_light)
+                )
+            } else {
+                binding.deadlineTextView.setTextColor(
+                    requireContext().getColor(android.R.color.darker_gray)
                 )
             }
         } else {
@@ -157,7 +172,7 @@ class TaskDetailFragment : Fragment() {
             binding.assigneesTextView.isVisible = true
             binding.assigneesTextView.text = getString(
                 R.string.task_detail_assignees_label,
-                task.assignees.joinToString(", ")
+                assigneeNames.joinToString(", ")
             )
         } else {
             binding.assigneesTextView.isVisible = false

@@ -16,6 +16,7 @@ import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.databinding.FragmentTaskBoardBinding
 import edu.bluejack252.hwixel.ui.project.hub.ProjectHubFragmentDirections
 import edu.bluejack252.hwixel.ui.project.hub.ProjectPagerAdapter
+import edu.bluejack252.hwixel.ui.project.hub.fillViewPagerPage
 import edu.bluejack252.hwixel.util.constants.Constants
 
 class TaskBoardFragment : Fragment() {
@@ -43,7 +44,8 @@ class TaskBoardFragment : Fragment() {
     private val viewModel: TaskBoardViewModel by viewModels {
         TaskBoardViewModelFactory(
             projectId = projectId,
-            taskRepository = ServiceLocator.getTaskRepository(requireContext())
+            taskRepository = ServiceLocator.getTaskRepository(requireContext()),
+            userRepository = ServiceLocator.getUserRepository(requireContext())
         )
     }
 
@@ -51,7 +53,7 @@ class TaskBoardFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTaskBoardBinding.inflate(inflater, container, false)
-        return binding.root
+        return binding.root.fillViewPagerPage()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -61,6 +63,18 @@ class TaskBoardFragment : Fragment() {
         setupFab()
         setupFilter()
         viewModel.uiState.observe(viewLifecycleOwner, ::render)
+        viewModel.statusUpdateResult.observe(viewLifecycleOwner) { result ->
+            result ?: return@observe
+            if (result.isFailure) {
+                val msg = result.exceptionOrNull()?.localizedMessage
+                    ?.takeIf { it.isNotBlank() }
+                    ?: getString(R.string.error_generic)
+                com.google.android.material.snackbar.Snackbar
+                    .make(binding.root, msg, com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+                    .show()
+            }
+            viewModel.consumeStatusResult()
+        }
     }
 
     private fun setupListView() {
@@ -103,13 +117,8 @@ class TaskBoardFragment : Fragment() {
     private fun setupFilter() {
         binding.filterButton.setOnClickListener {
             val state = viewModel.uiState.value ?: return@setOnClickListener
-            val allMembers = state.tasks
-                .flatMap { it.assignees }
-                .distinct()
-                .associateWith { it }
-
             val sheet = FilterBottomSheet()
-            sheet.setMembers(allMembers)
+            sheet.setMembers(state.memberNames)
             sheet.setCurrentFilter(state.filter)
             sheet.onFilterApplied = { filter -> viewModel.setFilter(filter) }
             sheet.onFilterReset = { viewModel.resetFilter() }

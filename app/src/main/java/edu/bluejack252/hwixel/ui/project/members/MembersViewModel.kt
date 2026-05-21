@@ -99,6 +99,10 @@ class MembersViewModel(
     }
 
     fun inviteMember(email: String) {
+        if (!isCurrentUserTeamLead()) {
+            _actionResult.value = "no_permission"
+            return
+        }
         viewModelScope.launch {
             val result = userRepository.findUserByEmail(email)
             if (result.isFailure) {
@@ -119,7 +123,7 @@ class MembersViewModel(
             val addResult = projectRepository.addMember(projectId, foundUser.id, newMember)
             if (addResult.isSuccess) {
                 val notifKey = FirebaseDatabase.getInstance().reference.push().key.orEmpty()
-                userRepository.writeNotification(
+                val notificationResult = userRepository.writeNotification(
                     foundUser.id,
                     notifKey,
                     mapOf(
@@ -130,9 +134,13 @@ class MembersViewModel(
                         "referenceId" to projectId
                     )
                 )
-                _actionResult.value = "invite_success"
+                _actionResult.value = if (notificationResult.isSuccess) {
+                    "invite_success"
+                } else {
+                    "error:Member was added, but invite notification failed: ${notificationResult.exceptionOrNull()?.localizedMessage.orEmpty()}"
+                }
             } else {
-                _actionResult.value = "error:${addResult.exceptionOrNull()?.localizedMessage.orEmpty()}"
+                _actionResult.value = "error:Member write failed: ${addResult.exceptionOrNull()?.localizedMessage.orEmpty()}"
             }
         }
     }

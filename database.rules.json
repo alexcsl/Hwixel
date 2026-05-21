@@ -9,7 +9,18 @@
     "projects": {
       ".read": "auth != null",
       "$projectId": {
-        ".write": "auth != null && (data.child('members').child(auth.uid).exists() || (!data.exists() && newData.child('members').child(auth.uid).exists()))"
+        ".write": "auth != null && ((!data.exists() && newData.child('members').child(auth.uid).child('role').val() === 'Team Lead') || (data.exists() && data.child('members').child(auth.uid).child('role').val() === 'Team Lead'))",
+        "completionPercentage": {
+          ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()"
+        },
+        "members": {
+          "$memberId": {
+            ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).child('role').val() === 'Team Lead'",
+            "contributionScore": {
+              ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()"
+            }
+          }
+        }
       }
     },
     "tasks": {

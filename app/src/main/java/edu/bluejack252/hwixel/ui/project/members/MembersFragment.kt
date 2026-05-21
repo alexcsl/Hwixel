@@ -79,8 +79,10 @@ class MembersFragment : Fragment() {
     }
 
     private fun render(state: MembersUiState) {
-        adapter.isTeamLead = state.currentUserRole == Constants.ROLE_TEAM_LEAD
+        val isTeamLead = state.currentUserRole == Constants.ROLE_TEAM_LEAD
+        adapter.isTeamLead = isTeamLead
         adapter.submitList(state.members)
+        binding.inviteMemberButton.isVisible = isTeamLead
         binding.emptyMembersTextView.isVisible = state.members.isEmpty() && !state.isLoading
     }
 

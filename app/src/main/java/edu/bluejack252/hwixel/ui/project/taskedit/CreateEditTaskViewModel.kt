@@ -5,6 +5,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import edu.bluejack252.hwixel.data.model.Attachment
 import edu.bluejack252.hwixel.data.model.Subtask
 import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
@@ -72,6 +73,7 @@ class CreateEditTaskViewModel(
         assigneeIds: List<String>,
         priority: String,
         subtasksInput: List<Subtask>,
+        attachmentsInput: List<Attachment>,
         actorId: String
     ) {
         if (title.isBlank()) {
@@ -94,7 +96,8 @@ class CreateEditTaskViewModel(
                     deadline = deadline,
                     assignees = assigneeIds,
                     priority = priority,
-                    subtasks = subtasks
+                    subtasks = subtasks,
+                    attachments = attachmentsInput
                 )
             } else {
                 Task(
@@ -105,7 +108,8 @@ class CreateEditTaskViewModel(
                     assignees = assigneeIds,
                     priority = priority.ifBlank { Constants.PRIORITY_MEDIUM },
                     status = Constants.STATUS_TODO,
-                    subtasks = subtasks
+                    subtasks = subtasks,
+                    attachments = attachmentsInput
                 )
             }
             val result = if (existingTask != null) {

@@ -35,7 +35,10 @@ class TaskDetailFragment : Fragment() {
 
     private val commentsAdapter = CommentsAdapter()
     private val historyAdapter = HistoryAdapter()
-    private val attachmentAdapter = AttachmentAdapter()
+    private val attachmentAdapter = AttachmentAdapter { attachment ->
+        ImageAttachmentDialogFragment.newInstance(attachment.url)
+            .show(childFragmentManager, "image_attachment")
+    }
     private val subtaskAdapter = SubtaskToggleAdapter { subtask, isDone ->
         viewModel.toggleSubtask(subtask.id, isDone)
     }

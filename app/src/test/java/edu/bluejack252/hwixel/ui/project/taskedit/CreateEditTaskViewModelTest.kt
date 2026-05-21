@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import edu.bluejack252.hwixel.MainDispatcherRule
+import edu.bluejack252.hwixel.data.model.Attachment
 import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
@@ -59,6 +60,7 @@ class CreateEditTaskViewModelTest {
             assigneeIds = emptyList(),
             priority = "medium",
             subtasksInput = listOf(Subtask(id = "s-real", title = "Draft", isDone = true)),
+            attachmentsInput = emptyList(),
             actorId = "u1"
         )
 
@@ -66,6 +68,37 @@ class CreateEditTaskViewModelTest {
         assertEquals(true, subtask?.isDone)
         assertEquals("s-real", subtask?.id)
         assertEquals("u1", taskRepository.updatedActorId)
+    }
+
+    @Test
+    fun editPreservesProvidedAttachments() = runTest {
+        val attachment = Attachment(
+            id = "a-real",
+            label = "Design",
+            url = "https://example.com/design.png",
+            type = "image"
+        )
+        projectLiveData.value = Project(id = "p1")
+        usersLiveData.value = emptyList()
+        taskLiveData.value = Task(
+            id = "t1",
+            projectId = "p1",
+            title = "Old",
+            attachments = listOf(attachment)
+        )
+
+        viewModel.saveTask(
+            title = "Updated",
+            description = "",
+            deadline = 0L,
+            assigneeIds = emptyList(),
+            priority = "medium",
+            subtasksInput = emptyList(),
+            attachmentsInput = listOf(attachment),
+            actorId = "u1"
+        )
+
+        assertEquals(listOf(attachment), taskRepository.updatedTask?.attachments)
     }
 
     private class FakeTaskRepository(private val task: LiveData<Task?>) : TaskRepository {

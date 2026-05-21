@@ -170,6 +170,17 @@
     <string name="task_detail_status_label">Status</string>
     <string name="task_detail_attachments_label">Attachments</string>
     <string name="task_detail_no_attachments">No attachments.</string>
+    <string name="add_attachment_button">+ Add Attachment</string>
+    <string name="add_attachment_title">Add Attachment</string>
+    <string name="attachment_label_hint">Label</string>
+    <string name="attachment_url_hint">Attachment URL</string>
+    <string name="attachment_type_label">Type</string>
+    <string name="attachment_type_pdf">PDF</string>
+    <string name="attachment_type_image">Image</string>
+    <string name="attachment_type_link">Link</string>
+    <string name="attachment_image_preview">Image attachment preview</string>
+    <string name="error_empty_attachment_label">Attachment label is required.</string>
+    <string name="error_invalid_attachment_url">Enter a valid HTTP or HTTPS attachment URL.</string>
     <string name="task_detail_comments_label">Comments</string>
     <string name="task_detail_no_comments">No comments yet.</string>
     <string name="task_detail_history_label">Activity History</string>

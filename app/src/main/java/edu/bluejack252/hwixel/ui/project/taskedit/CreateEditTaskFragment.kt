@@ -1,6 +1,7 @@
 package edu.bluejack252.hwixel.ui.project.taskedit
 
 import android.os.Bundle
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,18 +12,24 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
+import edu.bluejack252.hwixel.data.model.Attachment
 import edu.bluejack252.hwixel.data.model.Subtask
 import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.databinding.FragmentCreateEditTaskBinding
 import edu.bluejack252.hwixel.databinding.ItemSubtaskRowBinding
 import edu.bluejack252.hwixel.util.constants.Constants
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.Calendar
+import java.util.UUID
 
 class CreateEditTaskFragment : Fragment() {
 
@@ -36,8 +43,13 @@ class CreateEditTaskFragment : Fragment() {
     private var selectedHour: Int = 23
     private var selectedMinute: Int = 59
     private var selectedAssigneeIds: MutableList<String> = mutableListOf()
+    private val pendingAttachments = mutableListOf<Attachment>()
     private var availableMembers: List<MemberOption> = emptyList()
     private val subtaskViews = mutableListOf<ItemSubtaskRowBinding>()
+    private val attachmentAdapter = EditableAttachmentAdapter { attachment ->
+        pendingAttachments.removeAll { it.id == attachment.id && it.url == attachment.url }
+        renderAttachments()
+    }
 
     private val viewModel: CreateEditTaskViewModel by viewModels {
         CreateEditTaskViewModelFactory(
@@ -63,7 +75,13 @@ class CreateEditTaskFragment : Fragment() {
         binding.deadlineTimeButton.setOnClickListener { showTimeInputDialog() }
         binding.assigneesButton.setOnClickListener { showAssigneeDialog() }
         binding.addSubtaskButton.setOnClickListener { addSubtaskRow() }
+        binding.addAttachmentButton.setOnClickListener { showAddAttachmentDialog() }
         binding.saveTaskButton.setOnClickListener { save() }
+        binding.editAttachmentsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            adapter = attachmentAdapter
+        }
+        renderAttachments()
 
         viewModel.uiState.observe(viewLifecycleOwner) { state ->
             when (state) {
@@ -104,6 +122,9 @@ class CreateEditTaskFragment : Fragment() {
 
         selectedAssigneeIds = task.assignees.toMutableList()
         updateAssigneesLabel()
+        pendingAttachments.clear()
+        pendingAttachments.addAll(task.attachments)
+        renderAttachments()
 
         val priorityBtnId = when (task.priority) {
             Constants.PRIORITY_LOW -> binding.lowPriorityButton.id
@@ -225,6 +246,66 @@ class CreateEditTaskFragment : Fragment() {
         subtaskViews.add(rowBinding)
     }
 
+    private fun showAddAttachmentDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_attachment, null)
+        val labelLayout = dialogView.findViewById<TextInputLayout>(R.id.attachmentLabelInputLayout)
+        val urlLayout = dialogView.findViewById<TextInputLayout>(R.id.attachmentUrlInputLayout)
+        val labelEditText = dialogView.findViewById<TextInputEditText>(R.id.attachmentLabelEditText)
+        val urlEditText = dialogView.findViewById<TextInputEditText>(R.id.attachmentUrlEditText)
+        val typeGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.attachmentTypeRadioGroup)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle(R.string.add_attachment_title)
+            .setView(dialogView)
+            .setPositiveButton(R.string.btn_ok, null)
+            .setNegativeButton(R.string.btn_cancel, null)
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val label = labelEditText.text?.toString().orEmpty().trim()
+                val url = urlEditText.text?.toString().orEmpty().trim()
+                labelLayout.error = null
+                urlLayout.error = null
+                if (label.isBlank()) {
+                    labelLayout.error = getString(R.string.error_empty_attachment_label)
+                    return@setOnClickListener
+                }
+                if (!isValidHttpUrl(url)) {
+                    urlLayout.error = getString(R.string.error_invalid_attachment_url)
+                    return@setOnClickListener
+                }
+                val type = when (typeGroup.checkedRadioButtonId) {
+                    R.id.radioAttachmentPdf -> TYPE_PDF
+                    R.id.radioAttachmentImage -> TYPE_IMAGE
+                    else -> TYPE_LINK
+                }
+                pendingAttachments.add(
+                    Attachment(
+                        id = "a-${UUID.randomUUID()}",
+                        label = label,
+                        url = url,
+                        type = type
+                    )
+                )
+                renderAttachments()
+                dialog.dismiss()
+            }
+        }
+        dialog.show()
+    }
+
+    private fun renderAttachments() {
+        attachmentAdapter.submitList(pendingAttachments.toList())
+        binding.emptyAttachmentsTextView.isVisible = pendingAttachments.isEmpty()
+        binding.editAttachmentsRecyclerView.isVisible = pendingAttachments.isNotEmpty()
+    }
+
+    private fun isValidHttpUrl(url: String): Boolean {
+        val uri = runCatching { Uri.parse(url) }.getOrNull()
+        return uri?.scheme in setOf("http", "https") && !uri?.host.isNullOrBlank()
+    }
+
     private fun save() {
         val title = binding.taskTitleInputLayout.editText?.text?.toString().orEmpty().trim()
         if (title.isBlank()) {
@@ -256,6 +337,7 @@ class CreateEditTaskFragment : Fragment() {
             assigneeIds = selectedAssigneeIds.toList(),
             priority = priority,
             subtasksInput = subtasks,
+            attachmentsInput = pendingAttachments.toList(),
             actorId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
         )
     }
@@ -263,5 +345,11 @@ class CreateEditTaskFragment : Fragment() {
     override fun onDestroyView() {
         _binding = null
         super.onDestroyView()
+    }
+
+    private companion object {
+        const val TYPE_PDF = "pdf"
+        const val TYPE_IMAGE = "image"
+        const val TYPE_LINK = "link"
     }
 }

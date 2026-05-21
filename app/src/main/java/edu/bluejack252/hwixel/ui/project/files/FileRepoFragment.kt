@@ -22,9 +22,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.chip.ChipGroup
 import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.data.model.FileLink
+import com.google.android.material.snackbar.BaseTransientBottomBar
 
 class FileRepoFragment : Fragment() {
 
@@ -39,6 +41,8 @@ class FileRepoFragment : Fragment() {
 
     private lateinit var filesAdapter: FileCardAdapter
     private lateinit var historyAdapter: FileCardAdapter
+    private var visibleFiles: List<FileLink> = emptyList()
+    private var pendingDeleteFile: FileLink? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,7 +60,7 @@ class FileRepoFragment : Fragment() {
     private fun setupAdapters(view: View) {
         filesAdapter = FileCardAdapter(
             onOpen = { openLink(it) },
-            onDelete = { viewModel.deleteFile(it.id) },
+            onDelete = { showDeleteUndo(view, it) },
             showDelete = true
         )
         view.findViewById<RecyclerView>(R.id.filesRecyclerView).apply {
@@ -90,7 +94,7 @@ class FileRepoFragment : Fragment() {
                 val position = viewHolder.bindingAdapterPosition
                 if (position == RecyclerView.NO_POSITION) return
                 val file = filesAdapter.currentList[position]
-                viewModel.deleteFile(file.id)
+                showDeleteUndo(recyclerView, file)
             }
 
             override fun onChildDraw(
@@ -119,6 +123,16 @@ class FileRepoFragment : Fragment() {
             }
             sheet.show(childFragmentManager, "add_link")
         }
+        view.findViewById<ChipGroup>(R.id.fileTypeFilterGroup).setOnCheckedStateChangeListener { _, checkedIds ->
+            viewModel.setTypeFilter(
+                when (checkedIds.firstOrNull()) {
+                    R.id.filterDriveFilesChip -> "drive"
+                    R.id.filterGithubFilesChip -> "github"
+                    R.id.filterOtherFilesChip -> "other"
+                    else -> null
+                }
+            )
+        }
     }
 
     private fun observeViewModel(view: View) {
@@ -127,9 +141,10 @@ class FileRepoFragment : Fragment() {
         val emptyHistory = view.findViewById<TextView>(R.id.emptyVersionHistoryTextView)
         val historySection = view.findViewById<LinearLayout>(R.id.versionHistorySection)
 
-        viewModel.files.observe(viewLifecycleOwner) { files ->
-            filesAdapter.submitList(files)
-            emptyFiles.isVisible = files.isEmpty()
+        viewModel.filteredFiles.observe(viewLifecycleOwner) { files ->
+            visibleFiles = files
+            submitVisibleFiles()
+            emptyFiles.isVisible = visibleFiles.isEmpty() && pendingDeleteFile == null
         }
 
         viewModel.versionHistory.observe(viewLifecycleOwner) { history ->
@@ -176,5 +191,33 @@ class FileRepoFragment : Fragment() {
         } catch (e: Exception) {
             startActivity(Intent(Intent.ACTION_VIEW, uri))
         }
+    }
+
+    private fun showDeleteUndo(anchor: View, file: FileLink) {
+        pendingDeleteFile = file
+        submitVisibleFiles()
+        Snackbar.make(anchor, getString(R.string.file_delete_pending), Snackbar.LENGTH_LONG)
+            .setAction(R.string.file_delete_undo) {
+                pendingDeleteFile = null
+                submitVisibleFiles()
+            }
+            .addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    val pending = pendingDeleteFile ?: return
+                    pendingDeleteFile = null
+                    submitVisibleFiles()
+                    if (event != DISMISS_EVENT_ACTION) {
+                        viewModel.deleteFile(pending.id)
+                    }
+                }
+            })
+            .show()
+    }
+
+    private fun submitVisibleFiles() {
+        val pendingId = pendingDeleteFile?.id
+        filesAdapter.submitList(
+            visibleFiles.filterNot { file -> file.id == pendingId }
+        )
     }
 }

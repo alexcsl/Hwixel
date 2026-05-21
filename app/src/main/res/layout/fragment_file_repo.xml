@@ -90,6 +90,44 @@
                 android:text="@string/file_shared_links_label"
                 android:textAppearance="@style/TextAppearance.HWiXeL.SectionHeader" />
 
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/fileTypeFilterGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:singleSelection="true"
+                app:selectionRequired="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/filterAllFilesChip"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/file_type_all" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/filterDriveFilesChip"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/file_type_drive" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/filterGithubFilesChip"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/file_type_github" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/filterOtherFilesChip"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/file_type_other" />
+            </com.google.android.material.chip.ChipGroup>
+
             <TextView
                 android:id="@+id/emptyFilesTextView"
                 android:layout_width="match_parent"

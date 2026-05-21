@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import edu.bluejack252.hwixel.data.model.FileLink
 import edu.bluejack252.hwixel.data.repository.FileRepository
@@ -25,15 +24,16 @@ class FileRepoViewModel(
     private val _filteredFiles = MediatorLiveData<List<FileLink>>()
     val filteredFiles: LiveData<List<FileLink>> = _filteredFiles
 
-    val versionHistory: LiveData<List<FileLink>> = files.map { list ->
-        list.filter { it.versionNotes.isNotBlank() }
-            .sortedWith(compareBy<FileLink> { it.createdAt.takeIf { createdAt -> createdAt > 0L } ?: Long.MAX_VALUE }.thenBy { it.id })
-    }
+    private val _versionHistory = MediatorLiveData<List<FileLink>>()
+    val versionHistory: LiveData<List<FileLink>> = _versionHistory
 
     init {
         _filteredFiles.value = emptyList()
+        _versionHistory.value = emptyList()
         _filteredFiles.addSource(files) { publishFilteredFiles() }
         _filteredFiles.addSource(selectedType) { publishFilteredFiles() }
+        _versionHistory.addSource(files) { publishVersionHistory() }
+        _versionHistory.addSource(selectedType) { publishVersionHistory() }
     }
 
     private fun publishFilteredFiles() {
@@ -46,13 +46,31 @@ class FileRepoViewModel(
         }
     }
 
+    private fun publishVersionHistory() {
+        val type = selectedType.value
+        val list = files.value.orEmpty()
+            .filter { it.versionNotes.isNotBlank() }
+            .let { history ->
+                if (type.isNullOrBlank()) {
+                    history
+                } else {
+                    history.filter { it.type.equals(type, ignoreCase = true) }
+                }
+            }
+        _versionHistory.value = list.sortedWith(
+            compareBy<FileLink> {
+                it.createdAt.takeIf { createdAt -> createdAt > 0L } ?: Long.MAX_VALUE
+            }.thenBy { it.id }
+        )
+    }
+
     fun addFile(label: String, url: String, type: String, versionNotes: String) {
         if (label.isBlank() || url.isBlank()) {
             _uiState.value = FileRepoUiState.Error("empty_fields")
             return
         }
         val parsedUrl = runCatching { URI(url.trim()) }.getOrNull()
-        if (parsedUrl?.scheme !in setOf("http", "https")) {
+        if (parsedUrl?.scheme !in setOf("http", "https") || parsedUrl?.host.isNullOrBlank()) {
             _uiState.value = FileRepoUiState.Error("invalid_url")
             return
         }

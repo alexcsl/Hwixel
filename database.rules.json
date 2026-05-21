@@ -58,7 +58,10 @@
     "files": {
       "$projectId": {
         ".read": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()",
-        ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()"
+        ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()",
+        "$fileId": {
+          ".write": "auth != null && root.child('projects').child($projectId).child('members').child(auth.uid).exists()"
+        }
       }
     },
     "peerRatings": {

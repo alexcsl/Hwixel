@@ -8,7 +8,9 @@ import android.widget.RadioGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import edu.bluejack252.hwixel.R
+import java.net.URI
 
 class AddLinkBottomSheet : BottomSheetDialogFragment() {
 
@@ -23,6 +25,8 @@ class AddLinkBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val labelInput = view.findViewById<TextInputEditText>(R.id.linkLabelEditText)
         val urlInput = view.findViewById<TextInputEditText>(R.id.linkUrlEditText)
+        val labelLayout = view.findViewById<TextInputLayout>(R.id.linkLabelInputLayout)
+        val urlLayout = view.findViewById<TextInputLayout>(R.id.linkUrlInputLayout)
         val typeGroup = view.findViewById<RadioGroup>(R.id.linkTypeRadioGroup)
         val notesInput = view.findViewById<TextInputEditText>(R.id.linkVersionNotesEditText)
         val saveButton = view.findViewById<MaterialButton>(R.id.saveLinkButton)
@@ -31,6 +35,16 @@ class AddLinkBottomSheet : BottomSheetDialogFragment() {
         saveButton.setOnClickListener {
             val label = labelInput.text?.toString().orEmpty().trim()
             val url = urlInput.text?.toString().orEmpty().trim()
+            labelLayout.error = null
+            urlLayout.error = null
+            if (label.isBlank()) {
+                labelLayout.error = getString(R.string.file_error_empty_fields)
+                return@setOnClickListener
+            }
+            if (!isValidHttpUrl(url)) {
+                urlLayout.error = getString(R.string.file_error_invalid_url)
+                return@setOnClickListener
+            }
             val type = when (typeGroup.checkedRadioButtonId) {
                 R.id.radioTypeDrive -> "drive"
                 R.id.radioTypeGithub -> "github"
@@ -42,5 +56,10 @@ class AddLinkBottomSheet : BottomSheetDialogFragment() {
         }
 
         cancelButton.setOnClickListener { dismiss() }
+    }
+
+    private fun isValidHttpUrl(url: String): Boolean {
+        val parsed = runCatching { URI(url) }.getOrNull()
+        return parsed?.scheme in setOf("http", "https") && !parsed?.host.isNullOrBlank()
     }
 }

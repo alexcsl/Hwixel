@@ -115,6 +115,27 @@ class FileRepoViewModelTest {
         assertEquals(listOf("older", "newer"), viewModel.versionHistory.value.orEmpty().map { it.id })
     }
 
+    @Test
+    fun versionHistoryFollowsSelectedTypeFilter() {
+        repository.files.value = listOf(
+            file(id = "drive-v1", type = "drive", versionNotes = "drive notes", createdAt = 10L),
+            file(id = "github-v1", type = "github", versionNotes = "github notes", createdAt = 20L),
+            file(id = "github-current", type = "github")
+        )
+
+        viewModel.setTypeFilter("drive")
+
+        assertEquals(listOf("drive-v1"), viewModel.versionHistory.value.orEmpty().map { it.id })
+
+        viewModel.setTypeFilter("github")
+
+        assertEquals(listOf("github-v1"), viewModel.versionHistory.value.orEmpty().map { it.id })
+
+        viewModel.setTypeFilter(null)
+
+        assertEquals(listOf("drive-v1", "github-v1"), viewModel.versionHistory.value.orEmpty().map { it.id })
+    }
+
     private fun <T> observe(liveData: LiveData<T>) {
         @Suppress("UNCHECKED_CAST")
         val observer = Observer<T> {} as Observer<Any>

@@ -247,6 +247,26 @@ class AttendanceFragment : Fragment() {
         picker.show(childFragmentManager, "session_date_picker")
     }
 
+    private fun showTimePicker(dateMs: Long, onTimeSelected: (Long) -> Unit) {
+        val initial = Calendar.getInstance()
+        TimePickerDialog(
+            requireContext(),
+            { _, hourOfDay, minute ->
+                val selected = Calendar.getInstance().apply {
+                    timeInMillis = dateMs
+                    set(Calendar.HOUR_OF_DAY, hourOfDay)
+                    set(Calendar.MINUTE, minute)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                onTimeSelected(selected.timeInMillis)
+            },
+            initial.get(Calendar.HOUR_OF_DAY),
+            initial.get(Calendar.MINUTE),
+            true
+        ).show()
+    }
+
     private fun showNextSessionPicker(sessionDate: Long) {
         val picker = MaterialDatePicker.Builder.datePicker()
             .setTitleText(getString(R.string.attendance_dialog_set_next_date))

@@ -90,4 +90,15 @@ object ServiceLocator {
             firebaseSource = FileFirebaseSource()
         ).also { fileRepository = it }
     }
+
+    fun reset() {
+        authRepository = null
+        userRepository = null
+        projectRepository = null
+        taskRepository = null
+        teamHealthRepository = null
+        attendanceRepository = null
+        evalRepository = null
+        fileRepository = null
+    }
 }

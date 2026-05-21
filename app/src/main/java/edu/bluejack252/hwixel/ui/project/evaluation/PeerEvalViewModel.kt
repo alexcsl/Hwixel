@@ -21,9 +21,6 @@ class PeerEvalViewModel(
     private val _uiState = MutableLiveData<PeerEvalUiState>(PeerEvalUiState.Idle)
     val uiState: LiveData<PeerEvalUiState> = _uiState
 
-    private val _periods = MutableLiveData<List<String>>(emptyList())
-    val periods: LiveData<List<String>> = _periods
-
     private val _isPeriodOpen = MutableLiveData<Boolean>(false)
     val isPeriodOpen: LiveData<Boolean> = _isPeriodOpen
 
@@ -43,14 +40,16 @@ class PeerEvalViewModel(
         private set
 
     private val periodsMediator = MediatorLiveData<List<String>>()
+    val periods: LiveData<List<String>> = periodsMediator
     private val periodsSource = repository.observePeriods(projectId)
     private var periodOpenSource: LiveData<Boolean>? = null
     private var submittedSource: LiveData<Map<String, EvaluationSubmission>>? = null
     private var receivedSource: LiveData<List<EvaluationSubmission>>? = null
 
     init {
+        periodsMediator.value = emptyList()
         periodsMediator.addSource(periodsSource) { ids ->
-            _periods.value = ids
+            periodsMediator.value = ids
             val latest = ids.lastOrNull()
             if (latest != null && latest != activePeriodId) {
                 activePeriodId = latest

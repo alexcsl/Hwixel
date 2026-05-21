@@ -27,9 +27,9 @@ class CommentsAdapter : ListAdapter<CommentUi, CommentsAdapter.CommentViewHolder
     ) : RecyclerView.ViewHolder(binding.root) {
         private val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
 
-        fun bind(comment: Comment) {
-            binding.authorInitialTextView.text = comment.authorId.firstOrNull()?.uppercase() ?: "?"
-            binding.authorNameTextView.text = comment.authorId
+        fun bind(comment: CommentUi) {
+            binding.authorInitialTextView.text = comment.authorName.firstOrNull()?.uppercase() ?: "?"
+            binding.authorNameTextView.text = comment.authorName
             binding.commentTextView.text = comment.content
             binding.timestampTextView.text = dateFormat.format(Date(comment.timestamp))
         }

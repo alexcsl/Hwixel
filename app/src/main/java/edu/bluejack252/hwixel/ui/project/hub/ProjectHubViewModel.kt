@@ -108,4 +108,8 @@ class ProjectHubViewModel(
         val roles = ids.map { id -> project.members[id]?.role ?: "" }
         return Triple(ids.toTypedArray(), names.toTypedArray(), roles.toTypedArray())
     }
+
+    private companion object {
+        const val UNKNOWN_MEMBER_NAME = "Unknown member"
+    }
 }

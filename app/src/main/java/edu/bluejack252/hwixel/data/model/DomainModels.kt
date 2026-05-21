@@ -105,7 +105,8 @@ data class FileLink(
     val label: String = "",
     val url: String = "",
     val type: String = "",
-    val versionNotes: String = ""
+    val versionNotes: String = "",
+    val createdAt: Long = 0L
 )
 
 data class Notification(

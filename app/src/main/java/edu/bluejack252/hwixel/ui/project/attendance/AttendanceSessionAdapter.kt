@@ -16,6 +16,11 @@ import java.util.Locale
 class AttendanceSessionAdapter(
     private val onSessionClick: (AttendanceSession) -> Unit
 ) : ListAdapter<AttendanceSession, AttendanceSessionAdapter.ViewHolder>(DiffCallback) {
+    var totalMemberCount: Int = 0
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
     companion object DiffCallback : DiffUtil.ItemCallback<AttendanceSession>() {
         override fun areItemsTheSame(a: AttendanceSession, b: AttendanceSession) = a.id == b.id
@@ -30,11 +35,10 @@ class AttendanceSessionAdapter(
             val fmt = SimpleDateFormat("EEEE, d MMM yyyy", Locale.getDefault())
             dateView.text = fmt.format(Date(session.date))
             val presentCount = session.records.values.count { it }
-            val totalCount = session.records.size
             summaryView.text = itemView.context.getString(
                 R.string.attendance_session_summary_format,
                 presentCount,
-                totalCount
+                totalMemberCount
             )
             itemView.setOnClickListener { onSessionClick(session) }
         }

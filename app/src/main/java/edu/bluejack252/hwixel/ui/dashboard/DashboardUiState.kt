@@ -3,7 +3,8 @@ package edu.bluejack252.hwixel.ui.dashboard
 data class DashboardUiState(
     val projects: List<DashboardProjectUi> = emptyList(),
     val deadlines: List<DashboardDeadlineUi> = emptyList(),
-    val pendingTaskCount: Int = 0
+    val pendingTaskCount: Int = 0,
+    val isLoading: Boolean = true
 )
 
 data class DashboardProjectUi(

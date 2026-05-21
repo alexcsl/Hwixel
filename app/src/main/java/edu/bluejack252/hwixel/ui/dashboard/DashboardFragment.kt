@@ -2,6 +2,7 @@ package edu.bluejack252.hwixel.ui.dashboard
 
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -62,14 +63,23 @@ class DashboardFragment : Fragment() {
         viewModel.uiState.observe(viewLifecycleOwner, ::render)
         viewModel.createProjectResult.observe(viewLifecycleOwner) { result ->
             result ?: return@observe
-            val message = if (result.isSuccess) R.string.project_created else R.string.project_create_failed
-            Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+            if (result.isSuccess) {
+                Snackbar.make(binding.root, R.string.project_created, Snackbar.LENGTH_SHORT).show()
+            } else {
+                Log.e(TAG, "Failed to create project", result.exceptionOrNull())
+                val message = result.exceptionOrNull()?.localizedMessage
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { getString(R.string.project_create_failed_format, it) }
+                    ?: getString(R.string.project_create_failed)
+                Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
+            }
             viewModel.consumeCreateResult()
         }
         viewModel.loadDashboard(FirebaseAuth.getInstance().currentUser?.uid.orEmpty())
     }
 
     private fun render(state: DashboardUiState) {
+        binding.loadingIndicator.isVisible = state.isLoading
         projectAdapter.submitList(state.projects)
         deadlineAdapter.submitList(state.deadlines)
         binding.pendingTasksTextView.text = resources.getQuantityString(
@@ -77,8 +87,9 @@ class DashboardFragment : Fragment() {
             state.pendingTaskCount,
             state.pendingTaskCount
         )
-        binding.emptyProjectsTextView.isVisible = state.projects.isEmpty()
-        binding.emptyDeadlinesTextView.isVisible = state.deadlines.isEmpty()
+        binding.activeProjectsStatTextView.text = state.projects.size.toString()
+        binding.emptyProjectsTextView.isVisible = !state.isLoading && state.projects.isEmpty()
+        binding.emptyDeadlinesTextView.isVisible = !state.isLoading && state.deadlines.isEmpty()
     }
 
     private fun showCreateProjectDialog() {
@@ -118,5 +129,9 @@ class DashboardFragment : Fragment() {
     override fun onDestroyView() {
         _binding = null
         super.onDestroyView()
+    }
+
+    private companion object {
+        const val TAG = "DashboardFragment"
     }
 }

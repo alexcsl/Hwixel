@@ -12,6 +12,9 @@ interface ProjectDao {
     @Query("SELECT * FROM projects")
     fun observeAll(): LiveData<List<ProjectEntity>>
 
+    @Query("SELECT * FROM projects WHERE id = :id LIMIT 1")
+    suspend fun getById(id: String): ProjectEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(project: ProjectEntity)
 

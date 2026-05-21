@@ -8,11 +8,11 @@ import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.FileLink
 import kotlinx.coroutines.tasks.await
 
-class FileFirebaseSource {
+class FileFirebaseSource : FileRemoteSource {
 
     private val db = FirebaseDatabase.getInstance().reference
 
-    fun observeFiles(projectId: String): LiveData<List<FileLink>> {
+    override fun observeFiles(projectId: String): LiveData<List<FileLink>> {
         return object : LiveData<List<FileLink>>() {
             private val ref = db.child("files").child(projectId)
             private var listener: ValueEventListener? = null
@@ -26,13 +26,15 @@ class FileFirebaseSource {
                             val url = child.child("url").getValue(String::class.java) ?: return@mapNotNull null
                             val type = child.child("type").getValue(String::class.java) ?: "other"
                             val versionNotes = child.child("versionNotes").getValue(String::class.java) ?: ""
+                            val createdAt = child.child("createdAt").getValue(Long::class.java) ?: 0L
                             FileLink(
                                 id = child.key ?: "",
                                 projectId = projectId,
                                 label = label,
                                 url = url,
                                 type = type,
-                                versionNotes = versionNotes
+                                versionNotes = versionNotes,
+                                createdAt = createdAt
                             )
                         }
                         postValue(files)
@@ -51,14 +53,15 @@ class FileFirebaseSource {
         }
     }
 
-    suspend fun addFile(projectId: String, file: FileLink): Result<Unit> {
+    override suspend fun addFile(projectId: String, file: FileLink): Result<Unit> {
         return try {
             val ref = db.child("files").child(projectId).push()
             val data = mapOf(
                 "label" to file.label,
                 "url" to file.url,
                 "type" to file.type,
-                "versionNotes" to file.versionNotes
+                "versionNotes" to file.versionNotes,
+                "createdAt" to file.createdAt
             )
             ref.setValue(data).await()
             Result.success(Unit)
@@ -67,7 +70,7 @@ class FileFirebaseSource {
         }
     }
 
-    suspend fun deleteFile(projectId: String, fileId: String): Result<Unit> {
+    override suspend fun deleteFile(projectId: String, fileId: String): Result<Unit> {
         return try {
             db.child("files").child(projectId).child(fileId).removeValue().await()
             Result.success(Unit)

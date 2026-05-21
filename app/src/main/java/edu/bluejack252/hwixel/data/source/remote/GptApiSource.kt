@@ -52,23 +52,7 @@ class GptApiSource(
 
     internal fun parseResponse(body: String): TeamHealthResult {
         return try {
-            val assistantText = JSONObject(body)
-                .getJSONArray("output")
-                .getJSONObject(0)
-                .getJSONArray("content")
-                .getJSONObject(0)
-                .getString("text")
-
-            val parsed = JSONObject(assistantText)
-            val recommendations = parsed.optJSONArray("recommendations")
-                ?.toStringList()
-                .orEmpty()
-
-            TeamHealthResult(
-                status = parsed.getString("status"),
-                summary = parsed.getString("summary"),
-                recommendations = recommendations
-            )
+            parseTeamHealthJson(extractAssistantText(JSONObject(body)))
         } catch (exception: JSONException) {
             throw exception
         } catch (exception: RuntimeException) {
@@ -83,11 +67,63 @@ class GptApiSource(
         return (0 until length()).map { index -> getString(index) }
     }
 
+    private fun extractAssistantText(response: JSONObject): String {
+        response.optString("output_text").takeIf { it.isNotBlank() }?.let { return it }
+        response.optJSONArray("choices")?.let { choices ->
+            for (i in 0 until choices.length()) {
+                val choice = choices.optJSONObject(i) ?: continue
+                choice.optJSONObject("message")
+                    ?.optString("content")
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { return it }
+                choice.optString("text").takeIf { it.isNotBlank() }?.let { return it }
+            }
+        }
+        val output = response.getJSONArray("output")
+        for (i in 0 until output.length()) {
+            val item = output.optJSONObject(i) ?: continue
+            val content = item.optJSONArray("content") ?: continue
+            for (j in 0 until content.length()) {
+                val contentItem = content.optJSONObject(j) ?: continue
+                contentItem.optString("text").takeIf { it.isNotBlank() }?.let { return it }
+                contentItem.optString("output_text").takeIf { it.isNotBlank() }?.let { return it }
+            }
+        }
+        error("Missing GPT assistant text.")
+    }
+
+    private fun parseTeamHealthJson(text: String): TeamHealthResult {
+        val parsed = JSONObject(extractJsonObject(text))
+        val recommendations = parsed.optJSONArray("recommendations")
+            ?.toStringList()
+            .orEmpty()
+        return TeamHealthResult(
+            status = parsed.getString("status"),
+            summary = parsed.getString("summary"),
+            recommendations = recommendations
+        )
+    }
+
+    private fun extractJsonObject(text: String): String {
+        val trimmed = text.trim()
+        if (trimmed.startsWith("{") && trimmed.endsWith("}")) return trimmed
+        val start = trimmed.indexOf('{')
+        val end = trimmed.lastIndexOf('}')
+        require(start >= 0 && end > start) { "Missing JSON object in GPT response." }
+        return trimmed.substring(start, end + 1)
+    }
+
     private fun parseResponseFallback(body: String): TeamHealthResult {
-        val assistantText = Regex(
-            """"text"\s*:\s*"((?:\\.|[^"])*)"""",
-            RegexOption.DOT_MATCHES_ALL
-        ).find(body)?.groupValues?.get(1)?.unescapeJsonString()
+        val assistantText = listOf(
+            """"output_text"\s*:\s*"((?:\\.|[^"])*)"""",
+            """"text"\s*:\s*"((?:\\.|[^"])*)""""
+        ).firstNotNullOfOrNull { pattern ->
+            Regex(pattern, RegexOption.DOT_MATCHES_ALL)
+                .find(body)
+                ?.groupValues
+                ?.get(1)
+                ?.unescapeJsonString()
+        }
             ?: error("Malformed GPT response.")
 
         val status = Regex(""""status"\s*:\s*"([^"]+)"""")

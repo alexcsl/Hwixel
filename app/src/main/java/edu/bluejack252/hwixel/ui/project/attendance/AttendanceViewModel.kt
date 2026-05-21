@@ -2,9 +2,9 @@ package edu.bluejack252.hwixel.ui.project.attendance
 
 import android.content.Context
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
@@ -29,7 +29,7 @@ class AttendanceViewModel(
     private val _uiState = MutableLiveData<AttendanceUiState>(AttendanceUiState.Idle)
     val uiState: LiveData<AttendanceUiState> = _uiState
 
-    private val _sessions = MutableLiveData<List<AttendanceSession>>()
+    private val _sessions = MediatorLiveData<List<AttendanceSession>>()
     val sessions: LiveData<List<AttendanceSession>> = _sessions
 
     private var selectedSession: AttendanceSession? = null
@@ -38,11 +38,19 @@ class AttendanceViewModel(
     private var currentUserRole: String = ""
 
     private val sessionSource = repository.observeSessions(projectId)
-    private val sessionsMediator = MediatorLiveData<List<AttendanceSession>>()
 
     init {
-        sessionsMediator.addSource(sessionSource) { list ->
+        _sessions.addSource(sessionSource) { list ->
             _sessions.value = list
+            selectedSession?.let { selected ->
+                val updated = list.firstOrNull { it.id == selected.id }
+                if (updated != null) {
+                    selectedSession = updated
+                    publishSelectedSession()
+                } else {
+                    clearSelectedSession()
+                }
+            }
         }
     }
 
@@ -50,10 +58,29 @@ class AttendanceViewModel(
         projectMembers = members
         memberNames = names
         currentUserRole = currentRole
+        selectedSession?.let { publishSelectedSession() }
     }
 
     fun selectSession(session: AttendanceSession) {
         selectedSession = session
+        publishSelectedSession()
+    }
+
+    fun toggleSessionSelection(session: AttendanceSession) {
+        if (selectedSession?.id == session.id) {
+            clearSelectedSession()
+        } else {
+            selectSession(session)
+        }
+    }
+
+    private fun clearSelectedSession() {
+        selectedSession = null
+        _uiState.value = AttendanceUiState.Idle
+    }
+
+    private fun publishSelectedSession() {
+        val session = selectedSession ?: return
         val attendance = buildMemberAttendanceMap(session)
         _uiState.value = AttendanceUiState.SessionSelected(
             session = session,
@@ -78,15 +105,24 @@ class AttendanceViewModel(
             _uiState.value = AttendanceUiState.Error("lead_only")
             return
         }
+        val previousSession = selectedSession
+        selectedSession = selectedSession?.takeIf { it.id == sessionId }?.copy(
+            records = selectedSession?.records.orEmpty() + (userId to present)
+        )
+        publishSelectedSession()
         viewModelScope.launch {
             repository.markAttendance(projectId, sessionId, userId, present)
-                .onSuccess { _uiState.value = AttendanceUiState.AttendanceSaved }
-                .onFailure { _uiState.value = AttendanceUiState.Error(it.message ?: "") }
+                .onSuccess { publishSelectedSession() }
+                .onFailure {
+                    selectedSession = previousSession
+                    publishSelectedSession()
+                    _uiState.value = AttendanceUiState.Error(it.message ?: "")
+                }
         }
     }
 
     fun scheduleReminder(context: Context, projectName: String, nextSessionDate: Long) {
-        val delayMs = nextSessionDate - System.currentTimeMillis()
+        val delayMs = computeReminderDelayMs(System.currentTimeMillis(), nextSessionDate)
         if (delayMs <= 0) return
 
         val dateStr = SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault())
@@ -109,6 +145,10 @@ class AttendanceViewModel(
             request
         )
         _uiState.value = AttendanceUiState.ReminderSet
+    }
+
+    fun computeReminderDelayMs(now: Long, nextSessionDate: Long): Long {
+        return nextSessionDate - now
     }
 
     fun computeMemberAttendancePercentage(sessions: List<AttendanceSession>, userId: String): Float {
@@ -152,6 +192,6 @@ class AttendanceViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        sessionsMediator.removeSource(sessionSource)
+        _sessions.removeSource(sessionSource)
     }
 }

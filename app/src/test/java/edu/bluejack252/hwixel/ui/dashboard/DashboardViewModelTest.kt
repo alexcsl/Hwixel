@@ -28,32 +28,56 @@ class DashboardViewModelTest {
 
     @Test
     fun deadlinesAreSortedAscendingAndLimitedToFive() {
-        val projects = listOf(Project(id = "p1", name = "Mobile"), Project(id = "p2", name = "Backend"))
+        val projects = listOf(
+            Project(id = "p1", name = "Mobile", members = mapOf("u1" to ProjectMember("u1", status = Constants.MEMBER_STATUS_ACTIVE))),
+            Project(id = "p2", name = "Backend", members = mapOf("u1" to ProjectMember("u1", status = Constants.MEMBER_STATUS_ACTIVE)))
+        )
         val tasks = listOf(
-            Task(id = "t3", projectId = "p2", title = "Third", deadline = 3_000L),
-            Task(id = "t1", projectId = "p1", title = "First", deadline = 1_000L),
-            Task(id = "t2", projectId = "p1", title = "Second", deadline = 2_000L),
-            Task(id = "t6", projectId = "p1", title = "Sixth", deadline = 6_000L),
-            Task(id = "t5", projectId = "p1", title = "Fifth", deadline = 5_000L),
-            Task(id = "t4", projectId = "p1", title = "Fourth", deadline = 4_000L)
+            Task(id = "t3", projectId = "p2", title = "Third", deadline = 3_000L, assignees = listOf("u1")),
+            Task(id = "t1", projectId = "p1", title = "First", deadline = 1_000L, assignees = listOf("u1")),
+            Task(id = "t2", projectId = "p1", title = "Second", deadline = 2_000L, assignees = listOf("u1")),
+            Task(id = "t6", projectId = "p1", title = "Sixth", deadline = 6_000L, assignees = listOf("u1")),
+            Task(id = "t5", projectId = "p1", title = "Fifth", deadline = 5_000L, assignees = listOf("u1")),
+            Task(id = "t4", projectId = "p1", title = "Fourth", deadline = 4_000L, assignees = listOf("u1"))
         )
 
-        val result = viewModel.buildDeadlineItems(projects, tasks, nowMillis = 0L)
+        val result = viewModel.buildDeadlineItems(projects, tasks, nowMillis = 0L, userId = "u1")
 
         assertEquals(listOf("t1", "t2", "t3", "t4", "t5"), result.map { it.taskId })
         assertEquals("Mobile", result.first().projectName)
     }
 
     @Test
-    fun pendingTasksCountOnlyTodoAndInProgressAssignedToCurrentUser() {
+    fun deadlinesExcludeOtherUsersProjectsAndAssignments() {
+        val projects = listOf(
+            Project(id = "p1", name = "Mine", members = mapOf("new-user" to ProjectMember("new-user", status = Constants.MEMBER_STATUS_ACTIVE))),
+            Project(id = "p2", name = "Other", members = mapOf("other-user" to ProjectMember("other-user", status = Constants.MEMBER_STATUS_ACTIVE)))
+        )
         val tasks = listOf(
-            Task(id = "1", status = Constants.STATUS_TODO, assignees = listOf("u1")),
-            Task(id = "2", status = Constants.STATUS_IN_PROGRESS, assignees = listOf("u1", "u2")),
-            Task(id = "3", status = Constants.STATUS_REVIEW, assignees = listOf("u1")),
-            Task(id = "4", status = Constants.STATUS_TODO, assignees = listOf("u2"))
+            Task(id = "mine", projectId = "p1", deadline = 1_000L, assignees = listOf("new-user")),
+            Task(id = "other-project", projectId = "p2", deadline = 2_000L, assignees = listOf("new-user")),
+            Task(id = "other-assignee", projectId = "p1", deadline = 3_000L, assignees = listOf("other-user"))
         )
 
-        assertEquals(2, viewModel.countPendingTasks(tasks, "u1"))
+        val result = viewModel.buildDeadlineItems(projects, tasks, nowMillis = 0L, userId = "new-user")
+
+        assertEquals(listOf("mine"), result.map { it.taskId })
+    }
+
+    @Test
+    fun pendingTasksCountTodoAndInProgressAssignedToCurrentUserInActiveProjects() {
+        val projects = listOf(
+            Project(id = "p1", members = mapOf("u1" to ProjectMember("u1", status = Constants.MEMBER_STATUS_ACTIVE))),
+            Project(id = "p2", members = mapOf("u2" to ProjectMember("u2", status = Constants.MEMBER_STATUS_ACTIVE)))
+        )
+        val tasks = listOf(
+            Task(id = "1", projectId = "p1", status = Constants.STATUS_TODO, assignees = listOf("u1")),
+            Task(id = "2", projectId = "p1", status = Constants.STATUS_IN_PROGRESS, assignees = listOf("u2")),
+            Task(id = "3", projectId = "p1", status = Constants.STATUS_REVIEW, assignees = listOf("u1")),
+            Task(id = "4", projectId = "p2", status = Constants.STATUS_TODO, assignees = listOf("u1"))
+        )
+
+        assertEquals(1, viewModel.countPendingTasks(projects, tasks, "u1"))
     }
 
     @Test
@@ -81,6 +105,95 @@ class DashboardViewModelTest {
 
         assertEquals("Team Lead", result.single().role)
         assertEquals(75f, result.single().completionPercentage)
+    }
+
+    @Test
+    fun projectItemsIncludeProjectsWhereCurrentUserWasInvited() {
+        val projects = listOf(
+            Project(
+                id = "invited-project",
+                name = "Group Assignment",
+                members = mapOf(
+                    "owner" to ProjectMember(userId = "owner", role = "Team Lead", status = Constants.MEMBER_STATUS_ACTIVE),
+                    "invited-user" to ProjectMember(userId = "invited-user", role = "Other", status = Constants.MEMBER_STATUS_ACTIVE)
+                )
+            )
+        )
+
+        val result = viewModel.buildProjectItems(projects, "invited-user")
+
+        assertEquals(listOf("invited-project"), result.map { it.id })
+        assertEquals("Other", result.single().role)
+    }
+
+    @Test
+    fun projectItemsHideProjectsWhereCurrentUserIsNotMember() {
+        val projects = listOf(
+            Project(id = "other", name = "Zoo", members = mapOf("other-user" to ProjectMember("other-user"))),
+            Project(
+                id = "mine",
+                name = "Alpha",
+                members = mapOf(
+                    "current-user" to ProjectMember(
+                        "current-user",
+                        role = "Team Lead",
+                        status = Constants.MEMBER_STATUS_ACTIVE
+                    )
+                )
+            )
+        )
+
+        val result = viewModel.buildProjectItems(projects, "current-user")
+
+        assertEquals(listOf("mine"), result.map { it.id })
+        assertEquals("Team Lead", result.single().role)
+    }
+
+    @Test
+    fun projectItemsIncludeCurrentUserMembershipEvenWhenStatusIsMissing() {
+        val projects = listOf(
+            Project(
+                id = "legacy-member",
+                name = "Legacy",
+                members = mapOf("current-user" to ProjectMember(userId = "current-user", role = "Other"))
+            )
+        )
+
+        val result = viewModel.buildProjectItems(projects, "current-user")
+
+        assertEquals(listOf("legacy-member"), result.map { it.id })
+    }
+
+    @Test
+    fun projectItemsHideProjectsWhereCurrentUserIsInactive() {
+        val projects = listOf(
+            Project(
+                id = "inactive-member",
+                name = "Hidden",
+                members = mapOf(
+                    "current-user" to ProjectMember(
+                        userId = "current-user",
+                        role = "Other",
+                        status = Constants.MEMBER_STATUS_INACTIVE
+                    )
+                )
+            ),
+            Project(
+                id = "active-member",
+                name = "Shown",
+                members = mapOf(
+                    "current-user" to ProjectMember(
+                        userId = "current-user",
+                        role = "Other",
+                        status = Constants.MEMBER_STATUS_ACTIVE
+                    )
+                )
+            )
+        )
+
+        val result = viewModel.buildProjectItems(projects, "current-user")
+
+        assertEquals(listOf("active-member"), result.map { it.id })
     }
 
     private class FakeProjectRepository : ProjectRepository {

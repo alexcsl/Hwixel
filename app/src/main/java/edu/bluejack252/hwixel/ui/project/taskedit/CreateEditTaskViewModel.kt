@@ -5,6 +5,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import edu.bluejack252.hwixel.data.model.Attachment
 import edu.bluejack252.hwixel.data.model.Subtask
 import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
@@ -33,7 +34,7 @@ class CreateEditTaskViewModel(
         _uiState.value = CreateEditTaskUiState.Loading
         _uiState.addSource(projectRepository.observeProject(projectId)) { project ->
             val members = project?.members?.map { (userId, _) ->
-                MemberOption(userId = userId, name = userId)
+                MemberOption(userId = userId, name = UNKNOWN_MEMBER_NAME)
             } ?: emptyList()
             memberOptions = members
             publishLoaded()
@@ -42,7 +43,7 @@ class CreateEditTaskViewModel(
             usersLoaded = true
             memberOptions = memberOptions.map { option ->
                 val user = users.firstOrNull { it.id == option.userId }
-                option.copy(name = user?.name ?: option.userId)
+                option.copy(name = user?.name?.takeIf { it.isNotBlank() } ?: UNKNOWN_MEMBER_NAME)
             }
             publishLoaded()
         }
@@ -72,6 +73,7 @@ class CreateEditTaskViewModel(
         assigneeIds: List<String>,
         priority: String,
         subtasksInput: List<Subtask>,
+        attachmentsInput: List<Attachment>,
         actorId: String
     ) {
         if (title.isBlank()) {
@@ -94,7 +96,8 @@ class CreateEditTaskViewModel(
                     deadline = deadline,
                     assignees = assigneeIds,
                     priority = priority,
-                    subtasks = subtasks
+                    subtasks = subtasks,
+                    attachments = attachmentsInput
                 )
             } else {
                 Task(
@@ -105,7 +108,8 @@ class CreateEditTaskViewModel(
                     assignees = assigneeIds,
                     priority = priority.ifBlank { Constants.PRIORITY_MEDIUM },
                     status = Constants.STATUS_TODO,
-                    subtasks = subtasks
+                    subtasks = subtasks,
+                    attachments = attachmentsInput
                 )
             }
             val result = if (existingTask != null) {
@@ -119,5 +123,9 @@ class CreateEditTaskViewModel(
                 CreateEditTaskUiState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
             }
         }
+    }
+
+    private companion object {
+        const val UNKNOWN_MEMBER_NAME = "Unknown member"
     }
 }

@@ -20,6 +20,7 @@ import edu.bluejack252.hwixel.data.repository.TeamHealthRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.UserRepository
 import edu.bluejack252.hwixel.data.repository.UserRepositoryImpl
 import edu.bluejack252.hwixel.data.source.local.HwixelDatabase
+import edu.bluejack252.hwixel.data.source.remote.AttachmentUploadSource
 import edu.bluejack252.hwixel.data.source.remote.AttendanceFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.EvalFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.FileFirebaseSource
@@ -27,6 +28,7 @@ import edu.bluejack252.hwixel.data.source.remote.NotificationFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.AuthFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.GptApiSource
 import edu.bluejack252.hwixel.data.source.remote.ProjectFirebaseSource
+import edu.bluejack252.hwixel.data.source.remote.SupabaseStorageSource
 import edu.bluejack252.hwixel.data.source.remote.TaskFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.UserFirebaseSource
 
@@ -39,7 +41,7 @@ object ServiceLocator {
     private var attendanceRepository: AttendanceRepository? = null
     private var evalRepository: EvalRepository? = null
     private var fileRepository: FileRepository? = null
-    private var notificationRepository: NotificationRepository? = null
+    private var attachmentUploadSource: AttachmentUploadSource? = null
 
     fun getAuthRepository(context: Context): AuthRepository {
         return authRepository ?: AuthRepositoryImpl(
@@ -96,11 +98,20 @@ object ServiceLocator {
         ).also { fileRepository = it }
     }
 
-    fun getNotificationRepository(): NotificationRepository {
-        return notificationRepository ?: NotificationRepositoryImpl(
-            source = NotificationFirebaseSource()
-        ).also { notificationRepository = it }
+    fun getAttachmentUploadSource(): AttachmentUploadSource {
+        return attachmentUploadSource ?: SupabaseStorageSource()
+            .also { attachmentUploadSource = it }
     }
 
-    fun getNotificationSource(): NotificationFirebaseSource = NotificationFirebaseSource()
+    fun reset() {
+        authRepository = null
+        userRepository = null
+        projectRepository = null
+        taskRepository = null
+        teamHealthRepository = null
+        attendanceRepository = null
+        evalRepository = null
+        fileRepository = null
+        attachmentUploadSource = null
+    }
 }

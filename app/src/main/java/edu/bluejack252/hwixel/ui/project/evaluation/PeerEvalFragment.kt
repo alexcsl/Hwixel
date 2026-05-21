@@ -23,6 +23,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
+import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
 import edu.bluejack252.hwixel.util.constants.Constants
 
@@ -40,6 +41,8 @@ class PeerEvalFragment : Fragment() {
 
     private lateinit var receivedAdapter: ReceivedEvalAdapter
     private var memberDropdownItems: List<Pair<String, String>> = emptyList() // id to name
+    private var memberDropdownLabels: Map<String, String> = emptyMap() // label to id
+    private var periodOpenResolved = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,40 +53,80 @@ class PeerEvalFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Seed members from nav args
+        seedMembersFromArgs()
+        setupDropdown(view)
+        setupTabs(view)
+        setupClickListeners(view)
+        observeProjectMembers(view)
+        observeViewModel(view)
+    }
+
+    private fun seedMembersFromArgs() {
         val memberIds = args.memberIds.toList()
         val memberNameList = args.memberNames.toList()
         val memberRoleList = args.memberRoles.toList()
         val members = memberIds.zip(memberNameList).zip(memberRoleList).map { (idName, role) ->
             Triple(idName.first, idName.second, role)
         }
+        publishMembers(members)
+    }
 
+    private fun publishMembers(members: List<Triple<String, String, String>>) {
+        val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         val projectMembers = members.map { (id, _, role) -> ProjectMember(userId = id, role = role) }
-        val memberNames = members.associate { (id, name, _) -> id to name }
-
+        val memberNames = members.associate { (id, name, _) -> id to name.ifBlank { id } }
         viewModel.projectMembers = projectMembers
         viewModel.memberNames = memberNames
-        viewModel.currentUserRole = memberRoleList.getOrNull(
-            memberIds.indexOf(FirebaseAuth.getInstance().currentUser?.uid)
-        ) ?: ""
-
-        // Populate dropdown (exclude self)
-        val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-        memberDropdownItems = members.filter { it.first != currentUid }
-            .map { it.first to it.second }
-
-        setupDropdown(view)
-        setupTabs(view)
-        setupClickListeners(view)
-        observeViewModel(view)
+        viewModel.currentUserRole = members.firstOrNull { it.first == currentUid }?.third.orEmpty()
+        memberDropdownItems = members.filter { it.first != currentUid }.map { (id, name, _) ->
+            id to name.ifBlank { id }
+        }
+        view?.let(::setupDropdown)
     }
 
     private fun setupDropdown(view: View) {
         val dropdown = view.findViewById<AutoCompleteTextView>(R.id.evaluateeDropdown)
-        val names = memberDropdownItems.map { it.second }
+        val labels = memberDropdownItems.associate { (id, name) ->
+            val label = if (viewModel.hasAlreadySubmittedFor(id)) {
+                getString(R.string.eval_already_submitted_format, name)
+            } else {
+                name
+            }
+            label to id
+        }
+        memberDropdownLabels = labels
         dropdown.setAdapter(
-            ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, names)
+            ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, labels.keys.toList())
         )
+        val currentText = dropdown.text?.toString().orEmpty()
+        if (currentText.isNotBlank() && currentText !in labels.keys) {
+            dropdown.text?.clear()
+        }
+    }
+
+    private fun observeProjectMembers(view: View) {
+        ServiceLocator.getProjectRepository(requireContext())
+            .observeProject(args.projectId)
+            .observe(viewLifecycleOwner) { project ->
+                publishMembersFromProject(project ?: return@observe)
+            }
+    }
+
+    private fun publishMembersFromProject(project: Project) {
+        val members = project.members.mapNotNull { (userId, member) ->
+            if (member.status == Constants.MEMBER_STATUS_INACTIVE) return@mapNotNull null
+            val id = member.userId.ifBlank { userId }
+            val name = viewModel.memberNames[id] ?: id
+            Triple(id, name, member.role)
+        }.toMutableList()
+        if (
+            project.createdBy.isNotBlank() &&
+            members.none { (id, _, _) -> id == project.createdBy }
+        ) {
+            val leadName = viewModel.memberNames[project.createdBy] ?: project.createdBy
+            members.add(0, Triple(project.createdBy, leadName, Constants.ROLE_TEAM_LEAD))
+        }
+        publishMembers(members.distinctBy { it.first })
     }
 
     private fun setupTabs(view: View) {
@@ -113,8 +156,8 @@ class PeerEvalFragment : Fragment() {
 
         view.findViewById<MaterialButton>(R.id.submitEvalButton).setOnClickListener {
             val dropdown = view.findViewById<AutoCompleteTextView>(R.id.evaluateeDropdown)
-            val selectedName = dropdown.text.toString()
-            val evaluateeId = memberDropdownItems.firstOrNull { it.second == selectedName }?.first
+            val selectedLabel = dropdown.text.toString()
+            val evaluateeId = memberDropdownLabels[selectedLabel]
 
             if (evaluateeId == null) {
                 showSnack(view, getString(R.string.eval_error_select_member))
@@ -150,12 +193,16 @@ class PeerEvalFragment : Fragment() {
         val avgReceivedText = view.findViewById<TextView>(R.id.avgReceivedScoreText)
         val noReceivedText = view.findViewById<TextView>(R.id.noReceivedEvalsText)
         val receivedList = view.findViewById<RecyclerView>(R.id.receivedEvalsRecyclerView)
+        val submitButton = view.findViewById<MaterialButton>(R.id.submitEvalButton)
 
         val isLead = viewModel.currentUserRole == Constants.ROLE_TEAM_LEAD
         toggleButton.isVisible = isLead
         createButton.isVisible = isLead
+        submitButton.isEnabled = false
 
         viewModel.isPeriodOpen.observe(viewLifecycleOwner) { isOpen ->
+            periodOpenResolved = true
+            submitButton.isEnabled = isOpen
             periodBanner.setBackgroundResource(
                 if (isOpen) R.drawable.bg_eval_period_open else R.drawable.bg_eval_period_closed
             )
@@ -171,6 +218,11 @@ class PeerEvalFragment : Fragment() {
             val hasPeriod = ids.isNotEmpty()
             noPeriodCard.isVisible = !hasPeriod && isLead
             evalContent.isVisible = hasPeriod
+            submitButton.isEnabled = hasPeriod && periodOpenResolved && viewModel.isPeriodOpen.value == true
+        }
+
+        viewModel.submittedByMe.observe(viewLifecycleOwner) {
+            setupDropdown(view)
         }
 
         viewModel.receivedEvals.observe(viewLifecycleOwner) { evals ->
@@ -192,6 +244,7 @@ class PeerEvalFragment : Fragment() {
                 is PeerEvalUiState.Loading -> loading.isVisible = true
                 is PeerEvalUiState.SubmitSuccess -> {
                     loading.isVisible = false
+                    setupDropdown(view)
                     showSnack(view, getString(R.string.eval_submit_success))
                     // Reset form
                     view.findViewById<RatingBar>(R.id.ratingCommunication).rating = 0f

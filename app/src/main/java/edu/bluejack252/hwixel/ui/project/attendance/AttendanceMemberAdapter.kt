@@ -1,9 +1,11 @@
 package edu.bluejack252.hwixel.ui.project.attendance
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import edu.bluejack252.hwixel.R
@@ -47,8 +49,10 @@ class AttendanceMemberAdapter(
         val ctx = holder.itemView.context
         val presentBg = if (item.isPresent) ctx.getColor(R.color.attendance_present) else ctx.getColor(R.color.glass_fill)
         val absentBg = if (!item.isPresent) ctx.getColor(R.color.attendance_absent) else ctx.getColor(R.color.glass_fill)
-        holder.presentButton.setBackgroundColor(presentBg)
-        holder.absentButton.setBackgroundColor(absentBg)
+        holder.presentButton.backgroundTintList = ColorStateList.valueOf(presentBg)
+        holder.absentButton.backgroundTintList = ColorStateList.valueOf(absentBg)
+        holder.presentButton.setTextColor(ctx.getColor(if (item.isPresent) R.color.white else R.color.text_secondary))
+        holder.absentButton.setTextColor(ctx.getColor(if (!item.isPresent) R.color.white else R.color.text_secondary))
 
         if (item.isEditable) {
             holder.presentButton.isEnabled = true
@@ -66,8 +70,17 @@ class AttendanceMemberAdapter(
     override fun getItemCount() = items.size
 
     fun updateItems(newItems: List<AttendanceMemberItem>) {
+        val callback = object : DiffUtil.Callback() {
+            override fun getOldListSize() = items.size
+            override fun getNewListSize() = newItems.size
+            override fun areItemsTheSame(oldPos: Int, newPos: Int) =
+                items[oldPos].userId == newItems[newPos].userId
+            override fun areContentsTheSame(oldPos: Int, newPos: Int) =
+                items[oldPos] == newItems[newPos]
+        }
+        val diff = DiffUtil.calculateDiff(callback)
         items.clear()
         items.addAll(newItems)
-        notifyDataSetChanged()
+        diff.dispatchUpdatesTo(this)
     }
 }

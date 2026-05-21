@@ -1,43 +1,39 @@
 package edu.bluejack252.hwixel.ui.notifications
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import edu.bluejack252.hwixel.data.model.Notification
-import edu.bluejack252.hwixel.data.repository.NotificationRepository
+import edu.bluejack252.hwixel.data.repository.UserRepository
 import kotlinx.coroutines.launch
 
 class NotificationsViewModel(
-    private val repository: NotificationRepository,
-    private val currentUserId: String
+    private val userRepository: UserRepository
 ) : ViewModel() {
+    private val _notifications = MediatorLiveData<List<Notification>>()
+    val notifications: LiveData<List<Notification>> = _notifications
 
-    private val _uiState = MutableLiveData<NotificationsUiState>(NotificationsUiState.Idle)
-    val uiState: LiveData<NotificationsUiState> = _uiState
+    private var currentUserId = ""
+    private var hasLoaded = false
 
-    val notifications: LiveData<List<Notification>> = repository.observeNotifications(currentUserId)
-
-    val unreadCount: LiveData<Int> = notifications.map { list ->
-        list.count { !it.isRead }
+    init {
+        _notifications.value = emptyList()
     }
 
-    fun markRead(notifId: String) {
-        viewModelScope.launch {
-            repository.markRead(currentUserId, notifId)
+    fun load(userId: String) {
+        if (userId.isBlank() || (hasLoaded && currentUserId == userId)) return
+        hasLoaded = true
+        currentUserId = userId
+        _notifications.addSource(userRepository.observeNotifications(userId)) { value ->
+            _notifications.value = value
         }
     }
 
-    fun markAllRead() {
-        _uiState.value = NotificationsUiState.Loading
+    fun markRead(notificationId: String) {
+        if (currentUserId.isBlank() || notificationId.isBlank()) return
         viewModelScope.launch {
-            val result = repository.markAllRead(currentUserId)
-            _uiState.value = if (result.isSuccess) {
-                NotificationsUiState.MarkedAllRead
-            } else {
-                NotificationsUiState.Error(result.exceptionOrNull()?.message ?: "")
-            }
+            userRepository.markNotificationRead(currentUserId, notificationId)
         }
     }
 }

@@ -42,6 +42,21 @@ android {
             "GPT_MODEL",
             "\"${localProperties.getProperty("gpt.model", "gpt-5.5")}\""
         )
+        buildConfigField(
+            "String",
+            "SUPABASE_URL",
+            "\"${localProperties.getProperty("supabase.url", "")}\""
+        )
+        buildConfigField(
+            "String",
+            "SUPABASE_ANON_KEY",
+            "\"${localProperties.getProperty("supabase.anon.key", "")}\""
+        )
+        buildConfigField(
+            "String",
+            "SUPABASE_BUCKET",
+            "\"${localProperties.getProperty("supabase.bucket", "task-attachments")}\""
+        )
     }
 
     buildFeatures {

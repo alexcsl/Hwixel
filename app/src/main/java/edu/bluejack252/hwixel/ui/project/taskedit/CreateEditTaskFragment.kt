@@ -5,9 +5,11 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -25,6 +27,7 @@ import edu.bluejack252.hwixel.databinding.ItemSubtaskRowBinding
 import edu.bluejack252.hwixel.util.constants.Constants
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -49,6 +52,19 @@ class CreateEditTaskFragment : Fragment() {
     private val attachmentAdapter = EditableAttachmentAdapter { attachment ->
         pendingAttachments.removeAll { it.id == attachment.id && it.url == attachment.url }
         renderAttachments()
+        // Best-effort cleanup if this was an uploaded blob; ignore failures.
+        val uploadSource = ServiceLocator.getAttachmentUploadSource()
+        if (uploadSource.isOwnedUrl(attachment.url)) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                uploadSource.delete(attachment.url)
+            }
+        }
+    }
+
+    private val pickFileLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) handlePickedFile(uri)
     }
 
     private val viewModel: CreateEditTaskViewModel by viewModels {
@@ -76,6 +92,7 @@ class CreateEditTaskFragment : Fragment() {
         binding.assigneesButton.setOnClickListener { showAssigneeDialog() }
         binding.addSubtaskButton.setOnClickListener { addSubtaskRow() }
         binding.addAttachmentButton.setOnClickListener { showAddAttachmentDialog() }
+        binding.uploadAttachmentButton.setOnClickListener { pickFileLauncher.launch("*/*") }
         binding.saveTaskButton.setOnClickListener { save() }
         binding.editAttachmentsRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
@@ -301,6 +318,83 @@ class CreateEditTaskFragment : Fragment() {
         binding.editAttachmentsRecyclerView.isVisible = pendingAttachments.isNotEmpty()
     }
 
+    private fun handlePickedFile(uri: Uri) {
+        val resolver = requireContext().contentResolver
+        val mime = resolver.getType(uri) ?: "application/octet-stream"
+        val displayName = queryDisplayName(uri) ?: "file"
+
+        val bytes = runCatching {
+            resolver.openInputStream(uri)?.use { it.readBytes() }
+        }.getOrNull()
+        if (bytes == null) {
+            showSnack(getString(R.string.attachment_read_failed))
+            return
+        }
+        if (bytes.size > MAX_UPLOAD_BYTES) {
+            showSnack(getString(R.string.attachment_file_too_large_format, MAX_UPLOAD_BYTES / 1_000_000))
+            return
+        }
+
+        val type = when {
+            mime.startsWith("image/") -> TYPE_IMAGE
+            mime == "application/pdf" -> TYPE_PDF
+            else -> TYPE_LINK
+        }
+        binding.uploadAttachmentButton.isEnabled = false
+        val progressBar = Snackbar.make(binding.root, getString(R.string.attachment_uploading), Snackbar.LENGTH_INDEFINITE)
+        progressBar.show()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val uploadSource = ServiceLocator.getAttachmentUploadSource()
+            val result = uploadSource.upload(
+                taskId = args.taskId.ifBlank { "new" },
+                originalFileName = displayName,
+                bytes = bytes,
+                contentType = mime
+            )
+            progressBar.dismiss()
+            binding.uploadAttachmentButton.isEnabled = true
+            result
+                .onSuccess { publicUrl ->
+                    pendingAttachments.add(
+                        Attachment(
+                            id = "a-${UUID.randomUUID()}",
+                            label = displayName,
+                            url = publicUrl,
+                            type = type
+                        )
+                    )
+                    renderAttachments()
+                    showSnack(getString(R.string.attachment_upload_success))
+                }
+                .onFailure { ex ->
+                    val detail = ex.localizedMessage?.takeIf { it.isNotBlank() }
+                    val msg = if (detail != null) {
+                        getString(R.string.attachment_upload_failed_format, detail)
+                    } else {
+                        getString(R.string.attachment_upload_failed)
+                    }
+                    showSnack(msg)
+                }
+        }
+    }
+
+    private fun queryDisplayName(uri: Uri): String? {
+        val resolver = requireContext().contentResolver
+        val cursor = resolver.query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val idx = it.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                if (idx >= 0) return it.getString(idx)
+            }
+        }
+        return null
+    }
+
+    private fun showSnack(message: String) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
+    }
+
     private fun isValidHttpUrl(url: String): Boolean {
         val uri = runCatching { Uri.parse(url) }.getOrNull()
         return uri?.scheme in setOf("http", "https") && !uri?.host.isNullOrBlank()
@@ -351,5 +445,6 @@ class CreateEditTaskFragment : Fragment() {
         const val TYPE_PDF = "pdf"
         const val TYPE_IMAGE = "image"
         const val TYPE_LINK = "link"
+        const val MAX_UPLOAD_BYTES = 10 * 1_000_000 // 10 MB
     }
 }

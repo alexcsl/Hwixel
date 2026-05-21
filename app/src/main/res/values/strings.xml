@@ -170,7 +170,14 @@
     <string name="task_detail_status_label">Status</string>
     <string name="task_detail_attachments_label">Attachments</string>
     <string name="task_detail_no_attachments">No attachments.</string>
-    <string name="add_attachment_button">+ Add Attachment</string>
+    <string name="add_attachment_button">+ Add Link</string>
+    <string name="upload_attachment_button">Upload File</string>
+    <string name="attachment_uploading">Uploading…</string>
+    <string name="attachment_upload_success">File uploaded.</string>
+    <string name="attachment_upload_failed">Upload failed. Please try again.</string>
+    <string name="attachment_upload_failed_format">Upload failed: %1$s</string>
+    <string name="attachment_file_too_large_format">File is too large. Limit is %1$d MB.</string>
+    <string name="attachment_read_failed">Could not read the selected file.</string>
     <string name="add_attachment_title">Add Attachment</string>
     <string name="attachment_label_hint">Label</string>
     <string name="attachment_url_hint">Attachment URL</string>

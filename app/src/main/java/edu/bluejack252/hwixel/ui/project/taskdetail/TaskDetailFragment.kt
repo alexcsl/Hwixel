@@ -47,7 +47,9 @@ class TaskDetailFragment : Fragment() {
         TaskDetailViewModelFactory(
             projectId = args.projectId,
             taskId = args.taskId,
+            currentUserId = currentUserId,
             taskRepository = ServiceLocator.getTaskRepository(requireContext()),
+            projectRepository = ServiceLocator.getProjectRepository(requireContext()),
             userRepository = ServiceLocator.getUserRepository(requireContext())
         )
     }
@@ -141,7 +143,23 @@ class TaskDetailFragment : Fragment() {
         subtaskAdapter.submitList(state.subtasks)
         commentsAdapter.submitList(state.comments)
         historyAdapter.submitList(state.history)
+        binding.editButton.isVisible = state.canEditTask
+        updateCommentsHeight(state.comments.size)
         binding.subtaskOverallProgress.isVisible = state.subtasks.isNotEmpty()
+    }
+
+    private fun updateCommentsHeight(commentCount: Int) {
+        val targetDp = when {
+            commentCount <= 0 -> 96
+            commentCount == 1 -> 128
+            commentCount == 2 -> 184
+            else -> 240
+        }
+        val density = resources.displayMetrics.density
+        binding.commentsRecyclerView.layoutParams = binding.commentsRecyclerView.layoutParams.apply {
+            height = (targetDp * density).toInt()
+        }
+        binding.commentsRecyclerView.isNestedScrollingEnabled = commentCount > 2
     }
 
     private fun renderTask(task: Task, assigneeNames: List<String>) {

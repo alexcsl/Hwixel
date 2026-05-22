@@ -2,17 +2,27 @@ package edu.bluejack252.hwixel.ui.project.taskdetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import edu.bluejack252.hwixel.data.repository.ProjectRepository
 import edu.bluejack252.hwixel.data.repository.TaskRepository
 import edu.bluejack252.hwixel.data.repository.UserRepository
 
 class TaskDetailViewModelFactory(
     private val projectId: String,
     private val taskId: String,
+    private val currentUserId: String,
     private val taskRepository: TaskRepository,
+    private val projectRepository: ProjectRepository,
     private val userRepository: UserRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         @Suppress("UNCHECKED_CAST")
-        return TaskDetailViewModel(projectId, taskId, taskRepository, userRepository) as T
+        return TaskDetailViewModel(
+            projectId,
+            taskId,
+            currentUserId,
+            taskRepository,
+            projectRepository,
+            userRepository
+        ) as T
     }
 }

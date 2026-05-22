@@ -6,16 +6,21 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.bluejack252.hwixel.data.model.Comment
+import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.data.model.User
+import edu.bluejack252.hwixel.data.repository.ProjectRepository
 import edu.bluejack252.hwixel.data.repository.TaskRepository
 import edu.bluejack252.hwixel.data.repository.UserRepository
+import edu.bluejack252.hwixel.util.constants.Constants
 import kotlinx.coroutines.launch
 
 class TaskDetailViewModel(
     private val projectId: String,
     private val taskId: String,
+    private val currentUserId: String,
     private val taskRepository: TaskRepository,
+    private val projectRepository: ProjectRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
 
@@ -29,12 +34,17 @@ class TaskDetailViewModel(
     val deleteResult: LiveData<Result<Unit>?> = _deleteResult
 
     private var currentTask: Task? = null
+    private var currentProject: Project? = null
     private var users: List<User> = emptyList()
 
     init {
         _uiState.value = TaskDetailUiState(isLoading = true)
         _uiState.addSource(taskRepository.observeTask(projectId, taskId)) { task ->
             currentTask = task
+            publishState()
+        }
+        _uiState.addSource(projectRepository.observeProject(projectId)) { project ->
+            currentProject = project
             publishState()
         }
         _uiState.addSource(userRepository.observeUsers()) { userList ->
@@ -66,6 +76,7 @@ class TaskDetailViewModel(
                     timestamp = entry.timestamp
                 )
             },
+            canEditTask = currentProject?.members?.get(currentUserId)?.role == Constants.ROLE_TEAM_LEAD,
             isLoading = false
         )
     }

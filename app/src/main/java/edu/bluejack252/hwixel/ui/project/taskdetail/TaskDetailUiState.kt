@@ -11,6 +11,7 @@ data class TaskDetailUiState(
     val subtasks: List<Subtask> = emptyList(),
     val comments: List<CommentUi> = emptyList(),
     val history: List<HistoryUi> = emptyList(),
+    val canEditTask: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null
 )

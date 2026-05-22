@@ -304,7 +304,7 @@
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/commentsRecyclerView"
                         android:layout_width="match_parent"
-                        android:layout_height="260dp"
+                        android:layout_height="160dp"
                         android:layout_marginTop="12dp"
                         android:nestedScrollingEnabled="true"
                         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />

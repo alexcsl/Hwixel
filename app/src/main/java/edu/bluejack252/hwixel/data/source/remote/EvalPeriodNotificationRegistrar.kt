@@ -8,8 +8,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class EvalPeriodNotificationRegistrar(
-    private val database: FirebaseDatabase = FirebaseDatabase.getInstance(),
-    private val notificationSource: NotificationFirebaseSource = NotificationFirebaseSource()
+    private val database: FirebaseDatabase? = FirebaseDatabase.getInstance(),
+    private val notifier: EvalPeriodNotifier = FirebaseEvalPeriodNotifier()
 ) {
     private val states = mutableMapOf<String, Boolean>()
     private var initialized = false
@@ -17,7 +17,9 @@ class EvalPeriodNotificationRegistrar(
 
     fun register(scope: CoroutineScope) {
         if (listener != null) return
-        val ref = database.reference.child("evaluations")
+        val ref = requireNotNull(database) { "Firebase database is not configured." }
+            .reference
+            .child("evaluations")
         listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val current = snapshot.children.flatMap { projectSnapshot ->
@@ -33,30 +35,42 @@ class EvalPeriodNotificationRegistrar(
                     }
                 }.toMap()
 
-                if (!initialized) {
-                    states.clear()
-                    states.putAll(current)
-                    initialized = true
-                    return
-                }
-
-                current.forEach { (key, isOpen) ->
-                    if (states[key] != isOpen) {
-                        val projectId = key.substringBefore("|")
-                        scope.launch {
-                            notifyProjectMembers(projectId, isOpen)
-                        }
-                    }
-                }
-                states.clear()
-                states.putAll(current)
+                handlePeriodStates(current, scope)
             }
 
             override fun onCancelled(error: DatabaseError) = Unit
         }.also { ref.addValueEventListener(it) }
     }
 
-    private suspend fun notifyProjectMembers(projectId: String, isOpen: Boolean) {
+    internal fun handlePeriodStates(current: Map<String, Boolean>, scope: CoroutineScope) {
+        if (!initialized) {
+            states.clear()
+            states.putAll(current)
+            initialized = true
+            return
+        }
+
+        current.forEach { (key, isOpen) ->
+            if (states[key] != isOpen) {
+                val projectId = key.substringBefore("|")
+                scope.launch {
+                    notifier.notifyProjectMembers(projectId, isOpen)
+                }
+            }
+        }
+        states.clear()
+        states.putAll(current)
+    }
+}
+
+interface EvalPeriodNotifier {
+    suspend fun notifyProjectMembers(projectId: String, isOpen: Boolean)
+}
+
+class FirebaseEvalPeriodNotifier(
+    private val notificationSource: NotificationFirebaseSource = NotificationFirebaseSource()
+) : EvalPeriodNotifier {
+    override suspend fun notifyProjectMembers(projectId: String, isOpen: Boolean) {
         val type = if (isOpen) TYPE_EVAL_OPEN else TYPE_EVAL_CLOSE
         val message = if (isOpen) {
             "Peer evaluation period is now open"

@@ -27,7 +27,12 @@ interface TaskRepository {
         newStatus: String,
         actorId: String
     ): Result<Unit>
-    suspend fun addComment(projectId: String, taskId: String, comment: Comment): Result<Unit>
+    suspend fun addComment(
+        projectId: String,
+        taskId: String,
+        comment: Comment,
+        mentionedUserIds: List<String> = emptyList()
+    ): Result<Unit>
     suspend fun updateSubtask(
         projectId: String,
         taskId: String,
@@ -118,19 +123,28 @@ class TaskRepositoryImpl(
     override suspend fun addComment(
         projectId: String,
         taskId: String,
-        comment: Comment
+        comment: Comment,
+        mentionedUserIds: List<String>
     ): Result<Unit> = runCatching {
         firebaseSource.addComment(projectId, taskId, comment)
         notifSource?.let { src ->
             val ref = "$projectId|$taskId"
-            // Firebase Auth UIDs are normally 28 chars; keep the regex narrow to avoid tagging normal @words.
-            val mentionRegex = Regex("@([A-Za-z0-9_-]{20,})")
-            mentionRegex.findAll(comment.content).forEach { match ->
-                val mentionedUid = match.groupValues[1]
-                if (mentionedUid != comment.authorId) {
-                    runCatching { src.writeNotification(mentionedUid, "mention", "You were mentioned in a comment", ref) }
+            val uidMentions = UID_MENTION_REGEX.findAll(comment.content)
+                .map { it.groupValues[1] }
+                .toList()
+            (mentionedUserIds + uidMentions)
+                .distinct()
+                .filter { it.isNotBlank() && it != comment.authorId }
+                .forEach { mentionedUid ->
+                    runCatching {
+                        src.writeNotification(
+                            mentionedUid,
+                            TYPE_MENTION,
+                            "You were mentioned in a comment",
+                            ref
+                        )
+                    }
                 }
-            }
         }
     }
 
@@ -187,5 +201,9 @@ class TaskRepositoryImpl(
 
     private companion object {
         const val TYPE_TASK_ASSIGNED = "task_assigned"
+        const val TYPE_MENTION = "mention"
+
+        // Backward-compatible UID mention support. User-facing mentions are resolved by display name in TaskDetailViewModel.
+        val UID_MENTION_REGEX = Regex("@([A-Za-z0-9_-]{20,})")
     }
 }

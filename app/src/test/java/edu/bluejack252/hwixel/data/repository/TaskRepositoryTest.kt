@@ -127,7 +127,11 @@ class TaskRepositoryTest {
 
         override suspend fun addHistoryEntry(projectId: String, taskId: String, entry: HistoryEntry) = Unit
 
-        override suspend fun addComment(projectId: String, taskId: String, comment: Comment) = Unit
+        override suspend fun addComment(
+            projectId: String,
+            taskId: String,
+            comment: Comment
+        ) = Unit
 
         override suspend fun updateSubtask(projectId: String, taskId: String, subtaskId: String, isDone: Boolean) = Unit
 

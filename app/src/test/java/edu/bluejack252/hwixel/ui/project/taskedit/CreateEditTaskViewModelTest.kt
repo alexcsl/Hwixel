@@ -115,7 +115,7 @@ class CreateEditTaskViewModelTest {
             return Result.success(Unit)
         }
         override suspend fun updateTaskStatus(projectId: String, taskId: String, newStatus: String, actorId: String): Result<Unit> = Result.success(Unit)
-        override suspend fun addComment(projectId: String, taskId: String, comment: Comment): Result<Unit> = Result.success(Unit)
+        override suspend fun addComment(projectId: String, taskId: String, comment: Comment, mentionedUserIds: List<String>): Result<Unit> = Result.success(Unit)
         override suspend fun updateSubtask(projectId: String, taskId: String, subtaskId: String, isDone: Boolean): Result<Unit> = Result.success(Unit)
         override suspend fun deleteTask(task: Task): Result<Unit> = Result.success(Unit)
     }

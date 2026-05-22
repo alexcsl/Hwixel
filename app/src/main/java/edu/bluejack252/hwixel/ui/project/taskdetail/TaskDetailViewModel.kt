@@ -98,8 +98,33 @@ class TaskDetailViewModel(
                 content = content,
                 timestamp = System.currentTimeMillis()
             )
-            _commentResult.value = taskRepository.addComment(projectId, taskId, comment)
+            _commentResult.value = taskRepository.addComment(
+                projectId = projectId,
+                taskId = taskId,
+                comment = comment,
+                mentionedUserIds = resolveMentionedUserIds(content, authorId)
+            )
         }
+    }
+
+    private fun resolveMentionedUserIds(content: String, authorId: String): List<String> {
+        val projectMemberIds = currentProject?.members?.keys.orEmpty()
+        return users
+            .asSequence()
+            .filter { user -> user.id in projectMemberIds }
+            .filter { user -> user.id != authorId }
+            .filter { user -> user.name.isNotBlank() }
+            .filter { user -> containsNameMention(content, user.name) }
+            .map { user -> user.id }
+            .distinct()
+            .toList()
+    }
+
+    private fun containsNameMention(content: String, name: String): Boolean {
+        val pattern = Regex(
+            pattern = "(?i)(^|\\s)@${Regex.escape(name)}(?=\\s|$|[.,!?;:])"
+        )
+        return pattern.containsMatchIn(content)
     }
 
     fun deleteTask() {

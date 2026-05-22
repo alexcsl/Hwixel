@@ -87,11 +87,32 @@ class TaskDetailViewModelTest {
         assertEquals(false, viewModel.uiState.value?.canEditTask)
     }
 
+    @Test
+    fun addCommentResolvesNameMentionsToProjectMemberIds() = runTest {
+        taskLiveData.value = Task(id = "t1")
+        projectLiveData.value = Project(
+            id = "p1",
+            members = mapOf(
+                "author" to ProjectMember(userId = "author", role = Constants.ROLE_OTHER),
+                "alice-id" to ProjectMember(userId = "alice-id", role = Constants.ROLE_OTHER)
+            )
+        )
+        usersLiveData.value = listOf(
+            User(id = "author", name = "Bob Writer"),
+            User(id = "alice-id", name = "Alice Smith")
+        )
+
+        viewModel.addComment("Please review this @Alice Smith.", "author")
+
+        assertEquals(listOf("alice-id"), repository.mentionedUserIds)
+    }
+
     private class FakeTaskRepository(
         private val taskLiveData: LiveData<Task?>
     ) : TaskRepository {
         var updatedSubtaskId: String? = null
         var updatedSubtaskValue: Boolean? = null
+        var mentionedUserIds: List<String> = emptyList()
 
         override fun observeAllTasks(): LiveData<List<Task>> = MutableLiveData(emptyList())
         override fun observeTasks(projectId: String): LiveData<List<Task>> = MutableLiveData(emptyList())
@@ -99,7 +120,15 @@ class TaskDetailViewModelTest {
         override suspend fun createTask(task: Task): Result<Unit> = Result.success(Unit)
         override suspend fun updateTask(task: Task, actorId: String): Result<Unit> = Result.success(Unit)
         override suspend fun updateTaskStatus(projectId: String, taskId: String, newStatus: String, actorId: String): Result<Unit> = Result.success(Unit)
-        override suspend fun addComment(projectId: String, taskId: String, comment: Comment): Result<Unit> = Result.success(Unit)
+        override suspend fun addComment(
+            projectId: String,
+            taskId: String,
+            comment: Comment,
+            mentionedUserIds: List<String>
+        ): Result<Unit> {
+            this.mentionedUserIds = mentionedUserIds
+            return Result.success(Unit)
+        }
         override suspend fun updateSubtask(projectId: String, taskId: String, subtaskId: String, isDone: Boolean): Result<Unit> {
             updatedSubtaskId = subtaskId
             updatedSubtaskValue = isDone

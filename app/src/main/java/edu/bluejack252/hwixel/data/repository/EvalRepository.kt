@@ -3,7 +3,9 @@ package edu.bluejack252.hwixel.data.repository
 import androidx.lifecycle.LiveData
 import com.google.firebase.database.FirebaseDatabase
 import edu.bluejack252.hwixel.data.model.EvaluationSubmission
+import edu.bluejack252.hwixel.data.source.remote.EvalPeriodNotifier
 import edu.bluejack252.hwixel.data.source.remote.EvalFirebaseSource
+import edu.bluejack252.hwixel.data.source.remote.FirebaseEvalPeriodNotifier
 import kotlinx.coroutines.tasks.await
 
 interface EvalRepository {
@@ -19,7 +21,8 @@ interface EvalRepository {
 }
 
 class EvalRepositoryImpl(
-    private val firebaseSource: EvalFirebaseSource
+    private val firebaseSource: EvalFirebaseSource,
+    private val periodNotifier: EvalPeriodNotifier = FirebaseEvalPeriodNotifier()
 ) : EvalRepository {
 
     private val usersRef = FirebaseDatabase.getInstance().reference.child("users")
@@ -39,11 +42,21 @@ class EvalRepositoryImpl(
     override suspend fun submitEvaluation(submission: EvaluationSubmission) =
         firebaseSource.submitEvaluation(submission)
 
-    override suspend fun setPeriodOpen(projectId: String, periodId: String, isOpen: Boolean) =
-        firebaseSource.setPeriodOpen(projectId, periodId, isOpen)
+    override suspend fun setPeriodOpen(projectId: String, periodId: String, isOpen: Boolean): Result<Unit> {
+        val result = firebaseSource.setPeriodOpen(projectId, periodId, isOpen)
+        if (result.isSuccess) {
+            runCatching { periodNotifier.notifyProjectMembers(projectId, isOpen) }
+        }
+        return result
+    }
 
-    override suspend fun createPeriod(projectId: String) =
-        firebaseSource.createPeriod(projectId)
+    override suspend fun createPeriod(projectId: String): Result<String> {
+        val result = firebaseSource.createPeriod(projectId)
+        if (result.isSuccess) {
+            runCatching { periodNotifier.notifyProjectMembers(projectId, true) }
+        }
+        return result
+    }
 
     override suspend fun fetchAllReceivedSubmissions(projectId: String, evaluateeId: String) =
         runCatching { firebaseSource.fetchAllReceivedSubmissions(projectId, evaluateeId) }

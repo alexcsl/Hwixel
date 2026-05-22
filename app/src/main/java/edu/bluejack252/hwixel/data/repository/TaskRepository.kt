@@ -71,7 +71,8 @@ class TaskRepositoryImpl(
     }
 
     override suspend fun updateTask(task: Task, actorId: String): Result<Unit> = runCatching {
-        val previousAssignees = localDao.getById(task.id)?.toDomain()?.assignees.orEmpty()
+        val previousTask = localDao.getById(task.id)?.toDomain()
+        val previousAssignees = previousTask?.assignees.orEmpty()
         firebaseSource.updateTask(task)
         if (actorId.isNotBlank()) {
             firebaseSource.addHistoryEntry(
@@ -87,6 +88,9 @@ class TaskRepositoryImpl(
         localDao.upsert(task.toEntity())
         scheduleDeadline(task)
         notifyAssignedUsers(task, task.assignees.filterNot { it in previousAssignees })
+        if (previousTask != null && previousTask.deadline != task.deadline) {
+            notifyDeadlineChanged(task)
+        }
         recomputeCompletionPercentage(task.projectId)
     }
 
@@ -186,6 +190,21 @@ class TaskRepositoryImpl(
         }
     }
 
+    private suspend fun notifyDeadlineChanged(task: Task) {
+        val source = notifSource ?: return
+        val referenceId = "${task.projectId}|${task.id}"
+        task.assignees.distinct().filter { it.isNotBlank() }.forEach { userId ->
+            runCatching {
+                source.writeNotification(
+                    userId,
+                    TYPE_DEADLINE,
+                    "Deadline changed for ${task.title.ifBlank { "a task" }}",
+                    referenceId
+                )
+            }
+        }
+    }
+
     private suspend fun recomputeCompletionPercentage(projectId: String): List<Task> {
         val allTasks = firebaseSource.fetchTasksOnce(projectId)
         if (projectSource != null) {
@@ -200,6 +219,7 @@ class TaskRepositoryImpl(
     private companion object {
         const val TYPE_TASK_ASSIGNED = "task_assigned"
         const val TYPE_MENTION = "mention"
+        const val TYPE_DEADLINE = "deadline"
 
         // Backward-compatible UID mention support. User-facing mentions are resolved by display name in TaskDetailViewModel.
         val UID_MENTION_REGEX = Regex("@([A-Za-z0-9_-]{20,})")

@@ -2,6 +2,7 @@ package edu.bluejack252.hwixel.data.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import edu.bluejack252.hwixel.data.mapper.toEntity
 import edu.bluejack252.hwixel.data.model.Comment
 import edu.bluejack252.hwixel.data.model.HistoryEntry
 import edu.bluejack252.hwixel.data.model.Project
@@ -79,6 +80,57 @@ class TaskRepositoryTest {
             listOf("u1" to "project-1|task-1", "u2" to "project-1|task-1"),
             notificationSource.writes.map { it.userId to it.referenceId }
         )
+    }
+
+    @Test
+    fun updateTaskNotifiesAssignedUsersWhenDeadlineChanges() = runTest {
+        val notificationSource = FakeNotificationSource()
+        val repo = TaskRepositoryImpl(firebaseSource, localDao, projectSource, notificationSource)
+        localDao.taskToReturn = Task(
+            id = "task-1",
+            projectId = "project-1",
+            title = "Prototype",
+            deadline = 1_000L,
+            assignees = listOf("u1", "u2")
+        ).toEntity()
+        val updated = Task(
+            id = "task-1",
+            projectId = "project-1",
+            title = "Prototype",
+            deadline = 2_000L,
+            assignees = listOf("u1", "u2")
+        )
+
+        val result = repo.updateTask(updated)
+
+        assertTrue(result.isSuccess)
+        assertEquals(
+            listOf("u1" to "deadline", "u2" to "deadline"),
+            notificationSource.writes.map { it.userId to it.type }
+        )
+    }
+
+    @Test
+    fun updateTaskDoesNotNotifyDeadlineWhenDeadlineIsUnchanged() = runTest {
+        val notificationSource = FakeNotificationSource()
+        val repo = TaskRepositoryImpl(firebaseSource, localDao, projectSource, notificationSource)
+        localDao.taskToReturn = Task(
+            id = "task-1",
+            projectId = "project-1",
+            deadline = 1_000L,
+            assignees = listOf("u1")
+        ).toEntity()
+        val updated = Task(
+            id = "task-1",
+            projectId = "project-1",
+            deadline = 1_000L,
+            assignees = listOf("u1")
+        )
+
+        val result = repo.updateTask(updated)
+
+        assertTrue(result.isSuccess)
+        assertTrue(notificationSource.writes.isEmpty())
     }
 
     @Test
@@ -182,6 +234,7 @@ class TaskRepositoryTest {
 
     private class FakeTaskDao : TaskDao {
         var upsertedTask: TaskEntity? = null
+        var taskToReturn: TaskEntity? = null
 
         override fun observeAll(): LiveData<List<TaskEntity>> {
             return MutableLiveData(emptyList())
@@ -191,7 +244,7 @@ class TaskRepositoryTest {
             return MutableLiveData(emptyList())
         }
 
-        override suspend fun getById(taskId: String): TaskEntity? = null
+        override suspend fun getById(taskId: String): TaskEntity? = taskToReturn
 
         override suspend fun upsert(task: TaskEntity) {
             upsertedTask = task

@@ -136,14 +136,12 @@ class TaskRepositoryImpl(
                 .distinct()
                 .filter { it.isNotBlank() && it != comment.authorId }
                 .forEach { mentionedUid ->
-                    runCatching {
-                        src.writeNotification(
-                            mentionedUid,
-                            TYPE_MENTION,
-                            "You were mentioned in a comment",
-                            ref
-                        )
-                    }
+                    src.writeNotification(
+                        mentionedUid,
+                        TYPE_MENTION,
+                        "You were mentioned in a comment",
+                        ref
+                    )
                 }
         }
     }

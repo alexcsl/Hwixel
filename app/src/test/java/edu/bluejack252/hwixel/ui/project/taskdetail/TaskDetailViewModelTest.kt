@@ -107,6 +107,39 @@ class TaskDetailViewModelTest {
         assertEquals(listOf("alice-id"), repository.mentionedUserIds)
     }
 
+    @Test
+    fun addCommentResolvesFirstNameMentionToProjectMemberId() = runTest {
+        seedMentionUsers()
+
+        viewModel.addComment("Please review this @Alice.", "author")
+
+        assertEquals(listOf("alice-id"), repository.mentionedUserIds)
+    }
+
+    @Test
+    fun addCommentResolvesCompactNameMentionToProjectMemberId() = runTest {
+        seedMentionUsers()
+
+        viewModel.addComment("Please review this @AliceSmith.", "author")
+
+        assertEquals(listOf("alice-id"), repository.mentionedUserIds)
+    }
+
+    private fun seedMentionUsers() {
+        taskLiveData.value = Task(id = "t1")
+        projectLiveData.value = Project(
+            id = "p1",
+            members = mapOf(
+                "author" to ProjectMember(userId = "author", role = Constants.ROLE_OTHER),
+                "alice-id" to ProjectMember(userId = "alice-id", role = Constants.ROLE_OTHER)
+            )
+        )
+        usersLiveData.value = listOf(
+            User(id = "author", name = "Bob Writer"),
+            User(id = "alice-id", name = "Alice Smith")
+        )
+    }
+
     private class FakeTaskRepository(
         private val taskLiveData: LiveData<Task?>
     ) : TaskRepository {

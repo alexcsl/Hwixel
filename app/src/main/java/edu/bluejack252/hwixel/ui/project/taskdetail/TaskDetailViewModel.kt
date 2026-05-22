@@ -111,20 +111,33 @@ class TaskDetailViewModel(
         val projectMemberIds = currentProject?.members?.keys.orEmpty()
         return users
             .asSequence()
-            .filter { user -> user.id in projectMemberIds }
+            .filter { user -> projectMemberIds.isEmpty() || user.id in projectMemberIds }
             .filter { user -> user.id != authorId }
             .filter { user -> user.name.isNotBlank() }
-            .filter { user -> containsNameMention(content, user.name) }
+            .filter { user -> containsNameMention(content, user.name) || containsCompactNameMention(content, user.name) }
             .map { user -> user.id }
             .distinct()
             .toList()
     }
 
     private fun containsNameMention(content: String, name: String): Boolean {
+        val normalizedName = name.trim().replace(Regex("\\s+"), " ")
         val pattern = Regex(
-            pattern = "(?i)(^|\\s)@${Regex.escape(name)}(?=\\s|$|[.,!?;:])"
+            pattern = "(?i)(^|\\s)@${Regex.escape(normalizedName)}(?=\\s|$|[.,!?;:])"
         )
-        return pattern.containsMatchIn(content)
+        return pattern.containsMatchIn(content.trim().replace(Regex("\\s+"), " "))
+    }
+
+    private fun containsCompactNameMention(content: String, name: String): Boolean {
+        val parts = name.trim().split(Regex("\\s+")).filter { it.isNotBlank() }
+        val firstName = parts.firstOrNull().orEmpty()
+        val compactName = parts.joinToString("")
+        return listOf(firstName, compactName)
+            .filter { it.isNotBlank() }
+            .any { mention ->
+                Regex("(?i)(^|\\s)@${Regex.escape(mention)}(?=\\s|$|[.,!?;:])")
+                    .containsMatchIn(content)
+            }
     }
 
     fun deleteTask() {

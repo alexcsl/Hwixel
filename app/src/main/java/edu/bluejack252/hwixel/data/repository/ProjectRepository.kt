@@ -1,11 +1,14 @@
 package edu.bluejack252.hwixel.data.repository
 
 import androidx.lifecycle.LiveData
+import com.google.firebase.database.FirebaseDatabase
 import edu.bluejack252.hwixel.data.mapper.toEntity
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
 import edu.bluejack252.hwixel.data.source.local.ProjectDao
 import edu.bluejack252.hwixel.data.source.remote.ProjectRemoteSource
+import edu.bluejack252.hwixel.util.constants.Constants
+import kotlinx.coroutines.tasks.await
 
 interface ProjectRepository {
     fun observeProjects(): LiveData<List<Project>>
@@ -23,6 +26,7 @@ class ProjectRepositoryImpl(
     private val firebaseSource: ProjectRemoteSource,
     private val localDao: ProjectDao
 ) : ProjectRepository {
+    private val usersRef by lazy { FirebaseDatabase.getInstance().reference.child("users") }
 
     override fun observeProjects(): LiveData<List<Project>> {
         return firebaseSource.observeProjects()
@@ -50,7 +54,24 @@ class ProjectRepositoryImpl(
         projectId: String,
         percentage: Float
     ): Result<Unit> = runCatching {
+        val previousProject = firebaseSource.fetchProjectOnce(projectId)
         firebaseSource.updateCompletionPercentage(projectId, percentage)
+        if ((previousProject?.completionPercentage ?: 0f) < 100f && percentage >= 100f) {
+            incrementCompletedProjects(previousProject)
+        }
+    }
+
+    private suspend fun incrementCompletedProjects(project: Project?) {
+        project?.members.orEmpty()
+            .filterValues { member -> member.status != Constants.MEMBER_STATUS_INACTIVE }
+            .keys
+            .forEach { userId ->
+                runCatching {
+                    val countRef = usersRef.child(userId).child("totalProjectsCompleted")
+                    val current = countRef.get().await().getValue(Int::class.java) ?: 0
+                    countRef.setValue(current + 1).await()
+                }
+            }
     }
 
     override suspend fun addMember(

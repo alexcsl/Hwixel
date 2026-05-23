@@ -3,7 +3,10 @@
     "users": {
       ".read": "auth != null",
       "$userId": {
-        ".write": "$userId === auth.uid || (newData.child('id').val() === data.child('id').val() && newData.child('name').val() === data.child('name').val() && newData.child('studentId').val() === data.child('studentId').val() && newData.child('email').val() === data.child('email').val() && newData.child('phone').val() === data.child('phone').val() && newData.child('avatarUrl').val() === data.child('avatarUrl').val() && newData.child('totalProjectsCompleted').val() === data.child('totalProjectsCompleted').val() && newData.child('badges').val() === data.child('badges').val() && newData.child('averagePeerRating').isNumber())"
+        ".write": "$userId === auth.uid || (newData.child('id').val() === data.child('id').val() && newData.child('name').val() === data.child('name').val() && newData.child('studentId').val() === data.child('studentId').val() && newData.child('email').val() === data.child('email').val() && newData.child('phone').val() === data.child('phone').val() && newData.child('avatarUrl').val() === data.child('avatarUrl').val() && newData.child('totalProjectsCompleted').val() === data.child('totalProjectsCompleted').val() && newData.child('badges').val() === data.child('badges').val() && newData.child('averagePeerRating').isNumber())",
+        "totalProjectsCompleted": {
+          ".write": "auth != null && newData.isNumber()"
+        }
       }
     },
     "projects": {
@@ -41,6 +44,14 @@
       ".read": "auth != null",
       "$emailKey": {
         ".write": "auth != null && newData.val() === auth.uid"
+      }
+    },
+    "notificationPreferences": {
+      "$userId": {
+        ".read": "auth != null",
+        "$type": {
+          ".write": "auth != null && $userId === auth.uid && newData.isBoolean()"
+        }
       }
     },
     "attendance": {

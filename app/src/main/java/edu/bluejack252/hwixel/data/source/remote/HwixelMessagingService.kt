@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import edu.bluejack252.hwixel.R
+import edu.bluejack252.hwixel.data.repository.SharedPrefsProfileSettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -39,6 +40,7 @@ class HwixelMessagingService : FirebaseMessagingService() {
         val type = remoteMessage.data["type"] ?: return
         val message = remoteMessage.data["message"] ?: remoteMessage.notification?.body ?: return
         val referenceId = remoteMessage.data["referenceId"] ?: ""
+        if (!SharedPrefsProfileSettingsRepository(this).isNotificationEnabled(type)) return
 
         serviceScope.launch {
             runCatching {

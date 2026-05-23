@@ -8,6 +8,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import edu.bluejack252.hwixel.R
+import edu.bluejack252.hwixel.data.repository.SharedPrefsProfileSettingsRepository
 
 class DeadlineReminderWorker(
     private val context: Context,
@@ -22,6 +23,11 @@ class DeadlineReminderWorker(
     }
 
     override fun doWork(): Result {
+        if (!SharedPrefsProfileSettingsRepository(context)
+                .isNotificationEnabled(SharedPrefsProfileSettingsRepository.NOTIF_DEADLINE)
+        ) {
+            return Result.success()
+        }
         val taskTitle = inputData.getString(KEY_TASK_TITLE) ?: context.getString(R.string.notif_unknown_task)
         val label = inputData.getString(KEY_LABEL) ?: "soon"
 

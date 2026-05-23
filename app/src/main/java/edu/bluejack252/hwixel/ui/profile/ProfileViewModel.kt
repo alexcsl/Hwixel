@@ -30,7 +30,6 @@ class ProfileViewModel(
             notificationSettings = settingsRepository.notificationSettings()
         )
         observeUser()
-        refreshProfile()
     }
 
     private fun observeUser() {

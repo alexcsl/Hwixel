@@ -1,15 +1,17 @@
 package edu.bluejack252.hwixel.ui.profile
 
+import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
@@ -22,6 +24,9 @@ import edu.bluejack252.hwixel.data.model.User
 import edu.bluejack252.hwixel.data.repository.SharedPrefsProfileSettingsRepository
 import edu.bluejack252.hwixel.databinding.DialogEditProfileBinding
 import edu.bluejack252.hwixel.databinding.FragmentProfileBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Locale
 
 class ProfileFragment : Fragment() {
@@ -30,6 +35,7 @@ class ProfileFragment : Fragment() {
 
     private var _editBinding: DialogEditProfileBinding? = null
     private var selectedAvatarUrl: String = ""
+    private var selectedAvatarUri: Uri? = null
     private var isRendering = false
 
     private val viewModel: ProfileViewModel by viewModels {
@@ -42,7 +48,7 @@ class ProfileFragment : Fragment() {
 
     private val avatarPicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri ?: return@registerForActivityResult
-        selectedAvatarUrl = uri.toString()
+        selectedAvatarUri = uri
         _editBinding?.avatarPreviewImageView?.setImageURI(uri)
     }
 
@@ -171,6 +177,7 @@ class ProfileFragment : Fragment() {
         val dialogBinding = DialogEditProfileBinding.inflate(layoutInflater)
         _editBinding = dialogBinding
         selectedAvatarUrl = user.avatarUrl
+        selectedAvatarUri = null
         dialogBinding.nameInput.editText?.setText(user.name)
         dialogBinding.studentIdInput.editText?.setText(user.studentId)
         if (user.avatarUrl.isNotBlank()) {
@@ -194,16 +201,68 @@ class ProfileFragment : Fragment() {
                     Snackbar.make(binding.root, R.string.profile_required_fields, Snackbar.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
-                viewModel.saveProfile(name, studentId, selectedAvatarUrl)
-                dialog.dismiss()
+                saveProfileFromDialog(user, dialogBinding, dialog, name, studentId)
             }
         }
-        dialog.setOnDismissListener { _editBinding = null }
+        dialog.setOnDismissListener {
+            _editBinding = null
+            selectedAvatarUri = null
+        }
         dialog.show()
     }
 
+    private fun saveProfileFromDialog(
+        user: User,
+        dialogBinding: DialogEditProfileBinding,
+        dialog: androidx.appcompat.app.AlertDialog,
+        name: String,
+        studentId: String
+    ) {
+        val pickedUri = selectedAvatarUri
+        if (pickedUri == null) {
+            viewModel.saveProfile(name, studentId, selectedAvatarUrl)
+            dialog.dismiss()
+            return
+        }
+        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).isEnabled = false
+        lifecycleScope.launch {
+            val uploadResult = uploadAvatar(user.id, pickedUri)
+            uploadResult
+                .onSuccess { publicUrl ->
+                    selectedAvatarUrl = publicUrl
+                    viewModel.saveProfile(name, studentId, publicUrl)
+                    dialog.dismiss()
+                }
+                .onFailure {
+                    dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).isEnabled = true
+                    Snackbar.make(dialogBinding.root, R.string.profile_save_failed, Snackbar.LENGTH_SHORT).show()
+                }
+        }
+    }
+
+    private suspend fun uploadAvatar(userId: String, uri: Uri): Result<String> = runCatching {
+        val contentType = requireContext().contentResolver.getType(uri) ?: "image/jpeg"
+        val fileName = queryDisplayName(uri) ?: "$userId.jpg"
+        val bytes = withContext(Dispatchers.IO) {
+            requireNotNull(requireContext().contentResolver.openInputStream(uri)) { "Cannot open avatar." }
+                .use { stream -> stream.readBytes() }
+        }
+        ServiceLocator.getAttachmentUploadSource()
+            .upload("avatars", fileName, bytes, contentType)
+            .getOrThrow()
+    }
+
+    private fun queryDisplayName(uri: Uri): String? {
+        val cursor: Cursor = requireContext().contentResolver.query(uri, null, null, null, null)
+            ?: return null
+        return cursor.use {
+            val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (nameIndex >= 0 && it.moveToFirst()) it.getString(nameIndex) else null
+        }
+    }
+
     private fun confirmLogout() {
-        AlertDialog.Builder(requireContext())
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.logout_confirm_title)
             .setMessage(R.string.logout_confirm_message)
             .setPositiveButton(R.string.logout_button) { _, _ -> logout() }

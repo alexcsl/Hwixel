@@ -3,6 +3,8 @@ package edu.bluejack252.hwixel.data.repository
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 interface ProfileSettingsRepository {
     fun isDarkMode(): Boolean
@@ -37,14 +39,25 @@ class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRe
     }
 
     override fun isNotificationEnabled(type: String): Boolean {
-        return prefs.getBoolean(notificationKey(type), true)
+        return prefs.getBoolean(notificationKey(preferenceTypeFor(type)), true)
     }
 
     override fun setNotificationEnabled(type: String, enabled: Boolean) {
-        prefs.edit().putBoolean(notificationKey(type), enabled).apply()
+        val preferenceType = preferenceTypeFor(type)
+        prefs.edit().putBoolean(notificationKey(preferenceType), enabled).apply()
+        FirebaseAuth.getInstance().currentUser?.uid?.let { uid ->
+            runCatching {
+                FirebaseDatabase.getInstance().reference
+                    .child("notificationPreferences")
+                    .child(uid)
+                    .child(preferenceType)
+                    .setValue(enabled)
+            }
+        }
     }
 
     override fun notificationSettings(): Map<String, Boolean> {
+        syncNotificationPreferences()
         return NOTIFICATION_TYPES.associateWith(::isNotificationEnabled)
     }
 
@@ -53,9 +66,21 @@ class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRe
             if (isDarkMode()) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
         )
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(languageTag()))
+        syncNotificationPreferences()
     }
 
     private fun notificationKey(type: String): String = "$KEY_NOTIFICATION_PREFIX$type"
+
+    private fun syncNotificationPreferences() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val values = NOTIFICATION_TYPES.associateWith(::isNotificationEnabled)
+        runCatching {
+            FirebaseDatabase.getInstance().reference
+                .child("notificationPreferences")
+                .child(uid)
+                .updateChildren(values)
+        }
+    }
 
     companion object {
         const val PREFS_NAME = "hwixel_prefs"
@@ -69,6 +94,11 @@ class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRe
         const val NOTIF_DEADLINE = "deadline"
         const val NOTIF_EVALUATION = "evaluation"
         const val NOTIF_INVITE = "invite"
+
+        fun preferenceTypeFor(type: String): String = when (type) {
+            "eval_open", "eval_close" -> NOTIF_EVALUATION
+            else -> type
+        }
 
         val SUPPORTED_LANGUAGE_TAGS = setOf("en", "id")
         val NOTIFICATION_TYPES = listOf(

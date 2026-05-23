@@ -8,12 +8,13 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.Notification
 import edu.bluejack252.hwixel.data.model.User
+import edu.bluejack252.hwixel.data.repository.SharedPrefsProfileSettingsRepository
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 open class UserFirebaseSource(
-    database: FirebaseDatabase = FirebaseDatabase.getInstance()
+    private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
 ) : UserRemoteSource {
     private val usersRef = database.reference.child("users")
     private val notificationsRef = database.reference.child("notifications")
@@ -144,10 +145,31 @@ open class UserFirebaseSource(
     }
 
     override suspend fun writeNotification(userId: String, notifId: String, payload: Map<String, Any>) {
+        val type = payload["type"] as? String
+        if (type != null && !isNotificationEnabled(userId, type)) return
         notificationsRef.child(userId).child(notifId).setValue(payload).awaitResult()
     }
 
     override suspend fun markNotificationRead(userId: String, notifId: String) {
         notificationsRef.child(userId).child(notifId).child("isRead").setValue(true).awaitResult()
+    }
+
+    private suspend fun isNotificationEnabled(userId: String, type: String): Boolean {
+        val preferenceType = SharedPrefsProfileSettingsRepository.preferenceTypeFor(type)
+        return suspendCoroutine { continuation ->
+            database.reference
+                .child("notificationPreferences")
+                .child(userId)
+                .child(preferenceType)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        continuation.resume(snapshot.getValue(Boolean::class.java) ?: true)
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        continuation.resume(true)
+                    }
+                })
+        }
     }
 }

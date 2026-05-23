@@ -7,6 +7,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.Notification
+import edu.bluejack252.hwixel.data.repository.SharedPrefsProfileSettingsRepository
 import kotlinx.coroutines.tasks.await
 
 open class NotificationFirebaseSource(
@@ -59,6 +60,7 @@ open class NotificationFirebaseSource(
         message: String,
         referenceId: String
     ) {
+        if (!isNotificationEnabled(userId, type)) return
         val ref = requireDb().child("notifications").child(userId).push()
         val data = mapOf(
             "type" to type,
@@ -89,6 +91,17 @@ open class NotificationFirebaseSource(
     open suspend fun fetchProjectMemberIds(projectId: String): List<String> {
         val snapshot = requireDb().child("projects").child(projectId).child("members").get().await()
         return snapshot.children.mapNotNull { it.key }
+    }
+
+    private suspend fun isNotificationEnabled(userId: String, type: String): Boolean {
+        val preferenceType = SharedPrefsProfileSettingsRepository.preferenceTypeFor(type)
+        val snapshot = requireDb()
+            .child("notificationPreferences")
+            .child(userId)
+            .child(preferenceType)
+            .get()
+            .await()
+        return snapshot.getValue(Boolean::class.java) ?: true
     }
 
     private fun requireDb(): DatabaseReference {

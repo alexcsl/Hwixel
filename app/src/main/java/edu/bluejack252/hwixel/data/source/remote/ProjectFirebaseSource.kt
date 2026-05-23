@@ -8,6 +8,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
+import edu.bluejack252.hwixel.util.constants.Constants
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -181,7 +182,11 @@ open class ProjectFirebaseSource(
     }
 
     override suspend fun updateCompletionPercentage(projectId: String, percentage: Float) {
+        val previousProject = fetchProjectOnce(projectId)
         projectsRef.child(projectId).child("completionPercentage").setValue(percentage).awaitResult()
+        if ((previousProject?.completionPercentage ?: 0f) < 100f && percentage >= 100f) {
+            incrementCompletedProjects(previousProject)
+        }
     }
 
     override suspend fun addMember(projectId: String, userId: String, member: ProjectMember) {
@@ -205,6 +210,22 @@ open class ProjectFirebaseSource(
         runCatching {
             database.reference.updateChildren(indexUpdates).awaitResult()
         }
+    }
+
+    private suspend fun incrementCompletedProjects(project: Project?) {
+        project?.members.orEmpty()
+            .filterValues { member -> member.status != Constants.MEMBER_STATUS_INACTIVE }
+            .keys
+            .forEach { userId ->
+                runCatching {
+                    val countRef = database.reference
+                        .child("users")
+                        .child(userId)
+                        .child("totalProjectsCompleted")
+                    val current = countRef.get().awaitResult().safeInt()
+                    countRef.setValue(current + 1).awaitResult()
+                }
+            }
     }
 
     private fun DataSnapshot.toProject(): Project? {
@@ -259,6 +280,14 @@ open class ProjectFirebaseSource(
             is Number -> raw.toFloat()
             is String -> raw.toFloatOrNull() ?: 0f
             else -> 0f
+        }
+    }
+
+    private fun DataSnapshot.safeInt(): Int {
+        return when (val raw = value) {
+            is Number -> raw.toInt()
+            is String -> raw.toIntOrNull() ?: 0
+            else -> 0
         }
     }
 

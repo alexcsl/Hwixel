@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Brand palette -->
-    <color name="brand_violet">#7C3AED</color>
-    <color name="brand_violet_light">#A78BFA</color>
-    <color name="brand_violet_dark">#5B21B6</color>
-    <color name="brand_violet_container">#2D1B69</color>
+    <color name="brand_violet">#6D28D9</color>
+    <color name="brand_violet_light">#7C3AED</color>
+    <color name="brand_violet_dark">#4C1D95</color>
+    <color name="brand_violet_container">#EDE9FE</color>
     <color name="brand_cyan">#06B6D4</color>
     <color name="brand_cyan_light">#67E8F9</color>
     <color name="brand_amber">#F59E0B</color>
@@ -13,48 +13,48 @@
     <color name="brand_indigo">#4F46E5</color>
 
     <!-- Backgrounds -->
-    <color name="bg_dark">#0D0B1E</color>
-    <color name="bg_surface">#1A1630</color>
-    <color name="bg_surface_2">#231E3D</color>
-    <color name="bg_surface_3">#2D2650</color>
+    <color name="bg_dark">#F7F4FF</color>
+    <color name="bg_surface">#FFFFFF</color>
+    <color name="bg_surface_2">#F0EAFB</color>
+    <color name="bg_surface_3">#E4D8F8</color>
 
     <!-- Glass tokens (alpha encoded in hex: 1A=10%, 26=15%, 33=20%, 40=25%, 66=40%) -->
-    <color name="glass_fill">#1AFFFFFF</color>
-    <color name="glass_fill_medium">#26FFFFFF</color>
-    <color name="glass_fill_strong">#40FFFFFF</color>
-    <color name="glass_border">#33FFFFFF</color>
-    <color name="glass_border_strong">#66FFFFFF</color>
-    <color name="glass_primary">#267C3AED</color>
-    <color name="glass_primary_border">#667C3AED</color>
-    <color name="glass_cyan">#2606B6D4</color>
-    <color name="glass_emerald">#2610B981</color>
-    <color name="glass_amber">#26F59E0B</color>
-    <color name="glass_rose">#26F43F5E</color>
+    <color name="glass_fill">#F2FFFFFF</color>
+    <color name="glass_fill_medium">#FFFFFFFF</color>
+    <color name="glass_fill_strong">#FFFFFFFF</color>
+    <color name="glass_border">#331F1235</color>
+    <color name="glass_border_strong">#4D6D28D9</color>
+    <color name="glass_primary">#1A6D28D9</color>
+    <color name="glass_primary_border">#4D6D28D9</color>
+    <color name="glass_cyan">#1A0891B2</color>
+    <color name="glass_emerald">#1A059669</color>
+    <color name="glass_amber">#1AD97706</color>
+    <color name="glass_rose">#1AE11D48</color>
 
     <!-- Text -->
-    <color name="text_primary">#F5F3FF</color>
-    <color name="text_secondary">#9B8EC4</color>
-    <color name="text_hint">#5C5380</color>
+    <color name="text_primary">#1F1235</color>
+    <color name="text_secondary">#625173</color>
+    <color name="text_hint">#8B7C99</color>
     <color name="text_on_primary">#FFFFFF</color>
-    <color name="text_on_surface">#E8E4FF</color>
+    <color name="text_on_surface">#1F1235</color>
 
     <!-- Status colours -->
-    <color name="status_todo_bg">#1A64748B</color>
-    <color name="status_todo_text">#94A3B8</color>
-    <color name="status_in_progress_bg">#1A06B6D4</color>
-    <color name="status_in_progress_text">#67E8F9</color>
-    <color name="status_review_bg">#1AF59E0B</color>
-    <color name="status_review_text">#FCD34D</color>
-    <color name="status_done_bg">#1A10B981</color>
-    <color name="status_done_text">#6EE7B7</color>
+    <color name="status_todo_bg">#E2E8F0</color>
+    <color name="status_todo_text">#475569</color>
+    <color name="status_in_progress_bg">#CFFAFE</color>
+    <color name="status_in_progress_text">#0E7490</color>
+    <color name="status_review_bg">#FEF3C7</color>
+    <color name="status_review_text">#B45309</color>
+    <color name="status_done_bg">#D1FAE5</color>
+    <color name="status_done_text">#047857</color>
 
     <!-- Priority colours -->
-    <color name="priority_high_bg">#1AF43F5E</color>
-    <color name="priority_high_text">#FB7185</color>
-    <color name="priority_medium_bg">#1AF59E0B</color>
-    <color name="priority_medium_text">#FCD34D</color>
-    <color name="priority_low_bg">#1A10B981</color>
-    <color name="priority_low_text">#6EE7B7</color>
+    <color name="priority_high_bg">#FFE4E6</color>
+    <color name="priority_high_text">#BE123C</color>
+    <color name="priority_medium_bg">#FEF3C7</color>
+    <color name="priority_medium_text">#B45309</color>
+    <color name="priority_low_bg">#D1FAE5</color>
+    <color name="priority_low_text">#047857</color>
 
     <!-- Analytics -->
     <color name="analytics_healthy">#10B981</color>

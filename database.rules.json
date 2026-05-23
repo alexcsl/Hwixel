@@ -5,7 +5,7 @@
       "$userId": {
         ".write": "$userId === auth.uid || (newData.child('id').val() === data.child('id').val() && newData.child('name').val() === data.child('name').val() && newData.child('studentId').val() === data.child('studentId').val() && newData.child('email').val() === data.child('email').val() && newData.child('phone').val() === data.child('phone').val() && newData.child('avatarUrl').val() === data.child('avatarUrl').val() && newData.child('totalProjectsCompleted').val() === data.child('totalProjectsCompleted').val() && newData.child('badges').val() === data.child('badges').val() && newData.child('averagePeerRating').isNumber())",
         "totalProjectsCompleted": {
-          ".write": "auth != null && newData.isNumber()"
+          ".write": "auth != null && newData.isNumber() && (!data.exists() || newData.val() >= data.val())"
         }
       }
     },

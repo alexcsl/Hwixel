@@ -8,6 +8,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.databinding.ItemMemberCardBinding
 import edu.bluejack252.hwixel.util.constants.Constants
@@ -43,6 +44,20 @@ class MembersAdapter(
             binding.memberNameTextView.text = item.name
             binding.roleChip.text = ctx.getString(R.string.member_role_label, item.role)
             binding.scoreTextView.text = ctx.getString(R.string.member_score_label, item.contributionScore)
+            binding.avatarInitialTextView.text = item.name.trim().firstOrNull()?.uppercaseChar()?.toString().orEmpty()
+            val hasAvatar = item.avatarUrl.isNotBlank()
+            binding.avatarImageView.isVisible = hasAvatar
+            binding.avatarInitialTextView.isVisible = !hasAvatar
+            if (hasAvatar) {
+                Glide.with(binding.avatarImageView)
+                    .load(item.avatarUrl)
+                    .placeholder(R.drawable.circle_background)
+                    .error(R.drawable.circle_background)
+                    .circleCrop()
+                    .into(binding.avatarImageView)
+            } else {
+                Glide.with(binding.avatarImageView).clear(binding.avatarImageView)
+            }
 
             val isActive = item.status == Constants.MEMBER_STATUS_ACTIVE
             binding.statusTextView.text = if (isActive)

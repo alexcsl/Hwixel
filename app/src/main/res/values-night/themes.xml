@@ -3,12 +3,26 @@
         <item name="colorPrimary">@color/brand_violet</item>
         <item name="colorPrimaryVariant">@color/brand_violet_dark</item>
         <item name="colorOnPrimary">@color/text_on_primary</item>
+        <item name="colorPrimaryContainer">@color/brand_violet_container</item>
+        <item name="colorOnPrimaryContainer">@color/brand_violet_light</item>
         <item name="colorSecondary">@color/brand_cyan</item>
+        <item name="colorSecondaryVariant">@color/brand_cyan_light</item>
         <item name="colorOnSecondary">@color/bg_dark</item>
         <item name="android:colorBackground">@color/bg_dark</item>
         <item name="colorSurface">@color/bg_surface</item>
         <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorSurfaceVariant">@color/bg_surface_2</item>
+        <item name="colorError">@color/brand_rose</item>
+        <item name="colorOnError">@color/text_on_primary</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/bg_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowBackground">@color/bg_dark</item>
+        <item name="bottomNavigationStyle">@style/Widget.HWiXeL.BottomNavigationView</item>
+        <item name="textInputStyle">@style/Widget.HWiXeL.TextInputLayout</item>
+        <item name="floatingActionButtonStyle">@style/Widget.HWiXeL.FloatingActionButton</item>
     </style>
 </resources>

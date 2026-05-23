@@ -24,6 +24,15 @@
             android:background="@drawable/bg_glass_card_primary"
             android:layout_marginEnd="12dp">
 
+            <ImageView
+                android:id="@+id/avatarImageView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/content_description_avatar"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                tools:src="@drawable/circle_background" />
+
             <TextView
                 android:id="@+id/avatarInitialTextView"
                 android:layout_width="match_parent"

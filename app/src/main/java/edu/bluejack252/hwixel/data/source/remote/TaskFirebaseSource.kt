@@ -97,8 +97,17 @@ open class TaskFirebaseSource(
         tasksRef.child(task.projectId).child(task.id).setValue(task).awaitResult()
     }
 
-    override suspend fun updateTaskStatus(projectId: String, taskId: String, status: String) {
-        tasksRef.child(projectId).child(taskId).child("status").setValue(status).awaitResult()
+    override suspend fun updateTaskStatus(
+        projectId: String,
+        taskId: String,
+        status: String,
+        completedAt: Long
+    ) {
+        val updates = mutableMapOf<String, Any>(
+            "status" to status,
+            "completedAt" to completedAt
+        )
+        tasksRef.child(projectId).child(taskId).updateChildren(updates).awaitResult()
     }
 
     override suspend fun addHistoryEntry(projectId: String, taskId: String, entry: HistoryEntry) {

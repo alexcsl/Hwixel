@@ -25,6 +25,7 @@ data class TaskEntity(
     val status: String,
     val priority: String,
     val deadline: Long,
+    val completedAt: Long,
     val assigneesJson: String,
     val lastSynced: Long
 )

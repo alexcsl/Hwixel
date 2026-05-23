@@ -1,46 +1,45 @@
 package edu.bluejack252.hwixel.ui.notifications
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import edu.bluejack252.hwixel.data.model.Notification
 import edu.bluejack252.hwixel.data.repository.NotificationRepository
 import kotlinx.coroutines.launch
 
 class NotificationsViewModel(
-    private val notificationRepository: NotificationRepository
+    private val repository: NotificationRepository,
+    private val currentUserId: String
 ) : ViewModel() {
-    private val _notifications = MediatorLiveData<List<Notification>>()
-    val notifications: LiveData<List<Notification>> = _notifications
 
-    private var currentUserId = ""
-    private var hasLoaded = false
+    private val _uiState = MutableLiveData<NotificationsUiState>(NotificationsUiState.Idle)
+    val uiState: LiveData<NotificationsUiState> = _uiState
 
-    init {
-        _notifications.value = emptyList()
+    val notifications: LiveData<List<Notification>> = repository.observeNotifications(currentUserId)
+
+    val unreadCount: LiveData<Int> = notifications.map { list ->
+        list.count { !it.isRead }
     }
 
-    fun load(userId: String) {
-        if (userId.isBlank() || (hasLoaded && currentUserId == userId)) return
-        hasLoaded = true
-        currentUserId = userId
-        _notifications.addSource(notificationRepository.observeNotifications(userId)) { value ->
-            _notifications.value = value
-        }
-    }
-
-    fun markRead(notificationId: String) {
-        if (currentUserId.isBlank() || notificationId.isBlank()) return
+    fun markRead(notifId: String) {
+        if (currentUserId.isBlank() || notifId.isBlank()) return
         viewModelScope.launch {
-            notificationRepository.markRead(currentUserId, notificationId)
+            repository.markRead(currentUserId, notifId)
         }
     }
 
     fun markAllRead() {
         if (currentUserId.isBlank()) return
+        _uiState.value = NotificationsUiState.Loading
         viewModelScope.launch {
-            notificationRepository.markAllRead(currentUserId)
+            val result = repository.markAllRead(currentUserId)
+            _uiState.value = if (result.isSuccess) {
+                NotificationsUiState.MarkedAllRead
+            } else {
+                NotificationsUiState.Error(result.exceptionOrNull()?.message ?: "")
+            }
         }
     }
 }

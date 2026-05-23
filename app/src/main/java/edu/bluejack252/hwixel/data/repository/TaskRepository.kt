@@ -11,6 +11,8 @@ import edu.bluejack252.hwixel.data.source.local.TaskDao
 import edu.bluejack252.hwixel.data.source.remote.NotificationFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.ProjectRemoteSource
 import edu.bluejack252.hwixel.data.source.remote.TaskRemoteSource
+import edu.bluejack252.hwixel.data.source.remote.UserRemoteSource
+import edu.bluejack252.hwixel.util.BadgeEngine
 import edu.bluejack252.hwixel.util.DeadlineScheduler
 import edu.bluejack252.hwixel.util.ScoreCalculator
 import edu.bluejack252.hwixel.util.constants.Constants
@@ -47,6 +49,7 @@ class TaskRepositoryImpl(
     private val localDao: TaskDao,
     private val projectSource: ProjectRemoteSource? = null,
     private val notifSource: NotificationFirebaseSource? = null,
+    private val userSource: UserRemoteSource? = null,
     private val appContext: Context? = null
 ) : TaskRepository {
 
@@ -100,7 +103,8 @@ class TaskRepositoryImpl(
         newStatus: String,
         actorId: String
     ): Result<Unit> = runCatching {
-        firebaseSource.updateTaskStatus(projectId, taskId, newStatus)
+        val completionTimestamp = if (newStatus == Constants.STATUS_DONE) System.currentTimeMillis() else 0L
+        firebaseSource.updateTaskStatus(projectId, taskId, newStatus, completionTimestamp)
 
         val historyEntry = HistoryEntry(
             actorId = actorId,
@@ -110,7 +114,9 @@ class TaskRepositoryImpl(
         firebaseSource.addHistoryEntry(projectId, taskId, historyEntry)
 
         val cached = localDao.getById(taskId)
-        if (cached != null) localDao.upsert(cached.copy(status = newStatus))
+        if (cached != null) {
+            localDao.upsert(cached.copy(status = newStatus, completedAt = completionTimestamp))
+        }
 
         val allTasks = recomputeCompletionPercentage(projectId)
         if (newStatus == Constants.STATUS_DONE && projectSource != null) {
@@ -121,6 +127,34 @@ class TaskRepositoryImpl(
             }
             val score = ScoreCalculator.calculate(actorCompleted, actorTasks.size, actorHighPri)
             projectSource.updateMemberScore(projectId, actorId, score)
+            awardBadges(projectId, actorId, score, allTasks)
+        }
+    }
+
+    private suspend fun awardBadges(
+        projectId: String,
+        actorId: String,
+        actorScore: Float,
+        allTasks: List<Task>
+    ) {
+        if (actorId.isBlank() || userSource == null || projectSource == null) return
+        val project = projectSource.fetchProjectOnce(projectId) ?: return
+        val updatedMembers = project.members.toMutableMap()
+        val currentMember = updatedMembers[actorId]
+        if (currentMember != null) {
+            updatedMembers[actorId] = currentMember.copy(contributionScore = actorScore)
+        }
+
+        val user = userSource.fetchUser(actorId) ?: return
+        var badges = user.badges
+        if (BadgeEngine.shouldAwardTopContributor(actorId, updatedMembers)) {
+            badges = BadgeEngine.withBadge(badges, BadgeEngine.BADGE_TOP_CONTRIBUTOR)
+        }
+        if (BadgeEngine.shouldAwardDeadlineCrusher(actorId, allTasks)) {
+            badges = BadgeEngine.withBadge(badges, BadgeEngine.BADGE_DEADLINE_CRUSHER)
+        }
+        if (badges != user.badges) {
+            userSource.updateBadges(actorId, badges)
         }
     }
 

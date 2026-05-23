@@ -5,13 +5,10 @@ import androidx.lifecycle.ViewModelProvider
 import edu.bluejack252.hwixel.data.repository.NotificationRepository
 
 class NotificationsViewModelFactory(
-    private val notificationRepository: NotificationRepository
+    private val repository: NotificationRepository,
+    private val currentUserId: String
 ) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(NotificationsViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return NotificationsViewModel(notificationRepository) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+        NotificationsViewModel(repository, currentUserId) as T
 }

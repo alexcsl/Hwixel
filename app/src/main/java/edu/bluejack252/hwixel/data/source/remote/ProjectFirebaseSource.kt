@@ -8,6 +8,9 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 open class ProjectFirebaseSource(
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -148,6 +151,19 @@ open class ProjectFirebaseSource(
         })
         return liveData
     }
+
+    override suspend fun fetchProjectOnce(projectId: String): Project? =
+        suspendCoroutine { continuation ->
+            projectsRef.child(projectId).addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    continuation.resume(snapshot.toProjectOrNull())
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    continuation.resumeWithException(error.toException())
+                }
+            })
+        }
 
     override suspend fun createProject(project: Project): Project {
         val key = project.id.ifBlank { projectsRef.push().key.orEmpty() }

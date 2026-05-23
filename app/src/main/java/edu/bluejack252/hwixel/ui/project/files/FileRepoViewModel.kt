@@ -4,8 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.map
-import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import edu.bluejack252.hwixel.data.model.FileLink
 import edu.bluejack252.hwixel.data.repository.FileRepository

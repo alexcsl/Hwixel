@@ -3,16 +3,18 @@ package edu.bluejack252.hwixel.data
 import android.content.Context
 import edu.bluejack252.hwixel.data.repository.AttendanceRepository
 import edu.bluejack252.hwixel.data.repository.AttendanceRepositoryImpl
+import edu.bluejack252.hwixel.data.repository.AuthRepository
+import edu.bluejack252.hwixel.data.repository.AuthRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.EvalRepository
 import edu.bluejack252.hwixel.data.repository.EvalRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.FileRepository
 import edu.bluejack252.hwixel.data.repository.FileRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.NotificationRepository
 import edu.bluejack252.hwixel.data.repository.NotificationRepositoryImpl
-import edu.bluejack252.hwixel.data.repository.AuthRepository
-import edu.bluejack252.hwixel.data.repository.AuthRepositoryImpl
+import edu.bluejack252.hwixel.data.repository.ProfileSettingsRepository
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
 import edu.bluejack252.hwixel.data.repository.ProjectRepositoryImpl
+import edu.bluejack252.hwixel.data.repository.SharedPrefsProfileSettingsRepository
 import edu.bluejack252.hwixel.data.repository.TaskRepository
 import edu.bluejack252.hwixel.data.repository.TaskRepositoryImpl
 import edu.bluejack252.hwixel.data.repository.TeamHealthRepository
@@ -22,11 +24,11 @@ import edu.bluejack252.hwixel.data.repository.UserRepositoryImpl
 import edu.bluejack252.hwixel.data.source.local.HwixelDatabase
 import edu.bluejack252.hwixel.data.source.remote.AttachmentUploadSource
 import edu.bluejack252.hwixel.data.source.remote.AttendanceFirebaseSource
+import edu.bluejack252.hwixel.data.source.remote.AuthFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.EvalFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.FileFirebaseSource
-import edu.bluejack252.hwixel.data.source.remote.NotificationFirebaseSource
-import edu.bluejack252.hwixel.data.source.remote.AuthFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.GptApiSource
+import edu.bluejack252.hwixel.data.source.remote.NotificationFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.ProjectFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.SupabaseStorageSource
 import edu.bluejack252.hwixel.data.source.remote.TaskFirebaseSource
@@ -43,6 +45,7 @@ object ServiceLocator {
     private var fileRepository: FileRepository? = null
     private var notificationRepository: NotificationRepository? = null
     private var attachmentUploadSource: AttachmentUploadSource? = null
+    private var profileSettingsRepository: ProfileSettingsRepository? = null
 
     fun getAuthRepository(context: Context): AuthRepository {
         return authRepository ?: AuthRepositoryImpl(
@@ -72,6 +75,7 @@ object ServiceLocator {
             localDao = HwixelDatabase.getInstance(context).taskDao(),
             projectSource = ProjectFirebaseSource(),
             notifSource = NotificationFirebaseSource(),
+            userSource = UserFirebaseSource(),
             appContext = context.applicationContext
         ).also { taskRepository = it }
     }
@@ -81,6 +85,8 @@ object ServiceLocator {
             source = NotificationFirebaseSource()
         ).also { notificationRepository = it }
     }
+
+    fun getNotificationSource(): NotificationFirebaseSource = NotificationFirebaseSource()
 
     fun getTeamHealthRepository(): TeamHealthRepository {
         return teamHealthRepository ?: TeamHealthRepositoryImpl(
@@ -111,6 +117,11 @@ object ServiceLocator {
             .also { attachmentUploadSource = it }
     }
 
+    fun getProfileSettingsRepository(context: Context): ProfileSettingsRepository {
+        return profileSettingsRepository ?: SharedPrefsProfileSettingsRepository(context)
+            .also { profileSettingsRepository = it }
+    }
+
     fun reset() {
         authRepository = null
         userRepository = null
@@ -122,5 +133,6 @@ object ServiceLocator {
         fileRepository = null
         notificationRepository = null
         attachmentUploadSource = null
+        profileSettingsRepository = null
     }
 }

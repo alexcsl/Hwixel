@@ -14,6 +14,7 @@ fun TaskEntity.toDomain(): Task = Task(
     status = status,
     priority = priority,
     deadline = deadline,
+    completedAt = completedAt,
     assignees = listConverter.toList(assigneesJson)
 )
 
@@ -25,6 +26,7 @@ fun Task.toEntity(lastSynced: Long = System.currentTimeMillis()): TaskEntity = T
     status = status,
     priority = priority,
     deadline = deadline,
+    completedAt = completedAt,
     assigneesJson = listConverter.fromList(assignees),
     lastSynced = lastSynced
 )

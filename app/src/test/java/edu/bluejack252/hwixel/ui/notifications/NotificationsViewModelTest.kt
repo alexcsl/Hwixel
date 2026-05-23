@@ -25,8 +25,9 @@ class NotificationsViewModelTest {
     @Before
     fun setUp() {
         repository = FakeNotificationRepository()
-        viewModel = NotificationsViewModel(repository)
+        viewModel = NotificationsViewModel(repository, currentUserId = "u1")
         viewModel.notifications.observeForever { }
+        viewModel.unreadCount.observeForever { }
     }
 
     @Test
@@ -37,15 +38,11 @@ class NotificationsViewModelTest {
             Notification(id = "n3", isRead = false)
         )
 
-        viewModel.load("u1")
-
-        assertEquals(2, viewModel.notifications.value.orEmpty().count { !it.isRead })
+        assertEquals(2, viewModel.unreadCount.value)
     }
 
     @Test
     fun markReadUsesCurrentUserAndNotificationId() = runTest {
-        viewModel.load("u1")
-
         viewModel.markRead("n1")
         advanceUntilIdle()
 
@@ -54,8 +51,6 @@ class NotificationsViewModelTest {
 
     @Test
     fun markAllReadUsesCurrentUser() = runTest {
-        viewModel.load("u1")
-
         viewModel.markAllRead()
         advanceUntilIdle()
 

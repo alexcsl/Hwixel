@@ -12,6 +12,7 @@ interface UserRepository {
     fun observeUsers(): LiveData<List<User>>
     fun observeUser(userId: String): LiveData<User?>
     fun observeNotifications(userId: String): LiveData<List<Notification>> = MutableLiveData(emptyList())
+    suspend fun refreshUser(userId: String): Result<User?> = Result.success(null)
     suspend fun upsertUser(user: User): Result<Unit>
     suspend fun findUserByEmail(email: String): Result<User?>
     suspend fun writeNotification(userId: String, notifId: String, payload: Map<String, Any>): Result<Unit>
@@ -33,6 +34,12 @@ class UserRepositoryImpl(
 
     override fun observeNotifications(userId: String): LiveData<List<Notification>> {
         return firebaseSource.observeNotifications(userId)
+    }
+
+    override suspend fun refreshUser(userId: String): Result<User?> = runCatching {
+        val user = firebaseSource.fetchUser(userId)
+        if (user != null) localDao.upsert(user.toEntity())
+        user
     }
 
     override suspend fun upsertUser(user: User): Result<Unit> = runCatching {

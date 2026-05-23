@@ -56,6 +56,30 @@
     <string name="logout_button">Log out</string>
     <string name="logout_confirm_title">Log out?</string>
     <string name="logout_confirm_message">You will return to the login screen.</string>
+    <string name="profile_unknown_name">Student profile</string>
+    <string name="profile_missing_student_id">Student ID not set</string>
+    <string name="profile_projects_completed">projects completed</string>
+    <string name="profile_average_rating">average peer rating</string>
+    <string name="profile_badges">Badges</string>
+    <string name="profile_no_badges">No badges earned yet.</string>
+    <string name="profile_preferences">Preferences</string>
+    <string name="profile_dark_mode">Dark mode</string>
+    <string name="profile_language">Language</string>
+    <string name="profile_language_english">English</string>
+    <string name="profile_language_bahasa">Bahasa Indonesia</string>
+    <string name="profile_notification_preferences">Notification preferences</string>
+    <string name="profile_notif_task_assigned">Task assignments</string>
+    <string name="profile_notif_mentions">Mentions</string>
+    <string name="profile_notif_deadline">Deadline reminders</string>
+    <string name="profile_notif_evaluation">Peer evaluations</string>
+    <string name="profile_notif_invites">Project invitations</string>
+    <string name="profile_edit_title">Edit profile</string>
+    <string name="profile_change_avatar">Change avatar</string>
+    <string name="profile_required_fields">Name and student ID are required.</string>
+    <string name="profile_saved">Profile saved.</string>
+    <string name="profile_save_failed">Failed to save profile.</string>
+    <string name="badge_top_contributor">Top Contributor</string>
+    <string name="badge_deadline_crusher">Deadline Crusher</string>
 
     <!-- Project Hub -->
     <string name="project_hub_title">Project Hub</string>
@@ -399,6 +423,7 @@
     <string name="loading">Loading...</string>
     <string name="btn_ok">OK</string>
     <string name="btn_close">Close</string>
+    <string name="btn_save">Save</string>
     <string name="content_description_avatar">User avatar</string>
     <string name="content_description_member_status">Member status indicator</string>
 </resources>

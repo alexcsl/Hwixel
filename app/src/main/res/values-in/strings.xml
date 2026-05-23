@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_profile">Profil</string>
+    <string name="profile_unknown_name">Profil mahasiswa</string>
+    <string name="profile_missing_student_id">NIM belum diatur</string>
+    <string name="profile_projects_completed">proyek selesai</string>
+    <string name="profile_average_rating">rata-rata nilai rekan</string>
+    <string name="profile_badges">Lencana</string>
+    <string name="profile_no_badges">Belum ada lencana.</string>
+    <string name="profile_preferences">Preferensi</string>
+    <string name="profile_dark_mode">Mode gelap</string>
+    <string name="profile_language">Bahasa</string>
+    <string name="profile_language_english">Inggris</string>
+    <string name="profile_language_bahasa">Bahasa Indonesia</string>
+    <string name="profile_notification_preferences">Preferensi notifikasi</string>
+    <string name="profile_notif_task_assigned">Penugasan tugas</string>
+    <string name="profile_notif_mentions">Sebutan</string>
+    <string name="profile_notif_deadline">Pengingat tenggat</string>
+    <string name="profile_notif_evaluation">Evaluasi rekan</string>
+    <string name="profile_notif_invites">Undangan proyek</string>
+    <string name="profile_edit_title">Ubah profil</string>
+    <string name="profile_change_avatar">Ganti avatar</string>
+    <string name="profile_required_fields">Nama dan NIM wajib diisi.</string>
+    <string name="profile_saved">Profil tersimpan.</string>
+    <string name="profile_save_failed">Gagal menyimpan profil.</string>
+    <string name="badge_top_contributor">Kontributor Terbaik</string>
+    <string name="badge_deadline_crusher">Penakluk Tenggat</string>
+</resources>

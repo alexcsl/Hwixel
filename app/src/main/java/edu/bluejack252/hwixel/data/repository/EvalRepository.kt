@@ -3,8 +3,8 @@ package edu.bluejack252.hwixel.data.repository
 import androidx.lifecycle.LiveData
 import com.google.firebase.database.FirebaseDatabase
 import edu.bluejack252.hwixel.data.model.EvaluationSubmission
-import edu.bluejack252.hwixel.data.source.remote.EvalPeriodNotifier
 import edu.bluejack252.hwixel.data.source.remote.EvalFirebaseSource
+import edu.bluejack252.hwixel.data.source.remote.EvalPeriodNotifier
 import edu.bluejack252.hwixel.data.source.remote.FirebaseEvalPeriodNotifier
 import kotlinx.coroutines.tasks.await
 

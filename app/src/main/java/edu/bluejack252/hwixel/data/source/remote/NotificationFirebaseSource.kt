@@ -3,8 +3,8 @@ package edu.bluejack252.hwixel.data.source.remote
 import androidx.lifecycle.LiveData
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.Notification
 import kotlinx.coroutines.tasks.await

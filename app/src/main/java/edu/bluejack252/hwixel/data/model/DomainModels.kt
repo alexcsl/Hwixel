@@ -44,6 +44,7 @@ data class Task(
     val status: String = "",
     val priority: String = "",
     val deadline: Long = 0L,
+    val completedAt: Long = 0L,
     val assignees: List<String> = emptyList(),
     val attachments: List<Attachment> = emptyList(),
     val comments: Map<String, Comment> = emptyMap(),

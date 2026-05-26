@@ -50,6 +50,7 @@ class LoginFragment : Fragment() {
             LoginUiState.Loading -> Unit
             LoginUiState.Success -> {
                 Snackbar.make(binding.root, R.string.login_success, Snackbar.LENGTH_SHORT).show()
+                ServiceLocator.getProfileSettingsRepository(requireContext()).applyAppearance()
                 findNavController().setGraph(R.navigation.main_nav_graph)
             }
             is LoginUiState.Error -> showError(state.messageResId)

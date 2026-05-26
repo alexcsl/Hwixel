@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
@@ -218,12 +219,12 @@ open class ProjectFirebaseSource(
             .keys
             .forEach { userId ->
                 runCatching {
-                    val countRef = database.reference
+                    database.reference
                         .child("users")
                         .child(userId)
                         .child("totalProjectsCompleted")
-                    val current = countRef.get().awaitResult().safeInt()
-                    countRef.setValue(current + 1).awaitResult()
+                        .setValue(ServerValue.increment(1))
+                        .awaitResult()
                 }
             }
     }
@@ -280,14 +281,6 @@ open class ProjectFirebaseSource(
             is Number -> raw.toFloat()
             is String -> raw.toFloatOrNull() ?: 0f
             else -> 0f
-        }
-    }
-
-    private fun DataSnapshot.safeInt(): Int {
-        return when (val raw = value) {
-            is Number -> raw.toInt()
-            is String -> raw.toIntOrNull() ?: 0
-            else -> 0
         }
     }
 

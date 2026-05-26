@@ -1,13 +1,12 @@
 package edu.bluejack252.hwixel.ui.profile
 
-import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
-import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -194,7 +193,7 @@ class ProfileFragment : Fragment() {
             .setPositiveButton(R.string.btn_save, null)
             .create()
         dialog.setOnShowListener {
-            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val name = dialogBinding.nameInput.editText?.text?.toString().orEmpty()
                 val studentId = dialogBinding.studentIdInput.editText?.text?.toString().orEmpty()
                 if (name.isBlank() || studentId.isBlank()) {
@@ -214,7 +213,7 @@ class ProfileFragment : Fragment() {
     private fun saveProfileFromDialog(
         user: User,
         dialogBinding: DialogEditProfileBinding,
-        dialog: androidx.appcompat.app.AlertDialog,
+        dialog: AlertDialog,
         name: String,
         studentId: String
     ) {
@@ -224,7 +223,7 @@ class ProfileFragment : Fragment() {
             dialog.dismiss()
             return
         }
-        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).isEnabled = false
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
         lifecycleScope.launch {
             val uploadResult = uploadAvatar(user.id, pickedUri)
             uploadResult
@@ -234,7 +233,7 @@ class ProfileFragment : Fragment() {
                     dialog.dismiss()
                 }
                 .onFailure {
-                    dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).isEnabled = true
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
                     Snackbar.make(dialogBinding.root, R.string.profile_save_failed, Snackbar.LENGTH_SHORT).show()
                 }
         }
@@ -242,7 +241,13 @@ class ProfileFragment : Fragment() {
 
     private suspend fun uploadAvatar(userId: String, uri: Uri): Result<String> = runCatching {
         val contentType = requireContext().contentResolver.getType(uri) ?: "image/jpeg"
-        val fileName = queryDisplayName(uri) ?: "$userId.jpg"
+        val extension = when (contentType) {
+            "image/png" -> "png"
+            "image/webp" -> "webp"
+            "image/gif" -> "gif"
+            else -> "jpg"
+        }
+        val fileName = "$userId-${System.currentTimeMillis()}.$extension"
         val bytes = withContext(Dispatchers.IO) {
             requireNotNull(requireContext().contentResolver.openInputStream(uri)) { "Cannot open avatar." }
                 .use { stream -> stream.readBytes() }
@@ -250,15 +255,6 @@ class ProfileFragment : Fragment() {
         ServiceLocator.getAttachmentUploadSource()
             .upload("avatars", fileName, bytes, contentType)
             .getOrThrow()
-    }
-
-    private fun queryDisplayName(uri: Uri): String? {
-        val cursor: Cursor = requireContext().contentResolver.query(uri, null, null, null, null)
-            ?: return null
-        return cursor.use {
-            val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            if (nameIndex >= 0 && it.moveToFirst()) it.getString(nameIndex) else null
-        }
     }
 
     private fun confirmLogout() {

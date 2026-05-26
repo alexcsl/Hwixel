@@ -5,7 +5,6 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -64,7 +63,6 @@ class MainActivity : AppCompatActivity() {
             ?.navController
         navController?.currentDestination?.let(::updateBottomNavVisibility)
             ?: run { binding.bottomNavigationView.isVisible = FirebaseAuth.getInstance().currentUser != null }
-        window.navigationBarColor = ContextCompat.getColor(this, R.color.bg_surface)
     }
 
     private fun updateBottomNavVisibility(destination: NavDestination) {

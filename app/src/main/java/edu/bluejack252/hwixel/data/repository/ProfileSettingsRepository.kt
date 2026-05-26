@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 
 interface ProfileSettingsRepository {
@@ -19,6 +22,7 @@ interface ProfileSettingsRepository {
 
 class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRepository {
     private val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private var remoteMirrorAttachedFor: String? = null
 
     override fun isDarkMode(): Boolean = prefs.getBoolean(KEY_DARK_MODE, true)
 
@@ -57,7 +61,6 @@ class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRe
     }
 
     override fun notificationSettings(): Map<String, Boolean> {
-        syncNotificationPreferences()
         return NOTIFICATION_TYPES.associateWith(::isNotificationEnabled)
     }
 
@@ -67,6 +70,31 @@ class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRe
         )
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(languageTag()))
         syncNotificationPreferences()
+        startRemotePreferenceMirror()
+    }
+
+    private fun startRemotePreferenceMirror() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        if (remoteMirrorAttachedFor == uid) return
+        remoteMirrorAttachedFor = uid
+        runCatching {
+            FirebaseDatabase.getInstance().reference
+                .child("notificationPreferences")
+                .child(uid)
+                .addChildEventListener(object : ChildEventListener {
+                    override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) = writeFromRemote(snapshot)
+                    override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) = writeFromRemote(snapshot)
+                    override fun onChildRemoved(snapshot: DataSnapshot) {}
+                    override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+                    override fun onCancelled(error: DatabaseError) {}
+                })
+        }
+    }
+
+    private fun writeFromRemote(snapshot: DataSnapshot) {
+        val type = snapshot.key ?: return
+        val value = snapshot.getValue(Boolean::class.java) ?: return
+        prefs.edit().putBoolean(notificationKey(type), value).apply()
     }
 
     private fun notificationKey(type: String): String = "$KEY_NOTIFICATION_PREFIX$type"

@@ -53,6 +53,7 @@ class RegisterFragment : Fragment() {
             RegisterUiState.Loading -> Unit
             RegisterUiState.Success -> {
                 Snackbar.make(binding.root, R.string.register_success, Snackbar.LENGTH_SHORT).show()
+                ServiceLocator.getProfileSettingsRepository(requireContext()).applyAppearance()
                 findNavController().setGraph(R.navigation.main_nav_graph)
             }
             is RegisterUiState.Error -> showError(state.messageResId)

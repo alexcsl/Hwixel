@@ -18,6 +18,7 @@ interface ProfileSettingsRepository {
     fun setNotificationEnabled(type: String, enabled: Boolean)
     fun notificationSettings(): Map<String, Boolean>
     fun applyAppearance()
+    fun consumeNavigationRecoveryRequired(): Boolean
 }
 
 class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRepository {
@@ -27,7 +28,9 @@ class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRe
     override fun isDarkMode(): Boolean = prefs.getBoolean(KEY_DARK_MODE, true)
 
     override fun setDarkMode(enabled: Boolean) {
+        val changed = isDarkMode() != enabled
         prefs.edit().putBoolean(KEY_DARK_MODE, enabled).apply()
+        if (changed) markNavigationRecoveryRequired()
         AppCompatDelegate.setDefaultNightMode(
             if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
         )
@@ -38,7 +41,9 @@ class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRe
 
     override fun setLanguageTag(tag: String) {
         val normalized = if (SUPPORTED_LANGUAGE_TAGS.contains(tag)) tag else DEFAULT_LANGUAGE_TAG
+        val changed = languageTag() != normalized
         prefs.edit().putString(KEY_LANGUAGE_TAG, normalized).apply()
+        if (changed) markNavigationRecoveryRequired()
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(normalized))
     }
 
@@ -73,6 +78,14 @@ class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRe
         startRemotePreferenceMirror()
     }
 
+    override fun consumeNavigationRecoveryRequired(): Boolean {
+        val required = prefs.getBoolean(KEY_NAV_RECOVERY_REQUIRED, false)
+        if (required) {
+            prefs.edit().putBoolean(KEY_NAV_RECOVERY_REQUIRED, false).apply()
+        }
+        return required
+    }
+
     private fun startRemotePreferenceMirror() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         if (remoteMirrorAttachedFor == uid) return
@@ -82,8 +95,10 @@ class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRe
                 .child("notificationPreferences")
                 .child(uid)
                 .addChildEventListener(object : ChildEventListener {
-                    override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) = writeFromRemote(snapshot)
-                    override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) = writeFromRemote(snapshot)
+                    override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) =
+                        writeFromRemote(uid, snapshot)
+                    override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) =
+                        writeFromRemote(uid, snapshot)
                     override fun onChildRemoved(snapshot: DataSnapshot) {}
                     override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
                     override fun onCancelled(error: DatabaseError) {}
@@ -91,13 +106,22 @@ class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRe
         }
     }
 
-    private fun writeFromRemote(snapshot: DataSnapshot) {
+    private fun writeFromRemote(uid: String, snapshot: DataSnapshot) {
         val type = snapshot.key ?: return
         val value = snapshot.getValue(Boolean::class.java) ?: return
-        prefs.edit().putBoolean(notificationKey(type), value).apply()
+        prefs.edit().putBoolean(notificationKey(type, uid), value).apply()
     }
 
-    private fun notificationKey(type: String): String = "$KEY_NOTIFICATION_PREFIX$type"
+    private fun notificationKey(
+        type: String,
+        uid: String = FirebaseAuth.getInstance().currentUser?.uid ?: KEY_ANONYMOUS_USER
+    ): String {
+        return "$KEY_NOTIFICATION_PREFIX${uid}_$type"
+    }
+
+    private fun markNavigationRecoveryRequired() {
+        prefs.edit().putBoolean(KEY_NAV_RECOVERY_REQUIRED, true).apply()
+    }
 
     private fun syncNotificationPreferences() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
@@ -116,6 +140,8 @@ class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRe
         const val KEY_LANGUAGE_TAG = "language_tag"
         const val DEFAULT_LANGUAGE_TAG = "en"
         private const val KEY_NOTIFICATION_PREFIX = "notification_"
+        private const val KEY_ANONYMOUS_USER = "anonymous"
+        private const val KEY_NAV_RECOVERY_REQUIRED = "nav_recovery_required"
 
         const val NOTIF_TASK_ASSIGNED = "task_assigned"
         const val NOTIF_MENTION = "mention"

@@ -95,13 +95,15 @@ open class NotificationFirebaseSource(
 
     private suspend fun isNotificationEnabled(userId: String, type: String): Boolean {
         val preferenceType = SharedPrefsProfileSettingsRepository.preferenceTypeFor(type)
-        val snapshot = requireDb()
-            .child("notificationPreferences")
-            .child(userId)
-            .child(preferenceType)
-            .get()
-            .await()
-        return snapshot.getValue(Boolean::class.java) ?: true
+        return runCatching {
+            val snapshot = requireDb()
+                .child("notificationPreferences")
+                .child(userId)
+                .child(preferenceType)
+                .get()
+                .await()
+            snapshot.getValue(Boolean::class.java) ?: true
+        }.getOrDefault(true)
     }
 
     private fun requireDb(): DatabaseReference {

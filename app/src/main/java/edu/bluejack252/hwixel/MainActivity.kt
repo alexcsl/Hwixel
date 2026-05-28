@@ -14,6 +14,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
+import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -78,7 +79,9 @@ class MainActivity : AppCompatActivity() {
             val destinationId = item.itemId
             navigateToBottomDestination(navController, destinationId)
         }
-        binding.bottomNavigationView.setOnItemReselectedListener { }
+        binding.bottomNavigationView.setOnItemReselectedListener { item ->
+            navigateToBottomDestination(navController, item.itemId)
+        }
     }
 
     private fun navigateToBottomDestination(
@@ -86,28 +89,50 @@ class MainActivity : AppCompatActivity() {
         destinationId: Int
     ): Boolean {
         if (destinationId !in BOTTOM_NAV_DESTINATIONS) return false
-        if (navController.currentDestination?.id == destinationId) return true
         if (FirebaseAuth.getInstance().currentUser == null) return false
+        if (destinationId == R.id.dashboardFragment) {
+            return navigateToDashboard(navController)
+        }
+        if (navController.currentDestination?.id == destinationId) return true
 
         return runCatching {
             ensureMainGraph(navController)
-            if (!navController.popBackStack(R.id.dashboardFragment, false)) {
-                navController.setGraph(R.navigation.main_nav_graph)
-            }
-            if (destinationId != R.id.dashboardFragment) {
-                navController.navigate(
-                    destinationId,
-                    null,
-                    NavOptions.Builder()
-                        .setLaunchSingleTop(true)
-                        .build()
-                )
-            }
+            val options = NavOptions.Builder()
+                .setLaunchSingleTop(true)
+                .setPopUpTo(R.id.dashboardFragment, false, false)
+                .build()
+            navController.navigate(destinationId, null, options)
         }.recoverCatching {
             navController.setGraph(R.navigation.main_nav_graph)
             if (destinationId != R.id.dashboardFragment) {
                 navController.navigate(destinationId)
             }
+        }.isSuccess
+    }
+
+    private fun navigateToDashboard(navController: NavController): Boolean {
+        return runCatching {
+            val needsRecovery = ServiceLocator.getProfileSettingsRepository(this)
+                .consumeNavigationRecoveryRequired()
+            if (needsRecovery) {
+                navController.setGraph(R.navigation.main_nav_graph)
+                return@runCatching
+            }
+            ensureMainGraph(navController)
+            if (!navController.popBackStack(R.id.dashboardFragment, false) ||
+                navController.currentDestination?.id != R.id.dashboardFragment
+            ) {
+                navController.navigate(
+                    R.id.dashboardFragment,
+                    null,
+                    NavOptions.Builder()
+                        .setLaunchSingleTop(true)
+                        .setPopUpTo(R.id.dashboardFragment, false, false)
+                        .build()
+                )
+            }
+        }.recoverCatching {
+            navController.setGraph(R.navigation.main_nav_graph)
         }.isSuccess
     }
 

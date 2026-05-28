@@ -35,6 +35,7 @@ class CreateEditTaskViewModelTest {
         viewModel = CreateEditTaskViewModel(
             projectId = "p1",
             taskId = "t1",
+            currentUserId = "u1",
             taskRepository = taskRepository,
             projectRepository = FakeProjectRepository(projectLiveData),
             userRepository = FakeUserRepository(usersLiveData)
@@ -44,7 +45,7 @@ class CreateEditTaskViewModelTest {
 
     @Test
     fun editPreservesSubtaskIdAndDoneState() = runTest {
-        projectLiveData.value = Project(id = "p1")
+        projectLiveData.value = leadProject()
         usersLiveData.value = emptyList()
         taskLiveData.value = Task(
             id = "t1",
@@ -78,7 +79,7 @@ class CreateEditTaskViewModelTest {
             url = "https://example.com/design.png",
             type = "image"
         )
-        projectLiveData.value = Project(id = "p1")
+        projectLiveData.value = leadProject()
         usersLiveData.value = emptyList()
         taskLiveData.value = Task(
             id = "t1",
@@ -137,5 +138,14 @@ class CreateEditTaskViewModelTest {
         override suspend fun upsertUser(user: User): Result<Unit> = Result.success(Unit)
         override suspend fun findUserByEmail(email: String): Result<User?> = Result.success(null)
         override suspend fun writeNotification(userId: String, notifId: String, payload: Map<String, Any>): Result<Unit> = Result.success(Unit)
+    }
+
+    private fun leadProject(): Project {
+        return Project(
+            id = "p1",
+            members = mapOf(
+                "u1" to ProjectMember(userId = "u1", role = "Team Lead")
+            )
+        )
     }
 }

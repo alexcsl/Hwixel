@@ -71,6 +71,7 @@ class CreateEditTaskFragment : Fragment() {
         CreateEditTaskViewModelFactory(
             projectId = args.projectId,
             taskId = args.taskId,
+            currentUserId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty(),
             taskRepository = ServiceLocator.getTaskRepository(requireContext()),
             projectRepository = ServiceLocator.getProjectRepository(requireContext()),
             userRepository = ServiceLocator.getUserRepository(requireContext())
@@ -93,6 +94,7 @@ class CreateEditTaskFragment : Fragment() {
         binding.addSubtaskButton.setOnClickListener { addSubtaskRow() }
         binding.addAttachmentButton.setOnClickListener { showAddAttachmentDialog() }
         binding.uploadAttachmentButton.setOnClickListener { pickFileLauncher.launch("*/*") }
+        binding.saveTaskButton.isEnabled = false
         binding.saveTaskButton.setOnClickListener { save() }
         binding.editAttachmentsRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
@@ -104,6 +106,7 @@ class CreateEditTaskFragment : Fragment() {
             when (state) {
                 is CreateEditTaskUiState.Loaded -> {
                     availableMembers = state.projectMembers
+                    binding.saveTaskButton.isEnabled = state.canSaveTask
                     if (state.task != null && subtaskViews.isEmpty()) {
                         prefillTask(state.task)
                     }

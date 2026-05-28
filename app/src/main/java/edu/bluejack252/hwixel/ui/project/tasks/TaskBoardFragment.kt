@@ -62,6 +62,7 @@ class TaskBoardFragment : Fragment() {
         setupToggle()
         setupFab()
         setupFilter()
+        observeCreateTaskPermission()
         viewModel.uiState.observe(viewLifecycleOwner, ::render)
         viewModel.statusUpdateResult.observe(viewLifecycleOwner) { result ->
             result ?: return@observe
@@ -104,6 +105,7 @@ class TaskBoardFragment : Fragment() {
     }
 
     private fun setupFab() {
+        binding.addTaskFab.isVisible = false
         binding.addTaskFab.setOnClickListener {
             requireParentFragment().findNavController().navigate(
                 ProjectHubFragmentDirections.actionProjectHubFragmentToCreateEditTaskFragment(
@@ -112,6 +114,16 @@ class TaskBoardFragment : Fragment() {
                 )
             )
         }
+    }
+
+    private fun observeCreateTaskPermission() {
+        ServiceLocator.getProjectRepository(requireContext())
+            .observeProject(projectId)
+            .observe(viewLifecycleOwner) { project ->
+                val role = project?.members?.get(currentUserId)?.role
+                    ?: Constants.ROLE_TEAM_LEAD.takeIf { project?.createdBy == currentUserId }
+                binding.addTaskFab.isVisible = role == Constants.ROLE_TEAM_LEAD
+            }
     }
 
     private fun setupFilter() {

@@ -8,7 +8,8 @@ sealed class CreateEditTaskUiState {
     object Loading : CreateEditTaskUiState()
     data class Loaded(
         val task: Task?,
-        val projectMembers: List<MemberOption>
+        val projectMembers: List<MemberOption>,
+        val canSaveTask: Boolean = false
     ) : CreateEditTaskUiState()
     object Success : CreateEditTaskUiState()
     data class Error(val message: String) : CreateEditTaskUiState()

@@ -18,6 +18,7 @@ import java.util.UUID
 class CreateEditTaskViewModel(
     private val projectId: String,
     private val taskId: String,
+    private val currentUserId: String,
     private val taskRepository: TaskRepository,
     private val projectRepository: ProjectRepository,
     private val userRepository: UserRepository
@@ -29,6 +30,7 @@ class CreateEditTaskViewModel(
     private var existingTask: Task? = null
     private var memberOptions: List<MemberOption> = emptyList()
     private var usersLoaded = false
+    private var canSaveTask = false
 
     init {
         _uiState.value = CreateEditTaskUiState.Loading
@@ -37,6 +39,9 @@ class CreateEditTaskViewModel(
                 MemberOption(userId = userId, name = UNKNOWN_MEMBER_NAME)
             } ?: emptyList()
             memberOptions = members
+            val role = project?.members?.get(currentUserId)?.role
+                ?: Constants.ROLE_TEAM_LEAD.takeIf { project?.createdBy == currentUserId }
+            canSaveTask = role == Constants.ROLE_TEAM_LEAD
             publishLoaded()
         }
         _uiState.addSource(userRepository.observeUsers()) { users ->
@@ -62,7 +67,8 @@ class CreateEditTaskViewModel(
         }
         _uiState.value = CreateEditTaskUiState.Loaded(
             task = existingTask,
-            projectMembers = options
+            projectMembers = options,
+            canSaveTask = canSaveTask
         )
     }
 
@@ -76,6 +82,10 @@ class CreateEditTaskViewModel(
         attachmentsInput: List<Attachment>,
         actorId: String
     ) {
+        if (!canSaveTask) {
+            _uiState.value = CreateEditTaskUiState.Error("Only Team Leads can create or edit tasks.")
+            return
+        }
         if (title.isBlank()) {
             _uiState.value = CreateEditTaskUiState.Error("Title is required")
             return

@@ -99,5 +99,6 @@ class ProfileViewModelTest {
         }
         override fun notificationSettings(): Map<String, Boolean> = notifications.toMap()
         override fun applyAppearance() = Unit
+        override fun consumeNavigationRecoveryRequired(): Boolean = false
     }
 }

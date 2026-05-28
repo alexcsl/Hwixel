@@ -36,13 +36,13 @@ class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRe
         )
     }
 
-    override fun languageTag(): String = prefs.getString(KEY_LANGUAGE_TAG, DEFAULT_LANGUAGE_TAG)
+    override fun languageTag(): String = prefs.getString(userScopedKey(KEY_LANGUAGE_TAG), DEFAULT_LANGUAGE_TAG)
         ?: DEFAULT_LANGUAGE_TAG
 
     override fun setLanguageTag(tag: String) {
         val normalized = if (SUPPORTED_LANGUAGE_TAGS.contains(tag)) tag else DEFAULT_LANGUAGE_TAG
         val changed = languageTag() != normalized
-        prefs.edit().putString(KEY_LANGUAGE_TAG, normalized).apply()
+        prefs.edit().putString(userScopedKey(KEY_LANGUAGE_TAG), normalized).apply()
         if (changed) markNavigationRecoveryRequired()
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(normalized))
     }
@@ -117,6 +117,11 @@ class SharedPrefsProfileSettingsRepository(context: Context) : ProfileSettingsRe
         uid: String = FirebaseAuth.getInstance().currentUser?.uid ?: KEY_ANONYMOUS_USER
     ): String {
         return "$KEY_NOTIFICATION_PREFIX${uid}_$type"
+    }
+
+    private fun userScopedKey(key: String): String {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: KEY_ANONYMOUS_USER
+        return "${uid}_$key"
     }
 
     private fun markNavigationRecoveryRequired() {

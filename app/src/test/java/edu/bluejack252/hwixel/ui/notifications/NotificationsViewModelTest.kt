@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import edu.bluejack252.hwixel.MainDispatcherRule
 import edu.bluejack252.hwixel.data.model.Notification
 import edu.bluejack252.hwixel.data.repository.NotificationRepository
+import edu.bluejack252.hwixel.data.repository.ProfileSettingsRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -20,12 +21,14 @@ class NotificationsViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
     private lateinit var repository: FakeNotificationRepository
+    private lateinit var settingsRepository: FakeSettingsRepository
     private lateinit var viewModel: NotificationsViewModel
 
     @Before
     fun setUp() {
         repository = FakeNotificationRepository()
-        viewModel = NotificationsViewModel(repository, currentUserId = "u1")
+        settingsRepository = FakeSettingsRepository()
+        viewModel = NotificationsViewModel(repository, settingsRepository, currentUserId = "u1")
         viewModel.notifications.observeForever { }
         viewModel.unreadCount.observeForever { }
     }
@@ -39,6 +42,19 @@ class NotificationsViewModelTest {
         )
 
         assertEquals(2, viewModel.unreadCount.value)
+    }
+
+    @Test
+    fun disabledNotificationTypesAreFilteredOut() {
+        settingsRepository.disabledTypes.add("task_assigned")
+
+        repository.notifications.value = listOf(
+            Notification(id = "n1", type = "task_assigned", isRead = false),
+            Notification(id = "n2", type = "mention", isRead = false)
+        )
+
+        assertEquals(listOf("n2"), viewModel.notifications.value?.map { it.id })
+        assertEquals(1, viewModel.unreadCount.value)
     }
 
     @Test
@@ -87,5 +103,21 @@ class NotificationsViewModelTest {
             message: String,
             referenceId: String
         ) = Unit
+    }
+
+    private class FakeSettingsRepository : ProfileSettingsRepository {
+        val disabledTypes = mutableSetOf<String>()
+
+        override fun isDarkMode(): Boolean = false
+        override fun setDarkMode(enabled: Boolean) = Unit
+        override fun languageTag(): String = "en"
+        override fun setLanguageTag(tag: String) = Unit
+        override fun isNotificationEnabled(type: String): Boolean = type !in disabledTypes
+        override fun setNotificationEnabled(type: String, enabled: Boolean) {
+            if (enabled) disabledTypes.remove(type) else disabledTypes.add(type)
+        }
+        override fun notificationSettings(): Map<String, Boolean> = emptyMap()
+        override fun applyAppearance() = Unit
+        override fun consumeNavigationRecoveryRequired(): Boolean = false
     }
 }

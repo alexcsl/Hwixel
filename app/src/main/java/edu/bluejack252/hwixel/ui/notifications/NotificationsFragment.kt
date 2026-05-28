@@ -24,6 +24,7 @@ class NotificationsFragment : Fragment() {
     private val viewModel: NotificationsViewModel by viewModels {
         NotificationsViewModelFactory(
             repository = ServiceLocator.getNotificationRepository(),
+            settingsRepository = ServiceLocator.getProfileSettingsRepository(requireContext()),
             currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         )
     }

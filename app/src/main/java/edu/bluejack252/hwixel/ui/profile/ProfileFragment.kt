@@ -1,5 +1,6 @@
 package edu.bluejack252.hwixel.ui.profile
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -17,6 +18,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import edu.bluejack252.hwixel.MainActivity
 import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.data.model.User
@@ -269,7 +271,11 @@ class ProfileFragment : Fragment() {
     private fun logout() {
         ServiceLocator.getAuthRepository(requireContext()).logout()
         ServiceLocator.reset()
-        findNavController().setGraph(R.navigation.auth_nav_graph)
+        val intent = Intent(requireContext(), MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        startActivity(intent)
+        requireActivity().finish()
     }
 
     override fun onDestroyView() {

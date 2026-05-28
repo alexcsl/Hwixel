@@ -44,7 +44,9 @@ class TaskBoardFragment : Fragment() {
     private val viewModel: TaskBoardViewModel by viewModels {
         TaskBoardViewModelFactory(
             projectId = projectId,
+            currentUserId = currentUserId,
             taskRepository = ServiceLocator.getTaskRepository(requireContext()),
+            projectRepository = ServiceLocator.getProjectRepository(requireContext()),
             userRepository = ServiceLocator.getUserRepository(requireContext())
         )
     }

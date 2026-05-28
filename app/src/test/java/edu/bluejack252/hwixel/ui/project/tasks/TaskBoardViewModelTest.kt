@@ -5,8 +5,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import edu.bluejack252.hwixel.MainDispatcherRule
 import edu.bluejack252.hwixel.data.model.Comment
+import edu.bluejack252.hwixel.data.model.Project
+import edu.bluejack252.hwixel.data.model.ProjectMember
 import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.data.model.User
+import edu.bluejack252.hwixel.data.repository.ProjectRepository
 import edu.bluejack252.hwixel.data.repository.TaskRepository
 import edu.bluejack252.hwixel.data.repository.UserRepository
 import edu.bluejack252.hwixel.util.constants.Constants
@@ -22,12 +25,23 @@ class TaskBoardViewModelTest {
 
     private val tasksLiveData = MutableLiveData<List<Task>>()
     private val repository = FakeTaskRepository(tasksLiveData)
+    private val projectLiveData = MutableLiveData<Project?>()
     private val usersLiveData = MutableLiveData<List<User>>()
     private lateinit var viewModel: TaskBoardViewModel
 
     @Before
     fun setUp() {
-        viewModel = TaskBoardViewModel("p1", repository, FakeUserRepository(usersLiveData))
+        projectLiveData.value = Project(
+            id = "p1",
+            members = mapOf("u1" to ProjectMember(userId = "u1", role = Constants.ROLE_TEAM_LEAD))
+        )
+        viewModel = TaskBoardViewModel(
+            projectId = "p1",
+            currentUserId = "u1",
+            taskRepository = repository,
+            projectRepository = FakeProjectRepository(projectLiveData),
+            userRepository = FakeUserRepository(usersLiveData)
+        )
         viewModel.uiState.observeForever { }
     }
 
@@ -50,6 +64,21 @@ class TaskBoardViewModelTest {
 
         assertEquals("t1", repository.updatedTaskId)
         assertEquals(Constants.STATUS_DONE, repository.updatedStatus)
+    }
+
+    @Test
+    fun nonLeadOnlySeesAssignedTasks() {
+        projectLiveData.value = Project(
+            id = "p1",
+            members = mapOf("u1" to ProjectMember(userId = "u1", role = "Member"))
+        )
+        tasksLiveData.value = listOf(
+            Task(id = "1", assignees = listOf("u1")),
+            Task(id = "2", assignees = listOf("u2")),
+            Task(id = "3", assignees = emptyList())
+        )
+
+        assertEquals(listOf("1"), viewModel.uiState.value?.filteredTasks?.map { it.id })
     }
 
     private class FakeTaskRepository(
@@ -81,5 +110,18 @@ class TaskBoardViewModelTest {
         override suspend fun upsertUser(user: User): Result<Unit> = Result.success(Unit)
         override suspend fun findUserByEmail(email: String): Result<User?> = Result.success(null)
         override suspend fun writeNotification(userId: String, notifId: String, payload: Map<String, Any>): Result<Unit> = Result.success(Unit)
+    }
+
+    private class FakeProjectRepository(
+        private val projectLiveData: LiveData<Project?>
+    ) : ProjectRepository {
+        override fun observeProjects(): LiveData<List<Project>> = MutableLiveData(emptyList())
+        override fun observeProject(projectId: String): LiveData<Project?> = projectLiveData
+        override suspend fun createProject(project: Project): Result<Unit> = Result.success(Unit)
+        override suspend fun updateProject(project: Project): Result<Unit> = Result.success(Unit)
+        override suspend fun updateCompletionPercentage(projectId: String, percentage: Float): Result<Unit> = Result.success(Unit)
+        override suspend fun addMember(projectId: String, userId: String, member: ProjectMember): Result<Unit> = Result.success(Unit)
+        override suspend fun updateMember(projectId: String, userId: String, member: ProjectMember): Result<Unit> = Result.success(Unit)
+        override suspend fun updateMemberScore(projectId: String, userId: String, score: Float): Result<Unit> = Result.success(Unit)
     }
 }

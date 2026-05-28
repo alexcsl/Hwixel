@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.data.model.User
+import edu.bluejack252.hwixel.data.repository.ProjectRepository
 import edu.bluejack252.hwixel.data.repository.TaskRepository
 import edu.bluejack252.hwixel.data.repository.UserRepository
 import edu.bluejack252.hwixel.util.constants.Constants
@@ -14,7 +15,9 @@ import kotlinx.coroutines.launch
 
 class TaskBoardViewModel(
     private val projectId: String,
+    private val currentUserId: String,
     private val taskRepository: TaskRepository,
+    private val projectRepository: ProjectRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
 
@@ -28,9 +31,16 @@ class TaskBoardViewModel(
     private var users: List<User> = emptyList()
     private var currentFilter = TaskFilter()
     private var currentViewMode = ViewMode.LIST
+    private var isTeamLead = false
 
     init {
         _uiState.value = TaskBoardUiState(isLoading = true)
+        _uiState.addSource(projectRepository.observeProject(projectId)) { project ->
+            val role = project?.members?.get(currentUserId)?.role
+                ?: Constants.ROLE_TEAM_LEAD.takeIf { project?.createdBy == currentUserId }
+            isTeamLead = role == Constants.ROLE_TEAM_LEAD
+            publishState()
+        }
         _uiState.addSource(taskRepository.observeTasks(projectId)) { tasks ->
             allTasks = tasks
             publishState()
@@ -51,9 +61,10 @@ class TaskBoardViewModel(
     }
 
     private fun publishState() {
+        val visibleTasks = visibleTasksForRole()
         _uiState.value = TaskBoardUiState(
-            tasks = allTasks,
-            filteredTasks = applyFilter(allTasks, currentFilter),
+            tasks = visibleTasks,
+            filteredTasks = applyFilter(visibleTasks, currentFilter),
             memberNames = buildMemberNames(),
             filter = currentFilter,
             viewMode = currentViewMode,
@@ -61,8 +72,13 @@ class TaskBoardViewModel(
         )
     }
 
+    private fun visibleTasksForRole(): List<Task> {
+        if (isTeamLead) return allTasks
+        return allTasks.filter { task -> currentUserId.isNotBlank() && currentUserId in task.assignees }
+    }
+
     private fun buildMemberNames(): Map<String, String> {
-        return allTasks
+        return visibleTasksForRole()
             .flatMap { it.assignees }
             .distinct()
             .associateWith { userId ->

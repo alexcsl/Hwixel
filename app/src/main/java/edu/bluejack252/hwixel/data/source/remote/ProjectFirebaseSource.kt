@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
@@ -185,8 +184,10 @@ open class ProjectFirebaseSource(
     override suspend fun updateCompletionPercentage(projectId: String, percentage: Float) {
         val previousProject = fetchProjectOnce(projectId)
         projectsRef.child(projectId).child("completionPercentage").setValue(percentage).awaitResult()
-        if ((previousProject?.completionPercentage ?: 0f) < 100f && percentage >= 100f) {
-            incrementCompletedProjects(previousProject)
+        val previousPercentage = previousProject?.completionPercentage ?: 0f
+        when {
+            previousPercentage < 100f && percentage >= 100f -> adjustCompletedProjects(previousProject, 1)
+            previousPercentage >= 100f && percentage < 100f -> adjustCompletedProjects(previousProject, -1)
         }
     }
 
@@ -213,21 +214,34 @@ open class ProjectFirebaseSource(
         }
     }
 
-    private suspend fun incrementCompletedProjects(project: Project?) {
+    private suspend fun adjustCompletedProjects(project: Project?, delta: Int) {
         project?.members.orEmpty()
             .filterValues { member -> member.status != Constants.MEMBER_STATUS_INACTIVE }
             .keys
             .forEach { userId ->
                 runCatching {
-                    database.reference
+                    val completedRef = database.reference
                         .child("users")
                         .child(userId)
                         .child("totalProjectsCompleted")
-                        .setValue(ServerValue.increment(1))
-                        .awaitResult()
+                    val current = completedRef.readInt()
+                    completedRef.setValue((current + delta).coerceAtLeast(0)).awaitResult()
                 }
             }
     }
+
+    private suspend fun com.google.firebase.database.DatabaseReference.readInt(): Int =
+        suspendCoroutine { continuation ->
+            addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    continuation.resume((snapshot.value as? Number)?.toInt() ?: 0)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    continuation.resumeWithException(error.toException())
+                }
+            })
+        }
 
     private fun DataSnapshot.toProject(): Project? {
         val projectId = key.orEmpty()

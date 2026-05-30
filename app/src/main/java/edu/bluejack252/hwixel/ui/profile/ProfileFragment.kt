@@ -129,6 +129,9 @@ class ProfileFragment : Fragment() {
         binding.profileStudentIdTextView.text = user?.studentId?.takeIf { it.isNotBlank() }
             ?: getString(R.string.profile_missing_student_id)
         binding.profileEmailTextView.text = user?.email.orEmpty()
+        val phone = user?.phone.orEmpty()
+        binding.profilePhoneTextView.isVisible = phone.isNotBlank()
+        binding.profilePhoneTextView.text = phone
         binding.projectsCompletedValueTextView.text = (user?.totalProjectsCompleted ?: 0).toString()
         binding.peerRatingValueTextView.text = String.format(Locale.getDefault(), "%.1f", user?.averagePeerRating ?: 0f)
         binding.avatarInitialsTextView.text = displayName.trim().firstOrNull()?.uppercaseChar()?.toString().orEmpty()
@@ -181,6 +184,7 @@ class ProfileFragment : Fragment() {
         selectedAvatarUri = null
         dialogBinding.nameInput.editText?.setText(user.name)
         dialogBinding.studentIdInput.editText?.setText(user.studentId)
+        dialogBinding.phoneInput.editText?.setText(user.phone)
         if (user.avatarUrl.isNotBlank()) {
             Glide.with(this).load(user.avatarUrl).placeholder(R.drawable.circle_background)
                 .into(dialogBinding.avatarPreviewImageView)
@@ -198,11 +202,12 @@ class ProfileFragment : Fragment() {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val name = dialogBinding.nameInput.editText?.text?.toString().orEmpty()
                 val studentId = dialogBinding.studentIdInput.editText?.text?.toString().orEmpty()
+                val phone = dialogBinding.phoneInput.editText?.text?.toString().orEmpty()
                 if (name.isBlank() || studentId.isBlank()) {
                     Snackbar.make(binding.root, R.string.profile_required_fields, Snackbar.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
-                saveProfileFromDialog(user, dialogBinding, dialog, name, studentId)
+                saveProfileFromDialog(user, dialogBinding, dialog, name, studentId, phone)
             }
         }
         dialog.setOnDismissListener {
@@ -217,11 +222,12 @@ class ProfileFragment : Fragment() {
         dialogBinding: DialogEditProfileBinding,
         dialog: AlertDialog,
         name: String,
-        studentId: String
+        studentId: String,
+        phone: String
     ) {
         val pickedUri = selectedAvatarUri
         if (pickedUri == null) {
-            viewModel.saveProfile(name, studentId, selectedAvatarUrl)
+            viewModel.saveProfile(name, studentId, phone, selectedAvatarUrl)
             dialog.dismiss()
             return
         }
@@ -231,7 +237,7 @@ class ProfileFragment : Fragment() {
             uploadResult
                 .onSuccess { publicUrl ->
                     selectedAvatarUrl = publicUrl
-                    viewModel.saveProfile(name, studentId, publicUrl)
+                    viewModel.saveProfile(name, studentId, phone, publicUrl)
                     dialog.dismiss()
                 }
                 .onFailure {

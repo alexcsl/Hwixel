@@ -75,6 +75,8 @@
     <string name="profile_notif_invites">Project invitations</string>
     <string name="profile_edit_title">Edit profile</string>
     <string name="profile_change_avatar">Change avatar</string>
+    <string name="phone_label">Phone number (optional)</string>
+    <string name="profile_phone_not_set">Phone not set</string>
     <string name="profile_required_fields">Name and student ID are required.</string>
     <string name="profile_saved">Profile saved.</string>
     <string name="profile_save_failed">Failed to save profile.</string>

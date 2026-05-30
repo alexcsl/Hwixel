@@ -109,16 +109,23 @@ class TaskDetailViewModel(
 
     private fun resolveMentionedUserIds(content: String, authorId: String): List<String> {
         val projectMemberIds = currentProject?.members?.keys.orEmpty()
-        return users
+        val eligibleUsers = users
             .asSequence()
             .filter { user -> projectMemberIds.isEmpty() || user.id in projectMemberIds }
             .filter { user -> user.id != authorId }
+        if (containsAllMention(content)) {
+            return eligibleUsers.map { it.id }.distinct().toList()
+        }
+        return eligibleUsers
             .filter { user -> user.name.isNotBlank() }
             .filter { user -> containsNameMention(content, user.name) || containsCompactNameMention(content, user.name) }
             .map { user -> user.id }
             .distinct()
             .toList()
     }
+
+    private fun containsAllMention(content: String): Boolean =
+        Regex("(?i)(^|\\s)@all(?=\\s|$|[.,!?;:])").containsMatchIn(content)
 
     private fun containsNameMention(content: String, name: String): Boolean {
         val normalizedName = name.trim().replace(Regex("\\s+"), " ")

@@ -70,6 +70,8 @@
     <string name="profile_notif_invites">Undangan proyek</string>
     <string name="profile_edit_title">Ubah profil</string>
     <string name="profile_change_avatar">Ganti avatar</string>
+    <string name="phone_label">Nomor telepon (opsional)</string>
+    <string name="profile_phone_not_set">Telepon belum diatur</string>
     <string name="profile_required_fields">Nama dan NIM wajib diisi.</string>
     <string name="profile_saved">Profil tersimpan.</string>
     <string name="profile_save_failed">Gagal menyimpan profil.</string>

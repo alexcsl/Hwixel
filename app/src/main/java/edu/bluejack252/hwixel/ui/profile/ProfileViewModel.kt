@@ -61,7 +61,7 @@ class ProfileViewModel(
         }
     }
 
-    fun saveProfile(name: String, studentId: String, avatarUrl: String) {
+    fun saveProfile(name: String, studentId: String, phone: String, avatarUrl: String) {
         val current = _uiState.value?.user ?: return
         if (name.isBlank() || studentId.isBlank()) return
         publish { copy(isLoading = true, errorMessage = null) }
@@ -70,6 +70,7 @@ class ProfileViewModel(
                 current.copy(
                     name = name.trim(),
                     studentId = studentId.trim(),
+                    phone = phone.trim(),
                     avatarUrl = avatarUrl.trim()
                 )
             )

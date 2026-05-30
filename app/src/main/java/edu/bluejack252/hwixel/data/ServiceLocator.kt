@@ -44,6 +44,7 @@ object ServiceLocator {
     private var evalRepository: EvalRepository? = null
     private var fileRepository: FileRepository? = null
     private var notificationRepository: NotificationRepository? = null
+    private var notificationSource: NotificationFirebaseSource? = null
     private var attachmentUploadSource: AttachmentUploadSource? = null
     private var profileSettingsRepository: ProfileSettingsRepository? = null
 
@@ -86,7 +87,9 @@ object ServiceLocator {
         ).also { notificationRepository = it }
     }
 
-    fun getNotificationSource(): NotificationFirebaseSource = NotificationFirebaseSource()
+    fun getNotificationSource(): NotificationFirebaseSource {
+        return notificationSource ?: NotificationFirebaseSource().also { notificationSource = it }
+    }
 
     fun getTeamHealthRepository(): TeamHealthRepository {
         return teamHealthRepository ?: TeamHealthRepositoryImpl(
@@ -132,6 +135,7 @@ object ServiceLocator {
         evalRepository = null
         fileRepository = null
         notificationRepository = null
+        notificationSource = null
         attachmentUploadSource = null
         profileSettingsRepository = null
     }

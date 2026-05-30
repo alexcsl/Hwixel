@@ -1,6 +1,7 @@
 package edu.bluejack252.hwixel.data.repository
 
 import androidx.lifecycle.LiveData
+import edu.bluejack252.hwixel.data.mapper.toDomain
 import edu.bluejack252.hwixel.data.mapper.toEntity
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
@@ -51,6 +52,10 @@ class ProjectRepositoryImpl(
         percentage: Float
     ): Result<Unit> = runCatching {
         firebaseSource.updateCompletionPercentage(projectId, percentage)
+        val cached = localDao.getById(projectId)
+        if (cached != null) {
+            localDao.upsert(cached.copy(completionPercentage = percentage))
+        }
     }
 
     override suspend fun addMember(
@@ -59,6 +64,13 @@ class ProjectRepositoryImpl(
         member: ProjectMember
     ): Result<Unit> = runCatching {
         firebaseSource.addMember(projectId, userId, member)
+        val cached = localDao.getById(projectId)
+        if (cached != null) {
+            val project = cached.toDomain()
+            val updatedMembers = project.members.toMutableMap()
+            updatedMembers[userId] = member
+            localDao.upsert(project.copy(members = updatedMembers).toEntity(cached.lastSynced))
+        }
     }
 
     override suspend fun updateMember(
@@ -67,6 +79,13 @@ class ProjectRepositoryImpl(
         member: ProjectMember
     ): Result<Unit> = runCatching {
         firebaseSource.updateMember(projectId, userId, member)
+        val cached = localDao.getById(projectId)
+        if (cached != null) {
+            val project = cached.toDomain()
+            val updatedMembers = project.members.toMutableMap()
+            updatedMembers[userId] = member
+            localDao.upsert(project.copy(members = updatedMembers).toEntity(cached.lastSynced))
+        }
     }
 
     override suspend fun updateMemberScore(
@@ -75,6 +94,16 @@ class ProjectRepositoryImpl(
         score: Float
     ): Result<Unit> = runCatching {
         firebaseSource.updateMemberScore(projectId, userId, score)
+        val cached = localDao.getById(projectId)
+        if (cached != null) {
+            val project = cached.toDomain()
+            val existing = project.members[userId]
+            if (existing != null) {
+                val updatedMembers = project.members.toMutableMap()
+                updatedMembers[userId] = existing.copy(contributionScore = score)
+                localDao.upsert(project.copy(members = updatedMembers).toEntity(cached.lastSynced))
+            }
+        }
     }
 
 }

@@ -2,6 +2,7 @@ package edu.bluejack252.hwixel.data.repository
 
 import android.content.Context
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import edu.bluejack252.hwixel.data.mapper.toDomain
 import edu.bluejack252.hwixel.data.mapper.toEntity
 import edu.bluejack252.hwixel.data.model.Comment
@@ -10,6 +11,7 @@ import edu.bluejack252.hwixel.data.model.Task
 import edu.bluejack252.hwixel.data.source.local.TaskDao
 import edu.bluejack252.hwixel.data.source.remote.NotificationFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.ProjectRemoteSource
+import edu.bluejack252.hwixel.data.source.remote.TaskFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.TaskRemoteSource
 import edu.bluejack252.hwixel.data.source.remote.UserRemoteSource
 import edu.bluejack252.hwixel.util.BadgeEngine
@@ -19,6 +21,7 @@ import edu.bluejack252.hwixel.util.constants.Constants
 
 interface TaskRepository {
     fun observeAllTasks(): LiveData<List<Task>>
+    fun observeTasksForProjects(projectIds: Set<String>): LiveData<List<Task>>
     fun observeTasks(projectId: String): LiveData<List<Task>>
     fun observeTask(projectId: String, taskId: String): LiveData<Task?>
     suspend fun createTask(task: Task): Result<Unit>
@@ -55,6 +58,25 @@ class TaskRepositoryImpl(
 
     override fun observeAllTasks(): LiveData<List<Task>> {
         return firebaseSource.observeAllTasks()
+    }
+
+    override fun observeTasksForProjects(projectIds: Set<String>): LiveData<List<Task>> {
+        if (firebaseSource is TaskFirebaseSource) {
+            return firebaseSource.observeTasksForProjects(projectIds)
+        }
+        val merged = MediatorLiveData<List<Task>>()
+        val tasksByProject = mutableMapOf<String, List<Task>>()
+        if (projectIds.isEmpty()) {
+            merged.value = emptyList()
+            return merged
+        }
+        projectIds.forEach { pid ->
+            merged.addSource(firebaseSource.observeTasks(pid)) { tasks ->
+                tasksByProject[pid] = tasks
+                merged.value = tasksByProject.values.flatten()
+            }
+        }
+        return merged
     }
 
     override fun observeTasks(projectId: String): LiveData<List<Task>> {

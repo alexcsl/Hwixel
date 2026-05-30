@@ -56,7 +56,11 @@ class TaskBoardViewModel(
             val assigneeMatch = filter.assigneeIds.isEmpty() ||
                 task.assignees.any { it in filter.assigneeIds }
             val priorityMatch = filter.priority == null || task.priority == filter.priority
-            assigneeMatch && priorityMatch
+            val deadlineFromMatch = filter.deadlineFrom == null ||
+                (task.deadline > 0L && task.deadline >= filter.deadlineFrom)
+            val deadlineToMatch = filter.deadlineTo == null ||
+                (task.deadline > 0L && task.deadline <= filter.deadlineTo)
+            assigneeMatch && priorityMatch && deadlineFromMatch && deadlineToMatch
         }
     }
 

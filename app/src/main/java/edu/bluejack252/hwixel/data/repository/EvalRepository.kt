@@ -1,12 +1,10 @@
 package edu.bluejack252.hwixel.data.repository
 
 import androidx.lifecycle.LiveData
-import com.google.firebase.database.FirebaseDatabase
 import edu.bluejack252.hwixel.data.model.EvaluationSubmission
 import edu.bluejack252.hwixel.data.source.remote.EvalFirebaseSource
 import edu.bluejack252.hwixel.data.source.remote.EvalPeriodNotifier
 import edu.bluejack252.hwixel.data.source.remote.FirebaseEvalPeriodNotifier
-import kotlinx.coroutines.tasks.await
 
 interface EvalRepository {
     fun observePeriodOpen(projectId: String, periodId: String): LiveData<Boolean>
@@ -24,8 +22,6 @@ class EvalRepositoryImpl(
     private val firebaseSource: EvalFirebaseSource,
     private val periodNotifier: EvalPeriodNotifier = FirebaseEvalPeriodNotifier()
 ) : EvalRepository {
-
-    private val usersRef = FirebaseDatabase.getInstance().reference.child("users")
 
     override fun observePeriodOpen(projectId: String, periodId: String) =
         firebaseSource.observePeriodOpen(projectId, periodId)
@@ -61,7 +57,6 @@ class EvalRepositoryImpl(
     override suspend fun fetchAllReceivedSubmissions(projectId: String, evaluateeId: String) =
         runCatching { firebaseSource.fetchAllReceivedSubmissions(projectId, evaluateeId) }
 
-    override suspend fun updateAveragePeerRating(userId: String, average: Float): Result<Unit> = runCatching {
-        usersRef.child(userId).child("averagePeerRating").setValue(average).await()
-    }
+    override suspend fun updateAveragePeerRating(userId: String, average: Float): Result<Unit> =
+        firebaseSource.updateAveragePeerRating(userId, average)
 }

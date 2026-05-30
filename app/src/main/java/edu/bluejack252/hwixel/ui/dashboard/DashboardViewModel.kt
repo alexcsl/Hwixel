@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
@@ -39,15 +40,22 @@ class DashboardViewModel(
         _uiState.addSource(_tick) { publishState() }
     }
 
+    private val _activeProjectIds = MutableLiveData<Set<String>>(emptySet())
+
     fun loadDashboard(userId: String) {
         if (hasLoaded && currentUserId == userId) return
         hasLoaded = true
         currentUserId = userId
         _uiState.addSource(projectRepository.observeProjectsForUser(userId)) { value ->
             projects = value
+            _activeProjectIds.value = value.map { it.id }.toSet()
             publishState()
         }
-        _uiState.addSource(taskRepository.observeAllTasks()) { value ->
+        _uiState.addSource(
+            _activeProjectIds.switchMap { ids ->
+                taskRepository.observeTasksForProjects(ids)
+            }
+        ) { value ->
             tasks = value
             publishState()
         }
@@ -59,7 +67,7 @@ class DashboardViewModel(
         tickerJob = viewModelScope.launch {
             while (isActive) {
                 _tick.value = System.currentTimeMillis()
-                delay(1_000L)
+                delay(60_000L)
             }
         }
     }

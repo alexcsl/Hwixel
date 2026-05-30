@@ -2,11 +2,8 @@ package edu.bluejack252.hwixel.data.source.remote
 
 import androidx.lifecycle.LiveData
 import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ServerValue
-import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.EvaluationSubmission
 import kotlinx.coroutines.tasks.await
 
@@ -101,6 +98,10 @@ class EvalFirebaseSource {
         periodId
     }
 
+    suspend fun updateAveragePeerRating(userId: String, average: Float): Result<Unit> = runCatching {
+        db.child("users").child(userId).child("averagePeerRating").setValue(average).await()
+    }
+
     /** Fetch all submissions ever received by evaluateeId across all periods for rating recompute. */
     suspend fun fetchAllReceivedSubmissions(projectId: String, evaluateeId: String): List<EvaluationSubmission> {
         val snapshot = db.child("evaluations").child(projectId).get().await()
@@ -147,26 +148,4 @@ class EvalFirebaseSource {
         feedback = snap.child("feedback").getValue(String::class.java) ?: ""
     )
 
-    private class FirebaseValueLiveData<T>(
-        private val ref: DatabaseReference,
-        private val mapper: (DataSnapshot) -> T
-    ) : LiveData<T>() {
-        private var listener: ValueEventListener? = null
-
-        override fun onActive() {
-            if (listener != null) return
-            listener = object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    postValue(mapper(snapshot))
-                }
-
-                override fun onCancelled(error: DatabaseError) = Unit
-            }.also { ref.addValueEventListener(it) }
-        }
-
-        override fun onInactive() {
-            listener?.let(ref::removeEventListener)
-            listener = null
-        }
-    }
 }

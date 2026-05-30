@@ -262,6 +262,7 @@
     <string name="attendance_create_session">Buat Sesi</string>
     <string name="attendance_session_created">Sesi berhasil dibuat.</string>
     <string name="attendance_overall_rate_format">Rata-rata kehadiran: %1$.0f%%</string>
+    <string name="attendance_reminder_body_format">%1$s - %2$s</string>
     <string name="app_logo_mark">Hx</string>
     <string name="login_heading">Selamat\ndatang</string>
     <string name="register_heading">Buat\nakun</string>

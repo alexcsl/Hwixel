@@ -1,7 +1,6 @@
 package edu.bluejack252.hwixel.data.source.remote
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -9,9 +8,9 @@ import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.Notification
 import edu.bluejack252.hwixel.data.model.User
 import edu.bluejack252.hwixel.data.repository.SharedPrefsProfileSettingsRepository
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 open class UserFirebaseSource(
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -20,53 +19,26 @@ open class UserFirebaseSource(
     private val notificationsRef = database.reference.child("notifications")
     private val usersByEmailRef = database.reference.child("usersByEmail")
 
-    override fun observeUsers(): LiveData<List<User>> {
-        val liveData = MutableLiveData<List<User>>()
-        usersRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                liveData.value = snapshot.children.mapNotNull { child ->
-                    child.getValue(User::class.java)?.copy(id = child.key.orEmpty())
-                }
+    override fun observeUsers(): LiveData<List<User>> =
+        FirebaseValueLiveData(usersRef) { snapshot ->
+            snapshot.children.mapNotNull { child ->
+                child.getValue(User::class.java)?.copy(id = child.key.orEmpty())
             }
+        }
 
-            override fun onCancelled(error: DatabaseError) {
-                liveData.value = emptyList()
-            }
-        })
-        return liveData
-    }
+    override fun observeUser(userId: String): LiveData<User?> =
+        FirebaseValueLiveData(usersRef.child(userId)) { snapshot ->
+            snapshot.getValue(User::class.java)?.copy(id = snapshot.key.orEmpty())
+        }
 
-    override fun observeUser(userId: String): LiveData<User?> {
-        val liveData = MutableLiveData<User?>()
-        usersRef.child(userId).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                liveData.value = snapshot.getValue(User::class.java)?.copy(id = snapshot.key.orEmpty())
-            }
+    override fun observeNotifications(userId: String): LiveData<List<Notification>> =
+        FirebaseValueLiveData(notificationsRef.child(userId)) { snapshot ->
+            snapshot.children.mapNotNull { child ->
+                child.getValue(Notification::class.java)?.copy(id = child.key.orEmpty())
+            }.sortedByDescending { it.timestamp }
+        }
 
-            override fun onCancelled(error: DatabaseError) {
-                liveData.value = null
-            }
-        })
-        return liveData
-    }
-
-    override fun observeNotifications(userId: String): LiveData<List<Notification>> {
-        val liveData = MutableLiveData<List<Notification>>()
-        notificationsRef.child(userId).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                liveData.value = snapshot.children.mapNotNull { child ->
-                    child.getValue(Notification::class.java)?.copy(id = child.key.orEmpty())
-                }.sortedByDescending { notification -> notification.timestamp }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                liveData.value = emptyList()
-            }
-        })
-        return liveData
-    }
-
-    override suspend fun fetchUser(userId: String): User? = suspendCoroutine { continuation ->
+    override suspend fun fetchUser(userId: String): User? = suspendCancellableCoroutine { continuation ->
         usersRef.child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 continuation.resume(snapshot.getValue(User::class.java)?.copy(id = snapshot.key.orEmpty()))
@@ -90,7 +62,7 @@ open class UserFirebaseSource(
         usersRef.child(userId).child("badges").setValue(badges).awaitResult()
     }
 
-    override suspend fun findByEmail(email: String): User? = suspendCoroutine { continuation ->
+    override suspend fun findByEmail(email: String): User? = suspendCancellableCoroutine { continuation ->
         val normalized = email.trim().lowercase()
         val emailKey = normalized.replace(".", ",")
         var resumed = false
@@ -156,7 +128,7 @@ open class UserFirebaseSource(
 
     private suspend fun isNotificationEnabled(userId: String, type: String): Boolean {
         val preferenceType = SharedPrefsProfileSettingsRepository.preferenceTypeFor(type)
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             database.reference
                 .child("notificationPreferences")
                 .child(userId)

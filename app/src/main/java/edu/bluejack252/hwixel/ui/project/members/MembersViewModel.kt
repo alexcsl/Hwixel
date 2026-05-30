@@ -77,7 +77,7 @@ class MembersViewModel(
             val existing = currentProject?.members?.get(userId) ?: return@launch
             val updated = existing.copy(role = newRole)
             val result = projectRepository.updateMember(projectId, userId, updated)
-            _actionResult.value = if (result.isSuccess) "role_updated" else "error"
+            _actionResult.value = if (result.isSuccess) "role_updated" else "error:${result.exceptionOrNull()?.localizedMessage.orEmpty()}"
         }
     }
 
@@ -94,7 +94,7 @@ class MembersViewModel(
                 Constants.MEMBER_STATUS_ACTIVE
             val updated = existing.copy(status = newStatus)
             val result = projectRepository.updateMember(projectId, userId, updated)
-            _actionResult.value = if (result.isSuccess) "status_toggled" else "error"
+            _actionResult.value = if (result.isSuccess) "status_toggled" else "error:${result.exceptionOrNull()?.localizedMessage.orEmpty()}"
         }
     }
 
@@ -122,7 +122,8 @@ class MembersViewModel(
             )
             val addResult = projectRepository.addMember(projectId, foundUser.id, newMember)
             if (addResult.isSuccess) {
-                val notifKey = FirebaseDatabase.getInstance().reference.push().key.orEmpty()
+                val notifKey = FirebaseDatabase.getInstance().reference.push().key
+                    ?: java.util.UUID.randomUUID().toString()
                 val notificationResult = userRepository.writeNotification(
                     foundUser.id,
                     notifKey,

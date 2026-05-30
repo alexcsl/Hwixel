@@ -283,6 +283,7 @@
     <string name="attendance_create_session">Create Session</string>
     <string name="attendance_session_created">Session created successfully.</string>
     <string name="attendance_overall_rate_format">Avg attendance: %1$.0f%%</string>
+    <string name="attendance_reminder_body_format">%1$s - %2$s</string>
 
     <!-- UI strings for redesigned screens -->
     <string name="app_logo_mark">Hx</string>

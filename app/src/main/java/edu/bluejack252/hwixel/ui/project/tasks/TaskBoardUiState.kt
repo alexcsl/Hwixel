@@ -14,7 +14,9 @@ data class TaskBoardUiState(
 
 data class TaskFilter(
     val assigneeIds: Set<String> = emptySet(),
-    val priority: String? = null
+    val priority: String? = null,
+    val deadlineFrom: Long? = null,
+    val deadlineTo: Long? = null
 )
 
 enum class ViewMode { LIST, KANBAN }

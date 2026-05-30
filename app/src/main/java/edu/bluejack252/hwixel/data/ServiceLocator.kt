@@ -45,6 +45,7 @@ object ServiceLocator {
     private var fileRepository: FileRepository? = null
     private var notificationRepository: NotificationRepository? = null
     private var notificationSource: NotificationFirebaseSource? = null
+    private var projectFirebaseSource: ProjectFirebaseSource? = null
     private var attachmentUploadSource: AttachmentUploadSource? = null
     private var profileSettingsRepository: ProfileSettingsRepository? = null
 
@@ -63,9 +64,12 @@ object ServiceLocator {
         ).also { userRepository = it }
     }
 
+    private fun getProjectFirebaseSource(): ProjectFirebaseSource =
+        projectFirebaseSource ?: ProjectFirebaseSource().also { projectFirebaseSource = it }
+
     fun getProjectRepository(context: Context): ProjectRepository {
         return projectRepository ?: ProjectRepositoryImpl(
-            firebaseSource = ProjectFirebaseSource(),
+            firebaseSource = getProjectFirebaseSource(),
             localDao = HwixelDatabase.getInstance(context).projectDao()
         ).also { projectRepository = it }
     }
@@ -74,7 +78,7 @@ object ServiceLocator {
         return taskRepository ?: TaskRepositoryImpl(
             firebaseSource = TaskFirebaseSource(),
             localDao = HwixelDatabase.getInstance(context).taskDao(),
-            projectSource = ProjectFirebaseSource(),
+            projectSource = getProjectFirebaseSource(),
             notifSource = NotificationFirebaseSource(),
             userSource = UserFirebaseSource(),
             appContext = context.applicationContext
@@ -136,6 +140,7 @@ object ServiceLocator {
         fileRepository = null
         notificationRepository = null
         notificationSource = null
+        projectFirebaseSource = null
         attachmentUploadSource = null
         profileSettingsRepository = null
     }

@@ -184,9 +184,9 @@ class AttendanceViewModel(
         return sb.toString()
     }
 
-    private fun buildMemberAttendanceMap(session: AttendanceSession): Map<String, Boolean> {
+    private fun buildMemberAttendanceMap(session: AttendanceSession): Map<String, Boolean?> {
         return projectMembers.associate { member ->
-            member.userId to (session.records[member.userId] ?: false)
+            member.userId to session.records[member.userId]
         }
     }
 

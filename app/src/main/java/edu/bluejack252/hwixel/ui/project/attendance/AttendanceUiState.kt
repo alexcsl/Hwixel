@@ -8,7 +8,7 @@ sealed class AttendanceUiState {
     data class SessionsLoaded(val sessions: List<AttendanceSession>) : AttendanceUiState()
     data class SessionSelected(
         val session: AttendanceSession,
-        val memberAttendance: Map<String, Boolean>,
+        val memberAttendance: Map<String, Boolean?>,
         val memberNames: Map<String, String>
     ) : AttendanceUiState()
     data class Error(val message: String) : AttendanceUiState()

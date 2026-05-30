@@ -13,7 +13,7 @@ import edu.bluejack252.hwixel.R
 data class AttendanceMemberItem(
     val userId: String,
     val name: String,
-    val isPresent: Boolean,
+    val isPresent: Boolean?,
     val attendancePercentage: Float,
     val isEditable: Boolean
 )
@@ -47,12 +47,12 @@ class AttendanceMemberAdapter(
         )
 
         val ctx = holder.itemView.context
-        val presentBg = if (item.isPresent) ctx.getColor(R.color.attendance_present) else ctx.getColor(R.color.glass_fill)
-        val absentBg = if (!item.isPresent) ctx.getColor(R.color.attendance_absent) else ctx.getColor(R.color.glass_fill)
+        val presentBg = if (item.isPresent == true) ctx.getColor(R.color.attendance_present) else ctx.getColor(R.color.glass_fill)
+        val absentBg = if (item.isPresent == false) ctx.getColor(R.color.attendance_absent) else ctx.getColor(R.color.glass_fill)
         holder.presentButton.backgroundTintList = ColorStateList.valueOf(presentBg)
         holder.absentButton.backgroundTintList = ColorStateList.valueOf(absentBg)
-        holder.presentButton.setTextColor(ctx.getColor(if (item.isPresent) R.color.white else R.color.text_secondary))
-        holder.absentButton.setTextColor(ctx.getColor(if (!item.isPresent) R.color.white else R.color.text_secondary))
+        holder.presentButton.setTextColor(ctx.getColor(if (item.isPresent == true) R.color.white else R.color.text_secondary))
+        holder.absentButton.setTextColor(ctx.getColor(if (item.isPresent == false) R.color.white else R.color.text_secondary))
 
         if (item.isEditable) {
             holder.presentButton.isEnabled = true

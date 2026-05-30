@@ -199,7 +199,7 @@ class AttendanceFragment : Fragment() {
                         AttendanceMemberItem(
                             userId = userId,
                             name = name,
-                            isPresent = state.memberAttendance[userId] ?: false,
+                            isPresent = state.memberAttendance[userId],
                             attendancePercentage = viewModel.computeMemberAttendancePercentage(allSessions, userId),
                             isEditable = isLead
                         )

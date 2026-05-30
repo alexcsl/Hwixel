@@ -12,6 +12,7 @@ import edu.bluejack252.hwixel.data.model.User
 import edu.bluejack252.hwixel.data.repository.ProjectRepository
 import edu.bluejack252.hwixel.data.repository.UserRepository
 import edu.bluejack252.hwixel.util.constants.Constants
+import edu.bluejack252.hwixel.util.constants.NotificationTypes
 import kotlinx.coroutines.launch
 
 class MembersViewModel(
@@ -128,7 +129,7 @@ class MembersViewModel(
                     foundUser.id,
                     notifKey,
                     mapOf(
-                        "type" to "invite",
+                        "type" to NotificationTypes.TYPE_INVITE,
                         "message" to "You have been invited to a project.",
                         "timestamp" to System.currentTimeMillis(),
                         "isRead" to false,

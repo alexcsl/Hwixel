@@ -51,7 +51,17 @@ open class UserFirebaseSource(
     }
 
     override suspend fun upsertUser(user: User) {
-        usersRef.child(user.id).setValue(user).awaitResult()
+        val fields = mapOf(
+            "name" to user.name,
+            "studentId" to user.studentId,
+            "email" to user.email,
+            "phone" to user.phone,
+            "avatarUrl" to user.avatarUrl,
+            "totalProjectsCompleted" to user.totalProjectsCompleted,
+            "averagePeerRating" to user.averagePeerRating,
+            "badges" to user.badges
+        )
+        usersRef.child(user.id).updateChildren(fields).awaitResult()
         val emailKey = user.email.trim().lowercase().replace(".", ",")
         runCatching {
             usersByEmailRef.child(emailKey).setValue(user.id).awaitResult()

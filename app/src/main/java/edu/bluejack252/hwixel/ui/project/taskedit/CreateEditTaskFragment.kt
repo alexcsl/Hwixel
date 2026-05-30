@@ -116,7 +116,12 @@ class CreateEditTaskFragment : Fragment() {
                     findNavController().navigateUp()
                 }
                 is CreateEditTaskUiState.Error -> {
-                    Snackbar.make(binding.root, state.message, Snackbar.LENGTH_SHORT).show()
+                    val msg = when (state.message) {
+                        "no_permission" -> getString(R.string.error_no_permission)
+                        "empty_title" -> getString(R.string.error_empty_task_title)
+                        else -> state.message.ifBlank { getString(R.string.error_generic) }
+                    }
+                    Snackbar.make(binding.root, msg, Snackbar.LENGTH_SHORT).show()
                 }
                 else -> Unit
             }

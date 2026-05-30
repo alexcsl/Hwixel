@@ -12,13 +12,18 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 interface TeamHealthSource {
     suspend fun analyze(prompt: String): Result<TeamHealthResult>
 }
 
 class GptApiSource(
-    private val client: OkHttpClient = OkHttpClient(),
+    private val client: OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(15, TimeUnit.SECONDS)
+        .build(),
     private val baseUrl: String = BuildConfig.GPT_BASE_URL,
     private val model: String = BuildConfig.GPT_MODEL,
     private val apiKey: String = BuildConfig.GPT_API_KEY

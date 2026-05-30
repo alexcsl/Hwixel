@@ -1,28 +1,22 @@
 package edu.bluejack252.hwixel.ui.project.hub
 
-import android.app.DatePickerDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.tabs.TabLayoutMediator
-import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.data.model.Project
-import edu.bluejack252.hwixel.databinding.DialogCreateProjectBinding
 import edu.bluejack252.hwixel.databinding.FragmentProjectHubBinding
 import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -34,8 +28,6 @@ class ProjectHubFragment : Fragment() {
 
     private val args: ProjectHubFragmentArgs by navArgs()
     private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
-    private var selectedDueDate: Long = 0L
-    private var currentProject: Project? = null
     private val activityFeedAdapter = ActivityFeedAdapter()
 
     private val viewModel: ProjectHubViewModel by viewModels {
@@ -103,11 +95,6 @@ class ProjectHubFragment : Fragment() {
                 .actionProjectHubFragmentToFileRepoFragment(projectId = args.projectId)
             findNavController().navigate(action)
         }
-        binding.filesButton.setOnClickListener {
-            val action = ProjectHubFragmentDirections
-                .actionProjectHubFragmentToFileRepoFragment(projectId = args.projectId)
-            findNavController().navigate(action)
-        }
     }
 
     private fun setupViewPager() {
@@ -126,7 +113,6 @@ class ProjectHubFragment : Fragment() {
 
     private fun render(state: ProjectHubUiState) {
         if (state.isLoading || state.project == null) return
-        currentProject = state.project
         renderHeader(state.project)
         activityFeedAdapter.submitList(state.recentActivity)
     }
@@ -156,40 +142,6 @@ class ProjectHubFragment : Fragment() {
         } else {
             binding.dueDateTextView.isVisible = false
         }
-    }
-
-    private fun showCreateProjectDialog() {
-        val dialogView = DialogCreateProjectBinding.inflate(layoutInflater)
-        selectedDueDate = 0L
-        dialogView.projectDeadlineButton.setOnClickListener {
-            val cal = Calendar.getInstance()
-            DatePickerDialog(
-                requireContext(),
-                { _, year, month, day ->
-                    cal.set(year, month, day, 0, 0, 0)
-                    selectedDueDate = cal.timeInMillis
-                    dialogView.projectDeadlineButton.text = dateFormat.format(cal.time)
-                },
-                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)
-            ).show()
-        }
-
-        AlertDialog.Builder(requireContext())
-            .setTitle(R.string.create_project_title)
-            .setView(dialogView.root)
-            .setPositiveButton(R.string.btn_create) { _, _ ->
-                val name = dialogView.projectNameInput.editText?.text?.toString().orEmpty().trim()
-                if (name.isBlank()) {
-                    Snackbar.make(binding.root, R.string.error_empty_project_name, Snackbar.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-                val description = dialogView.projectDescriptionInput.editText?.text?.toString().orEmpty().trim()
-                val goals = dialogView.projectGoalsInput.editText?.text?.toString().orEmpty().trim()
-                val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-                viewModel.createProject(name, description, goals, selectedDueDate, uid)
-            }
-            .setNegativeButton(R.string.btn_cancel, null)
-            .show()
     }
 
     override fun onDestroyView() {

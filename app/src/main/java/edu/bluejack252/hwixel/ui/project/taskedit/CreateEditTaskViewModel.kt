@@ -83,11 +83,11 @@ class CreateEditTaskViewModel(
         actorId: String
     ) {
         if (!canSaveTask) {
-            _uiState.value = CreateEditTaskUiState.Error("Only Team Leads can create or edit tasks.")
+            _uiState.value = CreateEditTaskUiState.Error("no_permission")
             return
         }
         if (title.isBlank()) {
-            _uiState.value = CreateEditTaskUiState.Error("Title is required")
+            _uiState.value = CreateEditTaskUiState.Error("empty_title")
             return
         }
         val subtasks = subtasksInput

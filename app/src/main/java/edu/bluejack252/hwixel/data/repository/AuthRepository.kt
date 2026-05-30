@@ -23,7 +23,13 @@ class AuthRepositoryImpl(
 
     override suspend fun login(email: String, password: String): Result<Unit> = runCatching {
         authFirebaseSource.login(email, password)
-        Unit
+        val uid = authFirebaseSource.currentUserId
+        if (uid != null) {
+            runCatching {
+                val user = userFirebaseSource.fetchUser(uid)
+                if (user != null) userDao.upsert(user.toEntity())
+            }
+        }
     }
 
     override suspend fun register(

@@ -109,7 +109,7 @@ class TaskBoardFragment : Fragment() {
     private fun setupFab() {
         binding.addTaskFab.isVisible = false
         binding.addTaskFab.setOnClickListener {
-            requireParentFragment().findNavController().navigate(
+            findNavController().navigate(
                 ProjectHubFragmentDirections.actionProjectHubFragmentToCreateEditTaskFragment(
                     projectId = projectId,
                     taskId = ""
@@ -156,7 +156,7 @@ class TaskBoardFragment : Fragment() {
     }
 
     private fun navigateToDetail(task: Task) {
-        requireParentFragment().findNavController().navigate(
+        findNavController().navigate(
             ProjectHubFragmentDirections.actionProjectHubFragmentToTaskDetailFragment(
                 projectId = projectId,
                 taskId = task.id

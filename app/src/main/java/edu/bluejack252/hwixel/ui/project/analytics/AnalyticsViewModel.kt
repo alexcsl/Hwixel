@@ -189,7 +189,7 @@ class AnalyticsViewModel(
 }
 
 private const val UNKNOWN_MEMBER_NAME = "Unknown member"
-private const val GPT_TEAM_HEALTH_ENABLED = false
+private const val GPT_TEAM_HEALTH_ENABLED = true
 
 private data class HealthFingerprint(
     val members: List<HealthMemberFingerprint>

@@ -9,6 +9,7 @@ import com.google.firebase.database.ValueEventListener
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.data.model.ProjectMember
 import edu.bluejack252.hwixel.util.constants.Constants
+import edu.bluejack252.hwixel.util.constants.NotificationTypes
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -91,7 +92,7 @@ open class ProjectFirebaseSource(
                 snapshot.children.mapNotNull { child ->
                     val type = child.child("type").getValue(String::class.java)
                     val referenceId = child.child("referenceId").getValue(String::class.java).orEmpty()
-                    referenceId.takeIf { type == TYPE_INVITE && it.isNotBlank() }
+                    referenceId.takeIf { type == NotificationTypes.TYPE_INVITE && it.isNotBlank() }
                 }.forEach(::observeProjectId)
             }
 
@@ -298,7 +299,4 @@ open class ProjectFirebaseSource(
         }
     }
 
-    private companion object {
-        const val TYPE_INVITE = "invite"
-    }
 }

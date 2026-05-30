@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.data.model.Notification
+import edu.bluejack252.hwixel.util.constants.NotificationTypes
 
 class NotificationsFragment : Fragment() {
 
@@ -87,7 +88,7 @@ class NotificationsFragment : Fragment() {
     private fun handleNotifTap(notif: Notification) {
         viewModel.markRead(notif.id)
         when (notif.type) {
-            "task_assigned", "mention", "deadline" -> {
+            NotificationTypes.TYPE_TASK_ASSIGNED, NotificationTypes.TYPE_MENTION, NotificationTypes.TYPE_DEADLINE -> {
                 val parts = notif.referenceId.split("|")
                 if (parts.size == 2) {
                     val action = NotificationsFragmentDirections
@@ -98,7 +99,7 @@ class NotificationsFragment : Fragment() {
                     findNavController().navigate(action)
                 }
             }
-            "eval_open", "eval_close", "invite" -> {
+            NotificationTypes.TYPE_EVAL_OPEN, NotificationTypes.TYPE_EVAL_CLOSE, NotificationTypes.TYPE_INVITE -> {
                 val action = NotificationsFragmentDirections
                     .actionNotificationsFragmentToProjectHubFragment(
                         projectId = notif.referenceId

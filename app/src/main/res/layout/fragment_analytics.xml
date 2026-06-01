@@ -38,6 +38,16 @@
 
             </LinearLayout>
 
+            <!-- Loading indicator -->
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/analyticsLoadingIndicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:indicatorColor="@color/brand_violet"
+                app:trackColor="@color/glass_border" />
+
             <!-- Date Range Filter Card -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -199,6 +209,21 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/emptyMembersTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_glass_card"
+                android:gravity="center"
+                android:padding="24dp"
+                android:text="@string/analytics_empty"
+                android:textColor="@color/text_hint"
+                android:textSize="14sp"
+                android:visibility="gone" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/memberContributionRecyclerView"

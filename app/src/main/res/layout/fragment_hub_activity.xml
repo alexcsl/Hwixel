@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/hub_recent_activity"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+        style="@style/TextAppearance.HWiXeL.SectionHeader"
         android:layout_marginBottom="8dp" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -25,6 +25,11 @@
         android:id="@+id/emptyActivityTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_glass_card"
+        android:gravity="center"
+        android:padding="24dp"
         android:text="@string/hub_no_activity"
+        android:textColor="@color/text_hint"
+        android:textSize="14sp"
         android:visibility="gone" />
 </LinearLayout>

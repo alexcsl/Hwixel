@@ -1,6 +1,7 @@
 package edu.bluejack252.hwixel.ui.project.attendance
 
-import android.app.TimePickerDialog
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -223,7 +224,7 @@ class AttendanceFragment : Fragment() {
                         getString(R.string.attendance_lead_only)
                     else
                         state.message.ifBlank { getString(R.string.error_generic) }
-                    Snackbar.make(view, msg, Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(view, msg, Snackbar.LENGTH_LONG).show()
                 }
                 AttendanceUiState.Idle -> {
                     loading.isVisible = false
@@ -249,22 +250,23 @@ class AttendanceFragment : Fragment() {
 
     private fun showTimePicker(dateMs: Long, onTimeSelected: (Long) -> Unit) {
         val initial = Calendar.getInstance()
-        TimePickerDialog(
-            requireContext(),
-            { _, hourOfDay, minute ->
-                val selected = Calendar.getInstance().apply {
-                    timeInMillis = dateMs
-                    set(Calendar.HOUR_OF_DAY, hourOfDay)
-                    set(Calendar.MINUTE, minute)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
-                onTimeSelected(selected.timeInMillis)
-            },
-            initial.get(Calendar.HOUR_OF_DAY),
-            initial.get(Calendar.MINUTE),
-            true
-        ).show()
+        val picker = MaterialTimePicker.Builder()
+            .setTimeFormat(TimeFormat.CLOCK_24H)
+            .setHour(initial.get(Calendar.HOUR_OF_DAY))
+            .setMinute(initial.get(Calendar.MINUTE))
+            .setTitleText(getString(R.string.attendance_dialog_set_time))
+            .build()
+        picker.addOnPositiveButtonClickListener {
+            val selected = Calendar.getInstance().apply {
+                timeInMillis = dateMs
+                set(Calendar.HOUR_OF_DAY, picker.hour)
+                set(Calendar.MINUTE, picker.minute)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            onTimeSelected(selected.timeInMillis)
+        }
+        picker.show(childFragmentManager, "session_time_picker")
     }
 
     private fun showNextSessionPicker(sessionDate: Long) {

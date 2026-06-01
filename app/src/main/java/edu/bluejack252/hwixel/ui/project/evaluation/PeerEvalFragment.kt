@@ -271,7 +271,7 @@ class PeerEvalFragment : Fragment() {
                         "empty_feedback" -> getString(R.string.eval_error_feedback)
                         else -> state.message.ifBlank { getString(R.string.error_generic) }
                     }
-                    showSnack(view, msg)
+                    Snackbar.make(view, msg, Snackbar.LENGTH_LONG).show()
                 }
                 else -> loading.isVisible = false
             }

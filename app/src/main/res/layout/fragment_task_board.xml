@@ -89,61 +89,97 @@
             android:layout_height="1dp"
             android:background="@color/glass_border" />
 
-        <!-- ===== KANBAN VIEW (HorizontalScrollView) ===== -->
-        <HorizontalScrollView
-            android:id="@+id/kanbanScrollView"
+        <!-- Loading indicator -->
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/taskBoardLoadingIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:indicatorColor="@color/brand_violet"
+            app:trackColor="@color/glass_border" />
+
+        <!-- Content area: kanban / list / empty state -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:fillViewport="false">
+            android:layout_weight="1">
 
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <!-- ===== KANBAN VIEW (HorizontalScrollView) ===== -->
+            <HorizontalScrollView
+                android:id="@+id/kanbanScrollView"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:padding="12dp">
+                android:fillViewport="false">
 
-                <include
-                    android:id="@+id/columnTodo"
-                    layout="@layout/layout_kanban_column"
-                    android:layout_width="200dp"
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_marginEnd="10dp" />
+                    android:orientation="horizontal"
+                    android:padding="12dp">
 
-                <include
-                    android:id="@+id/columnInProgress"
-                    layout="@layout/layout_kanban_column"
-                    android:layout_width="200dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="10dp" />
+                    <include
+                        android:id="@+id/columnTodo"
+                        layout="@layout/layout_kanban_column"
+                        android:layout_width="200dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="10dp" />
 
-                <include
-                    android:id="@+id/columnReview"
-                    layout="@layout/layout_kanban_column"
-                    android:layout_width="200dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="10dp" />
+                    <include
+                        android:id="@+id/columnInProgress"
+                        layout="@layout/layout_kanban_column"
+                        android:layout_width="200dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="10dp" />
 
-                <include
-                    android:id="@+id/columnDone"
-                    layout="@layout/layout_kanban_column"
-                    android:layout_width="200dp"
-                    android:layout_height="match_parent" />
+                    <include
+                        android:id="@+id/columnReview"
+                        layout="@layout/layout_kanban_column"
+                        android:layout_width="200dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="10dp" />
+
+                    <include
+                        android:id="@+id/columnDone"
+                        layout="@layout/layout_kanban_column"
+                        android:layout_width="200dp"
+                        android:layout_height="match_parent" />
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- ===== LIST VIEW (initially GONE) ===== -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/tasksListRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:padding="12dp"
+                android:visibility="gone"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_task_card" />
+
+            <!-- ===== EMPTY STATE ===== -->
+            <LinearLayout
+                android:id="@+id/emptyTasksContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="32dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/task_board_no_tasks"
+                    android:textColor="@color/text_hint"
+                    android:textSize="15sp"
+                    android:gravity="center" />
 
             </LinearLayout>
-        </HorizontalScrollView>
 
-        <!-- ===== LIST VIEW (initially GONE) ===== -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/tasksListRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:clipToPadding="false"
-            android:padding="12dp"
-            android:visibility="gone"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_task_card" />
+        </FrameLayout>
 
     </LinearLayout>
 

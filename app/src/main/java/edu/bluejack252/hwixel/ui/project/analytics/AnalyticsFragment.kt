@@ -83,6 +83,10 @@ class AnalyticsFragment : Fragment() {
     }
 
     private fun render(state: AnalyticsUiState) {
+        binding.analyticsLoadingIndicator.isVisible = state.isLoading
+        val hasMembers = state.members.isNotEmpty()
+        binding.emptyMembersTextView.isVisible = !state.isLoading && !hasMembers
+        binding.memberContributionRecyclerView.isVisible = hasMembers
         memberAdapter.selectedMemberId = state.selectedMemberId
         memberAdapter.submitList(state.members)
         renderPieChart(state.members, state.selectedMemberId)

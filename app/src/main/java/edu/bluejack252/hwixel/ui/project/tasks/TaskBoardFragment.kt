@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -141,9 +141,13 @@ class TaskBoardFragment : Fragment() {
     }
 
     private fun render(state: TaskBoardUiState) {
+        binding.taskBoardLoadingIndicator.isVisible = state.isLoading
+        val isEmpty = !state.isLoading && state.filteredTasks.isEmpty()
+        binding.emptyTasksContainer.isVisible = isEmpty
+
         val isKanban = state.viewMode == ViewMode.KANBAN
-        binding.tasksListRecyclerView.isVisible = !isKanban
-        binding.kanbanScrollView.isVisible = isKanban
+        binding.tasksListRecyclerView.isVisible = !isKanban && !isEmpty
+        binding.kanbanScrollView.isVisible = isKanban && !isEmpty
 
         if (isKanban) {
             todoAdapter.submitList(state.filteredTasks.filter { it.status == Constants.STATUS_TODO })
@@ -177,7 +181,7 @@ class TaskBoardFragment : Fragment() {
             Constants.STATUS_REVIEW,
             Constants.STATUS_DONE
         )
-        AlertDialog.Builder(requireContext())
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.task_change_status)
             .setItems(statuses) { _, which ->
                 viewModel.updateTaskStatus(task.id, statusValues[which], currentUserId)

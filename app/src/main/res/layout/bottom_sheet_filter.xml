@@ -10,10 +10,10 @@
 
     <!-- Handle Bar -->
     <View
-        android:layout_width="32dp"
+        android:layout_width="40dp"
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
-        android:background="@color/text_hint"
+        android:background="@color/glass_border_strong"
         android:layout_marginBottom="16dp" />
 
     <!-- Title -->
@@ -100,12 +100,11 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/resetFilterButton"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            style="@style/Widget.HWiXeL.Button.Ghost"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="@string/filter_reset"
-            android:textColor="@color/text_secondary" />
+            android:text="@string/filter_reset" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/applyFilterButton"

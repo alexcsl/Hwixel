@@ -107,6 +107,11 @@ class TaskDetailFragment : Fragment() {
             if (result.isSuccess) {
                 Snackbar.make(binding.root, R.string.task_deleted, Snackbar.LENGTH_SHORT).show()
                 findNavController().navigateUp()
+            } else {
+                val msg = result.exceptionOrNull()?.localizedMessage
+                    ?.takeIf { it.isNotBlank() }
+                    ?: getString(R.string.task_delete_failed)
+                Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG).show()
             }
             viewModel.consumeDeleteResult()
         }
@@ -144,22 +149,7 @@ class TaskDetailFragment : Fragment() {
         commentsAdapter.submitList(state.comments)
         historyAdapter.submitList(state.history)
         binding.editButton.isVisible = state.canEditTask
-        updateCommentsHeight(state.comments.size)
         binding.subtaskOverallProgress.isVisible = state.subtasks.isNotEmpty()
-    }
-
-    private fun updateCommentsHeight(commentCount: Int) {
-        val targetDp = when {
-            commentCount <= 0 -> 96
-            commentCount == 1 -> 128
-            commentCount == 2 -> 184
-            else -> 240
-        }
-        val density = resources.displayMetrics.density
-        binding.commentsRecyclerView.layoutParams = binding.commentsRecyclerView.layoutParams.apply {
-            height = (targetDp * density).toInt()
-        }
-        binding.commentsRecyclerView.isNestedScrollingEnabled = commentCount > 2
     }
 
     private fun renderTask(task: Task, assigneeNames: List<String>) {
@@ -174,11 +164,11 @@ class TaskDetailFragment : Fragment() {
             )
             if (task.deadline < System.currentTimeMillis() && task.status != Constants.STATUS_DONE) {
                 binding.deadlineTextView.setTextColor(
-                    requireContext().getColor(android.R.color.holo_red_light)
+                    requireContext().getColor(R.color.brand_rose)
                 )
             } else {
                 binding.deadlineTextView.setTextColor(
-                    requireContext().getColor(android.R.color.darker_gray)
+                    requireContext().getColor(R.color.text_secondary)
                 )
             }
         } else {

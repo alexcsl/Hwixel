@@ -323,13 +323,16 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/logoutButton"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.HWiXeL.Button.Ghost"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="96dp"
                 android:text="@string/logout_button"
-                app:icon="@drawable/ic_logout" />
+                android:textColor="@color/brand_rose"
+                app:icon="@drawable/ic_logout"
+                app:iconTint="@color/brand_rose"
+                app:strokeColor="@color/brand_rose" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

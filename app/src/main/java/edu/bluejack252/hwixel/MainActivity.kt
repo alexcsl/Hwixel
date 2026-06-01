@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.navigation.NavDestination
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
@@ -32,6 +33,9 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.setPadding(0, systemBars.top, 0, systemBars.bottom)
             insets
+        }
+        binding.bottomNavigationView.post {
+            syncNavHostPadding(binding.bottomNavigationView.isVisible)
         }
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.navHostFragment) as NavHostFragment
@@ -69,9 +73,18 @@ class MainActivity : AppCompatActivity() {
     private fun updateBottomNavVisibility(destination: NavDestination) {
         val isBottomDestination = destination.id in BOTTOM_NAV_DESTINATIONS
         binding.bottomNavigationView.isVisible = isBottomDestination
+        syncNavHostPadding(isBottomDestination)
         if (isBottomDestination && binding.bottomNavigationView.selectedItemId != destination.id) {
             binding.bottomNavigationView.selectedItemId = destination.id
         }
+    }
+
+    private fun syncNavHostPadding(bottomNavVisible: Boolean) {
+        val height = if (bottomNavVisible) {
+            binding.bottomNavigationView.height.takeIf { it > 0 }
+                ?: (80 * resources.displayMetrics.density).toInt()
+        } else 0
+        binding.navHostFragment.updatePadding(bottom = height)
     }
 
     private fun setupBottomNavigation(navController: NavController) {

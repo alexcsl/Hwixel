@@ -108,22 +108,29 @@ class DashboardFragment : Fragment() {
             ).show()
         }
 
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle(R.string.create_project_title)
             .setView(dialogView.root)
-            .setPositiveButton(R.string.btn_create) { _, _ ->
+            .setPositiveButton(R.string.btn_create, null)
+            .setNegativeButton(R.string.btn_cancel, null)
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val name = dialogView.projectNameInput.editText?.text?.toString().orEmpty().trim()
                 if (name.isBlank()) {
-                    Snackbar.make(binding.root, R.string.error_empty_project_name, Snackbar.LENGTH_SHORT).show()
-                    return@setPositiveButton
+                    dialogView.projectNameInput.error = getString(R.string.error_empty_project_name)
+                    return@setOnClickListener
                 }
+                dialogView.projectNameInput.error = null
                 val description = dialogView.projectDescriptionInput.editText?.text?.toString().orEmpty().trim()
                 val goals = dialogView.projectGoalsInput.editText?.text?.toString().orEmpty().trim()
                 val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
                 viewModel.createProject(name, description, goals, selectedDueDate, uid)
+                dialog.dismiss()
             }
-            .setNegativeButton(R.string.btn_cancel, null)
-            .show()
+        }
+        dialog.show()
     }
 
     override fun onDestroyView() {

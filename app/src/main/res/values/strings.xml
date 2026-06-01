@@ -225,6 +225,7 @@
     <string name="error_empty_comment">Comment cannot be empty.</string>
     <string name="task_delete">Delete Task</string>
     <string name="task_deleted">Task deleted.</string>
+    <string name="task_delete_failed">Failed to delete task. Please try again.</string>
     <string name="task_no_description">No description provided.</string>
     <string name="task_no_deadline">No deadline set.</string>
     <string name="task_deadline_format">%1$s</string>

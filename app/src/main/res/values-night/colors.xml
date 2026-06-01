@@ -1,52 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="brand_violet">#7C3AED</color>
-    <color name="brand_violet_light">#A78BFA</color>
-    <color name="brand_violet_dark">#5B21B6</color>
-    <color name="brand_violet_container">#2D1B69</color>
-    <color name="brand_cyan">#06B6D4</color>
-    <color name="brand_cyan_light">#67E8F9</color>
+    <color name="brand_violet">#6D5BFF</color>
+    <color name="brand_violet_light">#8F82FF</color>
+    <color name="brand_violet_dark">#4F3CC9</color>
+    <color name="brand_violet_container">#2B2557</color>
+    <color name="brand_cyan">#3B82F6</color>
+    <color name="brand_cyan_light">#93C5FD</color>
     <color name="brand_amber">#F59E0B</color>
-    <color name="brand_emerald">#10B981</color>
-    <color name="brand_rose">#F43F5E</color>
-    <color name="brand_indigo">#4F46E5</color>
+    <color name="brand_emerald">#22C55E</color>
+    <color name="brand_rose">#EF4444</color>
+    <color name="brand_indigo">#4F3CC9</color>
+    <color name="brand_blue">#3B82F6</color>
 
-    <color name="bg_dark">#0D0B1E</color>
-    <color name="bg_surface">#1A1630</color>
-    <color name="bg_surface_2">#231E3D</color>
-    <color name="bg_surface_3">#2D2650</color>
+    <color name="bg_dark">#0E0F1A</color>
+    <color name="bg_surface">#181A2A</color>
+    <color name="bg_surface_2">#1F2238</color>
+    <color name="bg_surface_3">#262A44</color>
 
-    <color name="glass_fill">#1AFFFFFF</color>
-    <color name="glass_fill_medium">#26FFFFFF</color>
-    <color name="glass_fill_strong">#40FFFFFF</color>
-    <color name="glass_border">#33FFFFFF</color>
-    <color name="glass_border_strong">#66FFFFFF</color>
-    <color name="glass_primary">#267C3AED</color>
-    <color name="glass_primary_border">#667C3AED</color>
-    <color name="glass_cyan">#2606B6D4</color>
-    <color name="glass_emerald">#2610B981</color>
+    <color name="glass_fill">#181A2A</color>
+    <color name="glass_fill_medium">#1F2238</color>
+    <color name="glass_fill_strong">#262A44</color>
+    <color name="glass_border">#2A2E48</color>
+    <color name="glass_border_strong">#353A5C</color>
+    <color name="glass_primary">#266D5BFF</color>
+    <color name="glass_primary_border">#666D5BFF</color>
+    <color name="glass_cyan">#263B82F6</color>
+    <color name="glass_emerald">#2622C55E</color>
     <color name="glass_amber">#26F59E0B</color>
-    <color name="glass_rose">#26F43F5E</color>
+    <color name="glass_rose">#26EF4444</color>
 
-    <color name="text_primary">#F5F3FF</color>
-    <color name="text_secondary">#9B8EC4</color>
-    <color name="text_hint">#5C5380</color>
+    <color name="text_primary">#F4F5FA</color>
+    <color name="text_secondary">#B7BAD0</color>
+    <color name="text_hint">#7A7E97</color>
     <color name="text_on_primary">#FFFFFF</color>
-    <color name="text_on_surface">#E8E4FF</color>
+    <color name="text_on_surface">#F4F5FA</color>
 
     <color name="status_todo_bg">#1A64748B</color>
     <color name="status_todo_text">#94A3B8</color>
-    <color name="status_in_progress_bg">#1A06B6D4</color>
-    <color name="status_in_progress_text">#67E8F9</color>
+    <color name="status_in_progress_bg">#1A3B82F6</color>
+    <color name="status_in_progress_text">#93C5FD</color>
     <color name="status_review_bg">#1AF59E0B</color>
     <color name="status_review_text">#FCD34D</color>
-    <color name="status_done_bg">#1A10B981</color>
-    <color name="status_done_text">#6EE7B7</color>
+    <color name="status_done_bg">#1A22C55E</color>
+    <color name="status_done_text">#86EFAC</color>
 
-    <color name="priority_high_bg">#1AF43F5E</color>
-    <color name="priority_high_text">#FB7185</color>
+    <color name="priority_high_bg">#1AEF4444</color>
+    <color name="priority_high_text">#FCA5A5</color>
     <color name="priority_medium_bg">#1AF59E0B</color>
     <color name="priority_medium_text">#FCD34D</color>
-    <color name="priority_low_bg">#1A10B981</color>
-    <color name="priority_low_text">#6EE7B7</color>
+    <color name="priority_low_bg">#1A22C55E</color>
+    <color name="priority_low_text">#86EFAC</color>
+
+    <color name="analytics_healthy">#22C55E</color>
+    <color name="analytics_mild">#F59E0B</color>
+    <color name="analytics_severe">#EF4444</color>
+    <color name="analytics_neutral">#7A7E97</color>
+    <color name="analytics_selected_stroke">#6D5BFF</color>
+    <color name="analytics_card_stroke">#2A2E48</color>
+    <color name="analytics_chart_a">#6D5BFF</color>
+    <color name="analytics_chart_b">#3B82F6</color>
+    <color name="analytics_chart_c">#F59E0B</color>
+    <color name="analytics_chart_d">#EF4444</color>
+    <color name="analytics_chart_e">#22C55E</color>
+
+    <color name="attendance_present">#22C55E</color>
+    <color name="attendance_absent">#EF4444</color>
+    <color name="attendance_present_bg">#1A22C55E</color>
+    <color name="attendance_absent_bg">#1AEF4444</color>
 </resources>

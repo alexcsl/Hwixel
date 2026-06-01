@@ -1,86 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Brand palette -->
-    <color name="brand_violet">#6D28D9</color>
-    <color name="brand_violet_light">#7C3AED</color>
-    <color name="brand_violet_dark">#4C1D95</color>
-    <color name="brand_violet_container">#EDE9FE</color>
-    <color name="brand_cyan">#06B6D4</color>
-    <color name="brand_cyan_light">#67E8F9</color>
+    <color name="brand_violet">#6D5BFF</color>
+    <color name="brand_violet_light">#8F82FF</color>
+    <color name="brand_violet_dark">#4F3CC9</color>
+    <color name="brand_violet_container">#EEEAFE</color>
+    <color name="brand_cyan">#3B82F6</color>
+    <color name="brand_cyan_light">#93C5FD</color>
     <color name="brand_amber">#F59E0B</color>
-    <color name="brand_emerald">#10B981</color>
-    <color name="brand_rose">#F43F5E</color>
-    <color name="brand_indigo">#4F46E5</color>
+    <color name="brand_emerald">#22C55E</color>
+    <color name="brand_rose">#EF4444</color>
+    <color name="brand_indigo">#4F3CC9</color>
+    <color name="brand_blue">#3B82F6</color>
 
     <!-- Backgrounds -->
-    <color name="bg_dark">#F7F4FF</color>
+    <color name="bg_dark">#F7F7FB</color>
     <color name="bg_surface">#FFFFFF</color>
-    <color name="bg_surface_2">#F0EAFB</color>
-    <color name="bg_surface_3">#E4D8F8</color>
+    <color name="bg_surface_2">#F3F4F8</color>
+    <color name="bg_surface_3">#ECEEF5</color>
 
-    <!-- Glass tokens (alpha encoded in hex: 1A=10%, 26=15%, 33=20%, 40=25%, 66=40%) -->
-    <color name="glass_fill">#F2FFFFFF</color>
-    <color name="glass_fill_medium">#FFFFFFFF</color>
-    <color name="glass_fill_strong">#FFFFFFFF</color>
-    <color name="glass_border">#331F1235</color>
-    <color name="glass_border_strong">#4D6D28D9</color>
-    <color name="glass_primary">#1A6D28D9</color>
-    <color name="glass_primary_border">#4D6D28D9</color>
-    <color name="glass_cyan">#1A0891B2</color>
-    <color name="glass_emerald">#1A059669</color>
-    <color name="glass_amber">#1AD97706</color>
-    <color name="glass_rose">#1AE11D48</color>
+    <!-- Glass tokens -->
+    <color name="glass_fill">#FFFFFF</color>
+    <color name="glass_fill_medium">#F3F4F8</color>
+    <color name="glass_fill_strong">#ECEEF5</color>
+    <color name="glass_border">#E5E7F0</color>
+    <color name="glass_border_strong">#D8DCEA</color>
+    <color name="glass_primary">#1A6D5BFF</color>
+    <color name="glass_primary_border">#4D6D5BFF</color>
+    <color name="glass_cyan">#1A3B82F6</color>
+    <color name="glass_emerald">#1A22C55E</color>
+    <color name="glass_amber">#1AF59E0B</color>
+    <color name="glass_rose">#1AEF4444</color>
 
     <!-- Text -->
-    <color name="text_primary">#1F1235</color>
-    <color name="text_secondary">#625173</color>
-    <color name="text_hint">#8B7C99</color>
+    <color name="text_primary">#15172B</color>
+    <color name="text_secondary">#4A4D63</color>
+    <color name="text_hint">#8A8FA3</color>
     <color name="text_on_primary">#FFFFFF</color>
-    <color name="text_on_surface">#1F1235</color>
+    <color name="text_on_surface">#15172B</color>
 
     <!-- Status colours -->
     <color name="status_todo_bg">#E2E8F0</color>
     <color name="status_todo_text">#475569</color>
-    <color name="status_in_progress_bg">#CFFAFE</color>
-    <color name="status_in_progress_text">#0E7490</color>
+    <color name="status_in_progress_bg">#DBEAFE</color>
+    <color name="status_in_progress_text">#1D4ED8</color>
     <color name="status_review_bg">#FEF3C7</color>
     <color name="status_review_text">#B45309</color>
-    <color name="status_done_bg">#D1FAE5</color>
-    <color name="status_done_text">#047857</color>
+    <color name="status_done_bg">#DCFCE7</color>
+    <color name="status_done_text">#15803D</color>
 
     <!-- Priority colours -->
-    <color name="priority_high_bg">#FFE4E6</color>
-    <color name="priority_high_text">#BE123C</color>
+    <color name="priority_high_bg">#FEE2E2</color>
+    <color name="priority_high_text">#B91C1C</color>
     <color name="priority_medium_bg">#FEF3C7</color>
     <color name="priority_medium_text">#B45309</color>
-    <color name="priority_low_bg">#D1FAE5</color>
-    <color name="priority_low_text">#047857</color>
+    <color name="priority_low_bg">#DCFCE7</color>
+    <color name="priority_low_text">#15803D</color>
 
     <!-- Analytics -->
-    <color name="analytics_healthy">#10B981</color>
+    <color name="analytics_healthy">#22C55E</color>
     <color name="analytics_mild">#F59E0B</color>
-    <color name="analytics_severe">#F43F5E</color>
-    <color name="analytics_neutral">#9B8EC4</color>
-    <color name="analytics_selected_stroke">#7C3AED</color>
-    <color name="analytics_card_stroke">#33FFFFFF</color>
-    <color name="analytics_chart_a">#7C3AED</color>
-    <color name="analytics_chart_b">#06B6D4</color>
+    <color name="analytics_severe">#EF4444</color>
+    <color name="analytics_neutral">#8A8FA3</color>
+    <color name="analytics_selected_stroke">#6D5BFF</color>
+    <color name="analytics_card_stroke">#E5E7F0</color>
+    <color name="analytics_chart_a">#6D5BFF</color>
+    <color name="analytics_chart_b">#3B82F6</color>
     <color name="analytics_chart_c">#F59E0B</color>
-    <color name="analytics_chart_d">#F43F5E</color>
-    <color name="analytics_chart_e">#10B981</color>
+    <color name="analytics_chart_d">#EF4444</color>
+    <color name="analytics_chart_e">#22C55E</color>
 
     <!-- Attendance -->
-    <color name="attendance_present">#10B981</color>
-    <color name="attendance_absent">#F43F5E</color>
-    <color name="attendance_present_bg">#1A10B981</color>
-    <color name="attendance_absent_bg">#1AF43F5E</color>
+    <color name="attendance_present">#22C55E</color>
+    <color name="attendance_absent">#EF4444</color>
+    <color name="attendance_present_bg">#1A22C55E</color>
+    <color name="attendance_absent_bg">#1AEF4444</color>
 
     <!-- Legacy aliases kept for compiled code -->
     <color name="purple_200">#FFA78BFA</color>
-    <color name="purple_500">#FF7C3AED</color>
-    <color name="purple_700">#FF5B21B6</color>
-    <color name="teal_200">#FF06B6D4</color>
-    <color name="teal_700">#FF0284C7</color>
+    <color name="purple_500">#FF6D5BFF</color>
+    <color name="purple_700">#FF4F3CC9</color>
+    <color name="teal_200">#FF93C5FD</color>
+    <color name="teal_700">#FF1D4ED8</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="avatar_circle_background">#FFE8EEF7</color>

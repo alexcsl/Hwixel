@@ -1,5 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.HWiXeL" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Typography -->
+        <item name="android:fontFamily">@font/plus_jakarta_sans</item>
+        <item name="fontFamily">@font/plus_jakarta_sans</item>
+
         <!-- Primary brand -->
         <item name="colorPrimary">@color/brand_violet</item>
         <item name="colorPrimaryVariant">@color/brand_violet_dark</item>

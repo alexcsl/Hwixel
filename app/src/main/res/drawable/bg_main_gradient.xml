@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
-        <color android:color="#F7F4FF" />
+        <color android:color="#F7F7FB" />
     </item>
-    <!-- Subtle violet glow top-center -->
+    <!-- Subtle indigo glow top-center -->
     <item>
         <shape android:shape="oval">
             <gradient
@@ -11,7 +11,7 @@
                 android:gradientRadius="350dp"
                 android:centerX="0.5"
                 android:centerY="0.0"
-                android:startColor="#227C3AED"
+                android:startColor="#226D5BFF"
                 android:endColor="#00000000" />
         </shape>
     </item>

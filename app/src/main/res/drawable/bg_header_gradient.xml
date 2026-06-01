@@ -4,16 +4,16 @@
         <shape android:shape="rectangle">
             <gradient
                 android:angle="135"
-                android:startColor="#2D1B69"
-                android:centerColor="#1E1550"
-                android:endColor="#0D0B1E"
+                android:startColor="#251B7A"
+                android:centerColor="#180F5C"
+                android:endColor="#0E0F1A"
                 android:type="linear" />
             <corners
                 android:bottomLeftRadius="28dp"
                 android:bottomRightRadius="28dp" />
         </shape>
     </item>
-    <!-- Subtle violet shimmer overlay -->
+    <!-- Subtle indigo shimmer overlay -->
     <item>
         <shape android:shape="rectangle">
             <gradient
@@ -21,7 +21,7 @@
                 android:gradientRadius="250dp"
                 android:centerX="0.9"
                 android:centerY="0.3"
-                android:startColor="#267C3AED"
+                android:startColor="#266D5BFF"
                 android:endColor="#00000000" />
             <corners
                 android:bottomLeftRadius="28dp"

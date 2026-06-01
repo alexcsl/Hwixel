@@ -78,6 +78,7 @@ class DashboardViewModel(
             projects = buildProjectItems(projects, currentUserId),
             deadlines = buildDeadlineItems(projects, tasks, now, currentUserId),
             pendingTaskCount = countPendingTasks(projects, tasks, currentUserId),
+            completedTaskCount = countCompletedTasks(projects, tasks, currentUserId),
             isLoading = false
         )
     }
@@ -185,6 +186,21 @@ class DashboardViewModel(
                 )
             )
             _createProjectResult.value = projectRepository.createProject(project)
+        }
+    }
+
+    fun countCompletedTasks(projects: List<Project>, tasks: List<Task>, userId: String): Int {
+        val activeProjectIds = projects
+            .filter { project ->
+                val member = project.members[userId]
+                member != null && member.status != Constants.MEMBER_STATUS_INACTIVE
+            }
+            .map { project -> project.id }
+            .toSet()
+        return tasks.count { task ->
+            task.projectId in activeProjectIds &&
+                task.assignees.contains(userId) &&
+                task.status == Constants.STATUS_DONE
         }
     }
 

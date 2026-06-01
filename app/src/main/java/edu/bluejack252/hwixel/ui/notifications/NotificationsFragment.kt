@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -31,6 +32,8 @@ class NotificationsFragment : Fragment() {
     }
 
     private lateinit var adapter: NotificationAdapter
+    private var allNotifications: List<Notification> = emptyList()
+    private var activeFilter: String = FILTER_ALL
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,10 +57,20 @@ class NotificationsFragment : Fragment() {
         val emptyText = view.findViewById<TextView>(R.id.emptyNotificationsTextView)
         val unreadBadge = view.findViewById<TextView>(R.id.unreadCountBadge)
 
+        val filterChipGroup = view.findViewById<ChipGroup>(R.id.notifFilterChipGroup)
+        filterChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+            activeFilter = when (checkedIds.firstOrNull()) {
+                R.id.chipFilterMentions -> NotificationTypes.TYPE_MENTION
+                R.id.chipFilterDeadlines -> NotificationTypes.TYPE_DEADLINE
+                R.id.chipFilterReviews -> FILTER_REVIEWS
+                else -> FILTER_ALL
+            }
+            applyFilter(emptyText, markAllButton)
+        }
+
         viewModel.notifications.observe(viewLifecycleOwner) { list ->
-            adapter.submitList(list)
-            emptyText.isVisible = list.isEmpty()
-            markAllButton.isVisible = list.any { !it.isRead }
+            allNotifications = list
+            applyFilter(emptyText, markAllButton)
         }
 
         viewModel.unreadCount.observe(viewLifecycleOwner) { count ->
@@ -83,6 +96,25 @@ class NotificationsFragment : Fragment() {
                 else -> loading.isVisible = false
             }
         }
+    }
+
+    private fun applyFilter(emptyText: TextView, markAllButton: MaterialButton) {
+        val filtered = when (activeFilter) {
+            NotificationTypes.TYPE_MENTION -> allNotifications.filter { it.type == NotificationTypes.TYPE_MENTION }
+            NotificationTypes.TYPE_DEADLINE -> allNotifications.filter { it.type == NotificationTypes.TYPE_DEADLINE }
+            FILTER_REVIEWS -> allNotifications.filter {
+                it.type == NotificationTypes.TYPE_EVAL_OPEN || it.type == NotificationTypes.TYPE_EVAL_CLOSE
+            }
+            else -> allNotifications
+        }
+        adapter.submitList(filtered)
+        emptyText.isVisible = filtered.isEmpty()
+        markAllButton.isVisible = allNotifications.any { !it.isRead }
+    }
+
+    companion object {
+        private const val FILTER_ALL = "all"
+        private const val FILTER_REVIEWS = "reviews"
     }
 
     private fun handleNotifTap(notif: Notification) {

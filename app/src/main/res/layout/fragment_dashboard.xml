@@ -36,44 +36,108 @@
                 android:paddingTop="56dp"
                 android:paddingBottom="28dp">
 
-                <TextView
+                <!-- Greeting row: name + avatar button + bell -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/dashboard_greeting"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/dashboard_title"
-                    android:textColor="@color/text_primary"
-                    android:textSize="28sp"
-                    android:fontFamily="sans-serif-black" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                <!-- Stats row -->
+                        <TextView
+                            android:id="@+id/greetingTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/dashboard_greeting"
+                            android:textColor="@color/text_primary"
+                            android:textSize="22sp"
+                            android:fontFamily="sans-serif-black" />
+
+                        <TextView
+                            android:id="@+id/greetingSubtitleTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <!-- Avatar button → profile -->
+                    <FrameLayout
+                        android:id="@+id/profileAvatarButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="10dp"
+                        android:background="@drawable/bg_glass_card_primary"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <TextView
+                            android:id="@+id/greetingInitialsTextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:textColor="@color/brand_violet_light"
+                            android:textSize="14sp"
+                            android:fontFamily="sans-serif-black" />
+                    </FrameLayout>
+
+                    <!-- Notification bell -->
+                    <FrameLayout
+                        android:id="@+id/notificationBellButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_glass_card"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_notifications_24"
+                            app:tint="@color/text_secondary" />
+
+                        <!-- Unread dot -->
+                        <View
+                            android:id="@+id/bellUnreadDot"
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:layout_gravity="top|end"
+                            android:layout_margin="9dp"
+                            android:background="@drawable/bg_unread_dot"
+                            android:visibility="gone" />
+                    </FrameLayout>
+                </LinearLayout>
+
+                <!-- Stats row: 3 tiles -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
                     android:orientation="horizontal">
 
-                    <!-- Pending tasks stat -->
+                    <!-- Pending tasks -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        android:background="@drawable/bg_glass_card"
+                        android:background="@drawable/bg_glass_card_primary"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="14dp">
 
                         <TextView
                             android:id="@+id/pendingTasksTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="@color/brand_violet_light"
-                            android:textSize="28sp"
+                            android:textSize="26sp"
                             android:fontFamily="sans-serif-black" />
 
                         <TextView
@@ -82,26 +146,26 @@
                             android:layout_marginTop="2dp"
                             android:text="@string/dashboard_pending_label"
                             android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
+                            android:textSize="11sp" />
                     </LinearLayout>
 
-                    <!-- Spacer item for future stat -->
+                    <!-- Active projects -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp"
-                        android:background="@drawable/bg_glass_card_primary"
+                        android:background="@drawable/bg_glass_card_amber"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="14dp">
 
                         <TextView
                             android:id="@+id/activeProjectsStatTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/dashboard_count_placeholder"
-                            android:textColor="@color/brand_cyan"
-                            android:textSize="28sp"
+                            android:textColor="@color/brand_amber"
+                            android:textSize="26sp"
                             android:fontFamily="sans-serif-black" />
 
                         <TextView
@@ -110,7 +174,35 @@
                             android:layout_marginTop="2dp"
                             android:text="@string/dashboard_active_label"
                             android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <!-- Done tasks -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_glass_card_emerald"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+
+                        <TextView
+                            android:id="@+id/completedTasksTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/dashboard_count_placeholder"
+                            android:textColor="@color/brand_emerald"
+                            android:textSize="26sp"
+                            android:fontFamily="sans-serif-black" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/dashboard_done_label"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="11sp" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -121,7 +213,218 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingHorizontal="20dp"
-                android:paddingTop="24dp">
+                android:paddingTop="20dp">
+
+                <!-- Search bar -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="20dp"
+                    android:background="@drawable/bg_glass_card"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_filter"
+                        app:tint="@color/text_hint" />
+
+                    <EditText
+                        android:id="@+id/searchEditText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:hint="@string/dashboard_search_hint"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:textColor="@color/text_primary"
+                        android:textColorHint="@color/text_hint"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- Featured upcoming deadline card -->
+                <LinearLayout
+                    android:id="@+id/featuredDeadlineContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="22dp"
+                    android:background="@drawable/bg_card_gradient_primary"
+                    android:orientation="vertical"
+                    android:padding="18dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/dashboard_upcoming_deadline"
+                        android:textColor="#FFFFFFFF"
+                        android:textSize="11sp"
+                        android:fontFamily="sans-serif-black"
+                        android:letterSpacing="0.08"
+                        android:alpha="0.9" />
+
+                    <TextView
+                        android:id="@+id/featuredDeadlineTitleTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:textColor="#FFFFFFFF"
+                        android:textSize="20sp"
+                        android:fontFamily="sans-serif-black"
+                        android:letterSpacing="-0.01" />
+
+                    <TextView
+                        android:id="@+id/featuredDeadlineProjectTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="#FFFFFFFF"
+                        android:textSize="13sp"
+                        android:alpha="0.85" />
+
+                    <!-- Countdown grid: DAYS / HRS / MIN / SEC -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_countdown_tile"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp">
+
+                            <TextView
+                                android:id="@+id/featuredDeadlineDaysTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="00"
+                                android:textColor="#FFFFFFFF"
+                                android:textSize="22sp"
+                                android:fontFamily="sans-serif-black" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="DAYS"
+                                android:textColor="#FFFFFFFF"
+                                android:textSize="10sp"
+                                android:fontFamily="sans-serif-black"
+                                android:letterSpacing="0.1"
+                                android:alpha="0.85" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:background="@drawable/bg_countdown_tile"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp">
+
+                            <TextView
+                                android:id="@+id/featuredDeadlineHoursTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="00"
+                                android:textColor="#FFFFFFFF"
+                                android:textSize="22sp"
+                                android:fontFamily="sans-serif-black" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="HRS"
+                                android:textColor="#FFFFFFFF"
+                                android:textSize="10sp"
+                                android:fontFamily="sans-serif-black"
+                                android:letterSpacing="0.1"
+                                android:alpha="0.85" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:background="@drawable/bg_countdown_tile"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp">
+
+                            <TextView
+                                android:id="@+id/featuredDeadlineMinsTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="00"
+                                android:textColor="#FFFFFFFF"
+                                android:textSize="22sp"
+                                android:fontFamily="sans-serif-black" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="MIN"
+                                android:textColor="#FFFFFFFF"
+                                android:textSize="10sp"
+                                android:fontFamily="sans-serif-black"
+                                android:letterSpacing="0.1"
+                                android:alpha="0.85" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:background="@drawable/bg_countdown_tile"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp">
+
+                            <TextView
+                                android:id="@+id/featuredDeadlineSecsTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="00"
+                                android:textColor="#FFFFFFFF"
+                                android:textSize="22sp"
+                                android:fontFamily="sans-serif-black" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="SEC"
+                                android:textColor="#FFFFFFFF"
+                                android:textSize="10sp"
+                                android:fontFamily="sans-serif-black"
+                                android:letterSpacing="0.1"
+                                android:alpha="0.85" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
 
                 <!-- Deadlines section -->
                 <LinearLayout
@@ -138,6 +441,7 @@
                         style="@style/TextAppearance.HWiXeL.SectionHeader" />
 
                     <TextView
+                        android:id="@+id/deadlinesSeeAllButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/dashboard_see_all"
@@ -178,6 +482,14 @@
                         android:layout_weight="1"
                         android:text="@string/dashboard_projects_title"
                         style="@style/TextAppearance.HWiXeL.SectionHeader" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/dashboard_see_all"
+                        android:textColor="@color/brand_violet_light"
+                        android:textSize="13sp"
+                        android:visibility="gone" />
                 </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView

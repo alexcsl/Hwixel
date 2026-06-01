@@ -2,6 +2,7 @@ package edu.bluejack252.hwixel.ui.dashboard
 
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
@@ -21,6 +23,7 @@ import edu.bluejack252.hwixel.databinding.FragmentDashboardBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlin.math.max
 
 class DashboardFragment : Fragment() {
     private var _binding: FragmentDashboardBinding? = null
@@ -28,6 +31,8 @@ class DashboardFragment : Fragment() {
 
     private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
     private var selectedDueDate: Long = 0L
+    private var secondsTicker: CountDownTimer? = null
+    private var activeDeadlineMillis: Long = 0L
 
     private val projectAdapter = DashboardProjectAdapter { project ->
         val action = DashboardFragmentDirections.actionDashboardFragmentToProjectHubFragment(project.id)
@@ -60,6 +65,17 @@ class DashboardFragment : Fragment() {
         )
         binding.deadlinesRecyclerView.adapter = deadlineAdapter
         binding.addProjectFab.setOnClickListener { showCreateProjectDialog() }
+
+        binding.profileAvatarButton.setOnClickListener {
+            requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+                ?.selectedItemId = R.id.profileFragment
+        }
+        binding.notificationBellButton.setOnClickListener {
+            requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+                ?.selectedItemId = R.id.notificationsFragment
+        }
+
+        setupGreeting()
         viewModel.uiState.observe(viewLifecycleOwner, ::render)
         viewModel.createProjectResult.observe(viewLifecycleOwner) { result ->
             result ?: return@observe
@@ -78,18 +94,71 @@ class DashboardFragment : Fragment() {
         viewModel.loadDashboard(FirebaseAuth.getInstance().currentUser?.uid.orEmpty())
     }
 
+    private fun setupGreeting() {
+        val user = FirebaseAuth.getInstance().currentUser
+        val displayName = user?.displayName?.takeIf { it.isNotBlank() }
+        val firstName = displayName?.split(" ")?.firstOrNull() ?: getString(R.string.profile_unknown_name)
+        binding.greetingTextView.text = getString(R.string.dashboard_greeting_format, firstName)
+        val initials = displayName
+            ?.split(" ")
+            ?.filter { it.isNotBlank() }
+            ?.take(2)
+            ?.joinToString("") { it.first().uppercase() }
+            ?: "?"
+        binding.greetingInitialsTextView.text = initials
+    }
+
     private fun render(state: DashboardUiState) {
         binding.loadingIndicator.isVisible = state.isLoading
         projectAdapter.submitList(state.projects)
         deadlineAdapter.submitList(state.deadlines)
+
         binding.pendingTasksTextView.text = resources.getQuantityString(
             R.plurals.dashboard_pending_tasks,
             state.pendingTaskCount,
             state.pendingTaskCount
         )
         binding.activeProjectsStatTextView.text = state.projects.size.toString()
+        binding.completedTasksTextView.text = state.completedTaskCount.toString()
+
+        binding.greetingSubtitleTextView.text = getString(
+            R.string.dashboard_tasks_due_format,
+            state.pendingTaskCount
+        )
+
         binding.emptyProjectsTextView.isVisible = !state.isLoading && state.projects.isEmpty()
         binding.emptyDeadlinesTextView.isVisible = !state.isLoading && state.deadlines.isEmpty()
+
+        val nearest = state.deadlines.firstOrNull()
+        binding.featuredDeadlineContainer.isVisible = nearest != null
+        if (nearest != null) {
+            binding.featuredDeadlineTitleTextView.text = nearest.taskTitle
+            binding.featuredDeadlineProjectTextView.text = nearest.projectName
+            binding.featuredDeadlineDaysTextView.text = nearest.countdown.days.toString().padStart(2, '0')
+            binding.featuredDeadlineHoursTextView.text = nearest.countdown.hours.toString().padStart(2, '0')
+            binding.featuredDeadlineMinsTextView.text = nearest.countdown.minutes.toString().padStart(2, '0')
+            if (activeDeadlineMillis != nearest.deadline) {
+                activeDeadlineMillis = nearest.deadline
+                startSecondsTicker(nearest.deadline)
+            }
+        } else {
+            secondsTicker?.cancel()
+            activeDeadlineMillis = 0L
+        }
+    }
+
+    private fun startSecondsTicker(deadlineMillis: Long) {
+        secondsTicker?.cancel()
+        val remaining = max(0L, deadlineMillis - System.currentTimeMillis())
+        secondsTicker = object : CountDownTimer(remaining, 1_000L) {
+            override fun onTick(millisUntilFinished: Long) {
+                val secs = (millisUntilFinished / 1_000L) % 60L
+                _binding?.featuredDeadlineSecsTextView?.text = secs.toString().padStart(2, '0')
+            }
+            override fun onFinish() {
+                _binding?.featuredDeadlineSecsTextView?.text = "00"
+            }
+        }.start()
     }
 
     private fun showCreateProjectDialog() {
@@ -134,6 +203,8 @@ class DashboardFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        secondsTicker?.cancel()
+        secondsTicker = null
         _binding = null
         super.onDestroyView()
     }

@@ -134,6 +134,8 @@ class ProfileFragment : Fragment() {
         binding.profilePhoneTextView.text = phone
         binding.projectsCompletedValueTextView.text = (user?.totalProjectsCompleted ?: 0).toString()
         binding.peerRatingValueTextView.text = String.format(Locale.getDefault(), "%.1f", user?.averagePeerRating ?: 0f)
+        val reliabilityPct = ((user?.averagePeerRating ?: 0f) / 5f * 100f).toInt()
+        binding.profileReliabilityValueTextView.text = if (reliabilityPct > 0) "$reliabilityPct%" else "--"
         binding.avatarInitialsTextView.text = displayName.trim().firstOrNull()?.uppercaseChar()?.toString().orEmpty()
         val avatarUrl = user?.avatarUrl.orEmpty()
         binding.avatarImageView.isVisible = avatarUrl.isNotBlank()

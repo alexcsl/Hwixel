@@ -328,6 +328,16 @@
     <string name="end_date_button">End</string>
     <string name="date_range_separator">to</string>
     <string name="dashboard_count_placeholder">-</string>
+    <string name="dashboard_done_label">Done</string>
+    <string name="dashboard_greeting_format">Hi, %s</string>
+    <string name="dashboard_tasks_due_format">%d tasks due this week</string>
+    <string name="dashboard_search_hint">Search projects, tasks…</string>
+    <string name="dashboard_upcoming_deadline">UPCOMING DEADLINE</string>
+    <string name="profile_reliability_label">Reliability</string>
+    <string name="notif_filter_all">All</string>
+    <string name="notif_filter_mentions">Mentions</string>
+    <string name="notif_filter_deadlines">Deadlines</string>
+    <string name="notif_filter_reviews">Reviews</string>
     <string name="create_project_button">Create Project</string>
     <string name="date_range_label">Date range</string>
     <string name="apply_filter_button">Apply filter</string>

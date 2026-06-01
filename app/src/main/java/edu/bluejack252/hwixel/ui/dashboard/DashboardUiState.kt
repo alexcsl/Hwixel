@@ -4,6 +4,7 @@ data class DashboardUiState(
     val projects: List<DashboardProjectUi> = emptyList(),
     val deadlines: List<DashboardDeadlineUi> = emptyList(),
     val pendingTaskCount: Int = 0,
+    val completedTaskCount: Int = 0,
     val isLoading: Boolean = true
 )
 

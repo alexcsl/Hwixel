@@ -43,3 +43,8 @@ Thumbs.db
 
 # Kotlin symbol processing
 .kotlin/
+
+# AI assistant directories
+.claire/
+.claude/
+.codex/

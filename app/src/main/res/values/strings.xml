@@ -294,8 +294,8 @@
     <string name="register_heading">Create\naccount</string>
     <string name="divider_or">or</string>
     <string name="dashboard_greeting">Good day</string>
-    <string name="dashboard_pending_label">pending tasks</string>
-    <string name="dashboard_active_label">active projects</string>
+    <string name="dashboard_pending_label">pending</string>
+    <string name="dashboard_active_label">active</string>
     <string name="dashboard_see_all">See all</string>
     <string name="analytics_title">Analytics</string>
     <string name="placeholder_text">Coming soon</string>
@@ -328,7 +328,7 @@
     <string name="end_date_button">End</string>
     <string name="date_range_separator">to</string>
     <string name="dashboard_count_placeholder">-</string>
-    <string name="dashboard_done_label">Done</string>
+    <string name="dashboard_done_label">done</string>
     <string name="dashboard_greeting_format">Hi, %s</string>
     <string name="dashboard_tasks_due_format">%d tasks due this week</string>
     <string name="dashboard_search_hint">Search projects, tasks…</string>

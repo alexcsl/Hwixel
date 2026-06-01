@@ -1,26 +1,49 @@
 <resources>
     <style name="Theme.HWiXeL" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Typography -->
+        <item name="android:fontFamily">@font/plus_jakarta_sans</item>
+        <item name="fontFamily">@font/plus_jakarta_sans</item>
+
+        <!-- Primary brand -->
         <item name="colorPrimary">@color/brand_violet</item>
         <item name="colorPrimaryVariant">@color/brand_violet_dark</item>
         <item name="colorOnPrimary">@color/text_on_primary</item>
         <item name="colorPrimaryContainer">@color/brand_violet_container</item>
         <item name="colorOnPrimaryContainer">@color/brand_violet_light</item>
+
+        <!-- Secondary -->
         <item name="colorSecondary">@color/brand_cyan</item>
         <item name="colorSecondaryVariant">@color/brand_cyan_light</item>
         <item name="colorOnSecondary">@color/bg_dark</item>
+        <item name="colorSecondaryContainer">@color/brand_violet_container</item>
+        <item name="colorOnSecondaryContainer">@color/brand_violet_light</item>
+
+        <!-- Surfaces -->
         <item name="android:colorBackground">@color/bg_dark</item>
         <item name="colorSurface">@color/bg_surface</item>
         <item name="colorOnSurface">@color/text_primary</item>
         <item name="colorOnSurfaceVariant">@color/text_secondary</item>
         <item name="colorSurfaceVariant">@color/bg_surface_2</item>
+
+        <!-- Error -->
         <item name="colorError">@color/brand_rose</item>
         <item name="colorOnError">@color/text_on_primary</item>
+
+        <!-- Status bar — dark mode, icons are light -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@color/bg_dark</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+
+        <!-- Window background -->
         <item name="android:windowBackground">@color/bg_dark</item>
+
+        <!-- Shape overrides -->
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.HWiXeL.MediumComponent</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.HWiXeL.LargeComponent</item>
+
+        <!-- Widget styles -->
         <item name="bottomNavigationStyle">@style/Widget.HWiXeL.BottomNavigationView</item>
         <item name="textInputStyle">@style/Widget.HWiXeL.TextInputLayout</item>
         <item name="floatingActionButtonStyle">@style/Widget.HWiXeL.FloatingActionButton</item>

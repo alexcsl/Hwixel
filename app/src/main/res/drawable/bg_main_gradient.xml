@@ -1,18 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <color android:color="#0E0F1A" />
-    </item>
-    <!-- Subtle indigo glow top-center -->
-    <item>
-        <shape android:shape="oval">
-            <gradient
-                android:type="radial"
-                android:gradientRadius="350dp"
-                android:centerX="0.5"
-                android:centerY="0.0"
-                android:startColor="#226D5BFF"
-                android:endColor="#00000000" />
-        </shape>
-    </item>
-</layer-list>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/bg_dark" />
+</shape>

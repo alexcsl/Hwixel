@@ -144,6 +144,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
+                            android:maxLines="1"
                             android:text="@string/dashboard_pending_label"
                             android:textColor="@color/text_secondary"
                             android:textSize="11sp" />
@@ -172,6 +173,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
+                            android:maxLines="1"
                             android:text="@string/dashboard_active_label"
                             android:textColor="@color/text_secondary"
                             android:textSize="11sp" />
@@ -200,6 +202,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
+                            android:maxLines="1"
                             android:text="@string/dashboard_done_label"
                             android:textColor="@color/text_secondary"
                             android:textSize="11sp" />

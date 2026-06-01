@@ -9,12 +9,14 @@
         <item name="colorPrimaryVariant">@color/brand_violet_dark</item>
         <item name="colorOnPrimary">@color/text_on_primary</item>
         <item name="colorPrimaryContainer">@color/brand_violet_container</item>
-        <item name="colorOnPrimaryContainer">@color/brand_violet_light</item>
+        <item name="colorOnPrimaryContainer">@color/brand_violet_dark</item>
 
         <!-- Secondary -->
         <item name="colorSecondary">@color/brand_cyan</item>
         <item name="colorSecondaryVariant">@color/brand_cyan_light</item>
-        <item name="colorOnSecondary">@color/bg_dark</item>
+        <item name="colorOnSecondary">@color/text_on_primary</item>
+        <item name="colorSecondaryContainer">@color/brand_violet_container</item>
+        <item name="colorOnSecondaryContainer">@color/brand_violet_dark</item>
 
         <!-- Surfaces -->
         <item name="android:colorBackground">@color/bg_dark</item>
@@ -27,12 +29,12 @@
         <item name="colorError">@color/brand_rose</item>
         <item name="colorOnError">@color/text_on_primary</item>
 
-        <!-- Status bar transparent so gradient shows through -->
+        <!-- Status bar — light mode uses opaque bg, icons are dark -->
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/bg_dark</item>
+        <item name="android:navigationBarColor">@color/bg_surface</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
 
         <!-- Window background -->
         <item name="android:windowBackground">@color/bg_dark</item>

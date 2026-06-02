@@ -43,5 +43,9 @@
         <item name="bottomNavigationStyle">@style/Widget.HWiXeL.BottomNavigationView</item>
         <item name="textInputStyle">@style/Widget.HWiXeL.TextInputLayout</item>
         <item name="floatingActionButtonStyle">@style/Widget.HWiXeL.FloatingActionButton</item>
+
+        <!-- Dialogs -->
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.HWiXeL.MaterialAlertDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.HWiXeL.Dialog</item>
     </style>
 </resources>

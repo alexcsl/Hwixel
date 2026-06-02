@@ -1,4 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/bg_dark" />
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Solid base matches the window/status bar background so nothing leaks at the top -->
+    <item>
+        <color android:color="@color/bg_dark" />
+    </item>
+
+    <!-- Soft violet glow, upper-left -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="320dp"
+                android:centerX="0.15"
+                android:centerY="0.12"
+                android:startColor="#1F6D5BFF"
+                android:endColor="#00000000" />
+        </shape>
+    </item>
+
+    <!-- Soft cyan glow, upper-right -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="300dp"
+                android:centerX="0.95"
+                android:centerY="0.05"
+                android:startColor="#163B82F6"
+                android:endColor="#00000000" />
+        </shape>
+    </item>
+
+    <!-- Soft amber glow, mid-right -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="260dp"
+                android:centerX="1.0"
+                android:centerY="0.55"
+                android:startColor="#10F59E0B"
+                android:endColor="#00000000" />
+        </shape>
+    </item>
+
+    <!-- Soft emerald glow, lower-left -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="320dp"
+                android:centerX="0.05"
+                android:centerY="0.92"
+                android:startColor="#1422C55E"
+                android:endColor="#00000000" />
+        </shape>
+    </item>
+
+    <!-- Soft violet glow, lower-right -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="300dp"
+                android:centerX="0.9"
+                android:centerY="1.0"
+                android:startColor="#1A8F82FF"
+                android:endColor="#00000000" />
+        </shape>
+    </item>
+</layer-list>

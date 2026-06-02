@@ -47,6 +47,10 @@
 
         <!-- FAB -->
         <item name="floatingActionButtonStyle">@style/Widget.HWiXeL.FloatingActionButton</item>
+
+        <!-- Dialogs -->
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.HWiXeL.MaterialAlertDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.HWiXeL.Dialog</item>
     </style>
 
     <!-- Shape appearances -->
@@ -173,5 +177,43 @@
         <item name="cornerSizeTopRight">24dp</item>
         <item name="cornerSizeBottomLeft">0dp</item>
         <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <!-- Custom Material dialog (used by MaterialAlertDialogBuilder app-wide) -->
+    <style name="ThemeOverlay.HWiXeL.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorSurface">@color/bg_surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorPrimary">@color/brand_violet</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/TextAppearance.HWiXeL.DialogTitle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.HWiXeL.Dialog.Button</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.HWiXeL.Dialog.Button</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.HWiXeL.Dialog.Button</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.HWiXeL.Dialog</item>
+        <item name="textInputStyle">@style/Widget.HWiXeL.TextInputLayout</item>
+    </style>
+
+    <style name="ShapeAppearance.HWiXeL.Dialog" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerSize">24dp</item>
+    </style>
+
+    <!-- Custom AppCompat dialog (used by androidx AlertDialog.Builder app-wide) -->
+    <style name="ThemeOverlay.HWiXeL.Dialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="colorAccent">@color/brand_violet</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:windowBackground">@drawable/bg_dialog</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.HWiXeL.Dialog.Button</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.HWiXeL.Dialog.Button</item>
+    </style>
+
+    <style name="TextAppearance.HWiXeL.DialogTitle" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif-black</item>
+    </style>
+
+    <style name="Widget.HWiXeL.Dialog.Button" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/brand_violet_light</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 </resources>

@@ -57,6 +57,14 @@
     <color name="priority_low_bg">#DCFCE7</color>
     <color name="priority_low_text">#15803D</color>
 
+    <!-- Dashboard stat tiles — light theme -->
+    <color name="tile_amber_fill">#FFF6E6</color>
+    <color name="tile_amber_stroke">#F4D08A</color>
+    <color name="tile_amber_text">#B45309</color>
+    <color name="tile_emerald_fill">#E7FBEF</color>
+    <color name="tile_emerald_stroke">#A6E7C1</color>
+    <color name="tile_emerald_text">#15803D</color>
+
     <!-- Analytics -->
     <color name="analytics_healthy">#22C55E</color>
     <color name="analytics_mild">#F59E0B</color>

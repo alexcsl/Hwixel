@@ -333,6 +333,7 @@
     <string name="dashboard_tasks_due_format">%d tasks due this week</string>
     <string name="dashboard_search_hint">Search projects, tasks…</string>
     <string name="dashboard_upcoming_deadline">UPCOMING DEADLINE</string>
+    <string name="analytics_select_date_filter">Select date to filter</string>
     <string name="profile_reliability_label">Reliability</string>
     <string name="notif_filter_all">All</string>
     <string name="notif_filter_mentions">Mentions</string>

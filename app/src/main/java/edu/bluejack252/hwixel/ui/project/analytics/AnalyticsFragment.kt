@@ -56,7 +56,7 @@ class AnalyticsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.memberContributionRecyclerView.adapter = memberAdapter
-        binding.applyFilterButton.setOnClickListener { showDateRangePicker() }
+        binding.dateFilterButton.setOnClickListener { showDateRangePicker() }
         binding.analyzeButton.setOnClickListener { viewModel.refreshTeamHealth() }
         configurePieChart()
         viewModel.uiState.observe(viewLifecycleOwner, ::render)
@@ -140,10 +140,9 @@ class AnalyticsFragment : Fragment() {
                 ?: getString(R.string.analytics_range_any_end)
             getString(R.string.analytics_range_format, start, end)
         } else {
-            getString(R.string.analytics_pick_date_range)
+            getString(R.string.analytics_select_date_filter)
         }
-        binding.startDateButton.text = rangeText
-        binding.endDateButton.isVisible = false
+        binding.dateFilterButton.text = rangeText
     }
 
     private fun renderTeamHealth(state: AnalyticsUiState) {

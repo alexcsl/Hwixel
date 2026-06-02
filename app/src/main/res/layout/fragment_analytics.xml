@@ -67,45 +67,15 @@
                     android:textSize="12sp"
                     android:layout_marginBottom="10dp" />
 
-                <LinearLayout
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/dateFilterButton"
+                    style="@style/Widget.HWiXeL.Button.Ghost"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/startDateButton"
-                        style="@style/Widget.HWiXeL.Button.Ghost"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/start_date_button" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:text="@string/date_range_separator"
-                        android:textColor="@color/text_hint" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/endDateButton"
-                        style="@style/Widget.HWiXeL.Button.Ghost"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/end_date_button" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/applyFilterButton"
-                        style="@style/Widget.HWiXeL.Button.Primary"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="@string/apply_filter_button" />
-
-                </LinearLayout>
+                    android:text="@string/analytics_select_date_filter"
+                    app:icon="@drawable/ic_calendar"
+                    app:iconGravity="start"
+                    app:iconTint="@color/text_secondary" />
 
             </LinearLayout>
 

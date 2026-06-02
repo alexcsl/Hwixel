@@ -25,6 +25,7 @@ class DashboardFragment : Fragment() {
 
     private var secondsTicker: CountDownTimer? = null
     private var activeDeadlineMillis: Long = 0L
+    private var seeAllProjectId: String? = null
 
     private val projectAdapter = DashboardProjectAdapter { project ->
         val action = DashboardFragmentDirections.actionDashboardFragmentToProjectHubFragment(project.id)
@@ -66,6 +67,12 @@ class DashboardFragment : Fragment() {
             requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
                 ?.selectedItemId = R.id.notificationsFragment
         }
+        binding.deadlinesSeeAllButton.setOnClickListener {
+            val projectId = seeAllProjectId ?: return@setOnClickListener
+            val action = DashboardFragmentDirections
+                .actionDashboardFragmentToProjectHubFragment(projectId)
+            findNavController().navigate(action)
+        }
 
         setupGreeting()
         observeNotificationBell()
@@ -101,8 +108,18 @@ class DashboardFragment : Fragment() {
     }
 
     private fun setupGreeting() {
-        val user = FirebaseAuth.getInstance().currentUser
-        val displayName = user?.displayName?.takeIf { it.isNotBlank() }
+        // Seed from Firebase display name, then keep in sync with the stored profile.
+        applyGreeting(FirebaseAuth.getInstance().currentUser?.displayName)
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        ServiceLocator.getUserRepository(requireContext())
+            .observeUser(uid)
+            .observe(viewLifecycleOwner) { user ->
+                applyGreeting(user?.name)
+            }
+    }
+
+    private fun applyGreeting(rawName: String?) {
+        val displayName = rawName?.takeIf { it.isNotBlank() }
         val firstName = displayName?.split(" ")?.firstOrNull() ?: getString(R.string.profile_unknown_name)
         binding.greetingTextView.text = getString(R.string.dashboard_greeting_format, firstName)
         val initials = displayName
@@ -131,6 +148,7 @@ class DashboardFragment : Fragment() {
         binding.emptyProjectsTextView.isVisible = !state.isLoading && state.projects.isEmpty()
         binding.emptyDeadlinesTextView.isVisible = !state.isLoading && state.deadlines.isEmpty()
         binding.deadlinesSeeAllButton.isVisible = state.deadlines.isNotEmpty()
+        seeAllProjectId = state.deadlines.firstOrNull()?.projectId
 
         val nearest = state.deadlines.firstOrNull()
         binding.featuredDeadlineContainer.isVisible = nearest != null

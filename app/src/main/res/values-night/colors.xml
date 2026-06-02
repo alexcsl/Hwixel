@@ -51,6 +51,13 @@
     <color name="priority_low_bg">#1A22C55E</color>
     <color name="priority_low_text">#86EFAC</color>
 
+    <color name="tile_amber_fill">#2D2210</color>
+    <color name="tile_amber_stroke">#3A2E1A</color>
+    <color name="tile_amber_text">#F59E0B</color>
+    <color name="tile_emerald_fill">#0F2D1A</color>
+    <color name="tile_emerald_stroke">#1A3A28</color>
+    <color name="tile_emerald_text">#22C55E</color>
+
     <color name="analytics_healthy">#22C55E</color>
     <color name="analytics_mild">#F59E0B</color>
     <color name="analytics_severe">#EF4444</color>

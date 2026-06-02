@@ -398,4 +398,9 @@
     <string name="btn_save">Simpan</string>
     <string name="content_description_avatar">Avatar pengguna</string>
     <string name="content_description_member_status">Indikator status anggota</string>
+    <string name="dashboard_greeting_format">Hai, %s</string>
+    <string name="dashboard_tasks_due_format">%d tugas jatuh tempo minggu ini</string>
+    <string name="dashboard_search_hint">Cari proyek, tugas…</string>
+    <string name="dashboard_upcoming_deadline">TENGGAT MENDATANG</string>
+    <string name="analytics_select_date_filter">Pilih tanggal untuk memfilter</string>
 </resources>

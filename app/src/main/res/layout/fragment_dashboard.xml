@@ -104,14 +104,18 @@
                             android:src="@drawable/ic_notifications_24"
                             app:tint="@color/text_secondary" />
 
-                        <!-- Unread dot -->
-                        <View
-                            android:id="@+id/bellUnreadDot"
-                            android:layout_width="8dp"
-                            android:layout_height="8dp"
+                        <!-- Unread count badge -->
+                        <TextView
+                            android:id="@+id/bellUnreadBadge"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
                             android:layout_gravity="top|end"
-                            android:layout_margin="9dp"
+                            android:layout_margin="4dp"
                             android:background="@drawable/bg_unread_dot"
+                            android:gravity="center"
+                            android:textColor="@color/white"
+                            android:textSize="9sp"
+                            android:fontFamily="sans-serif-black"
                             android:visibility="gone" />
                     </FrameLayout>
                 </LinearLayout>
@@ -126,7 +130,7 @@
                     <!-- Pending tasks -->
                     <LinearLayout
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@drawable/bg_glass_card_primary"
                         android:orientation="vertical"
@@ -136,6 +140,7 @@
                             android:id="@+id/pendingTasksTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:maxLines="1"
                             android:textColor="@color/brand_violet_light"
                             android:textSize="26sp"
                             android:fontFamily="sans-serif-black" />
@@ -449,7 +454,8 @@
                         android:layout_height="wrap_content"
                         android:text="@string/dashboard_see_all"
                         android:textColor="@color/brand_violet_light"
-                        android:textSize="13sp" />
+                        android:textSize="13sp"
+                        android:visibility="gone" />
                 </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView

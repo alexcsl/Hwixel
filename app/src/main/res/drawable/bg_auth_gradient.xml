@@ -1,31 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Base deep dark -->
+    <!-- Base — matches activity window bg so no seam at status bar -->
     <item>
-        <color android:color="#0E0F1A" />
+        <color android:color="@color/bg_dark" />
     </item>
-    <!-- Radial indigo glow top-right -->
+    <!-- Diagonal violet wash from top-left -->
     <item>
-        <shape android:shape="oval">
+        <shape android:shape="rectangle">
             <gradient
-                android:type="radial"
-                android:gradientRadius="400dp"
-                android:centerX="0.85"
-                android:centerY="0.1"
-                android:startColor="#5C6D5BFF"
-                android:endColor="#00000000" />
+                android:angle="135"
+                android:startColor="#2A1A1B7A"
+                android:centerColor="#130F0F5C"
+                android:endColor="#00000000"
+                android:type="linear" />
         </shape>
     </item>
-    <!-- Radial indigo glow bottom-left -->
+    <!-- Bottom-right accent -->
     <item>
-        <shape android:shape="oval">
+        <shape android:shape="rectangle">
             <gradient
-                android:type="radial"
-                android:gradientRadius="300dp"
-                android:centerX="0.1"
-                android:centerY="0.85"
-                android:startColor="#304F3CC9"
-                android:endColor="#00000000" />
+                android:angle="315"
+                android:startColor="#00000000"
+                android:endColor="#166D5BFF"
+                android:type="linear" />
         </shape>
     </item>
 </layer-list>

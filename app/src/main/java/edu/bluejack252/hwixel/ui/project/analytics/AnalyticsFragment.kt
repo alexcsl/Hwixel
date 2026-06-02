@@ -62,12 +62,20 @@ class AnalyticsFragment : Fragment() {
         viewModel.uiState.observe(viewLifecycleOwner, ::render)
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.refreshTeamHealth()
+    }
+
     private fun configurePieChart() {
         binding.pieChart.description.isEnabled = false
         binding.pieChart.setUsePercentValues(false)
         binding.pieChart.setDrawEntryLabels(false)
-        binding.pieChart.legend.isWordWrapEnabled = true
         binding.pieChart.setNoDataText(getString(R.string.analytics_no_completed_tasks))
+        val labelColor = ContextCompat.getColor(requireContext(), R.color.text_primary)
+        binding.pieChart.setNoDataTextColor(labelColor)
+        binding.pieChart.legend.isWordWrapEnabled = true
+        binding.pieChart.legend.textColor = labelColor
         binding.pieChart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             override fun onValueSelected(e: com.github.mikephil.charting.data.Entry?, h: Highlight?) {
                 if (isUpdatingChartSelection) return

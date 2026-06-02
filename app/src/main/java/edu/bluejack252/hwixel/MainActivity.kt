@@ -21,6 +21,7 @@ import edu.bluejack252.hwixel.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private var isUpdatingNavSelection = false
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
@@ -54,6 +55,7 @@ class MainActivity : AppCompatActivity() {
                 ?: run { binding.bottomNavigationView.isVisible = FirebaseAuth.getInstance().currentUser != null }
         }
         requestNotificationPermissionIfNeeded()
+        observeNotificationBadge()
         navController.addOnDestinationChangedListener { _, destination, _ ->
             updateBottomNavVisibility(destination)
         }
@@ -75,7 +77,9 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNavigationView.isVisible = isBottomDestination
         syncNavHostPadding(isBottomDestination)
         if (isBottomDestination && binding.bottomNavigationView.selectedItemId != destination.id) {
+            isUpdatingNavSelection = true
             binding.bottomNavigationView.selectedItemId = destination.id
+            isUpdatingNavSelection = false
         }
     }
 
@@ -89,10 +93,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupBottomNavigation(navController: NavController) {
         binding.bottomNavigationView.setOnItemSelectedListener { item ->
-            val destinationId = item.itemId
-            navigateToBottomDestination(navController, destinationId)
+            if (isUpdatingNavSelection) return@setOnItemSelectedListener true
+            navigateToBottomDestination(navController, item.itemId)
         }
         binding.bottomNavigationView.setOnItemReselectedListener { item ->
+            if (isUpdatingNavSelection) return@setOnItemReselectedListener
             navigateToBottomDestination(navController, item.itemId)
         }
     }
@@ -153,6 +158,18 @@ class MainActivity : AppCompatActivity() {
         if (navController.graph.id != R.id.main_nav_graph || navController.currentDestination == null) {
             navController.setGraph(R.navigation.main_nav_graph)
         }
+    }
+
+    private fun observeNotificationBadge() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        ServiceLocator.getNotificationRepository()
+            .observeNotifications(uid)
+            .observe(this) { notifications ->
+                val unread = notifications.count { !it.isRead }
+                val badge = binding.bottomNavigationView.getOrCreateBadge(R.id.notificationsFragment)
+                badge.isVisible = unread > 0
+                if (unread > 0) badge.number = unread
+            }
     }
 
     private fun requestNotificationPermissionIfNeeded() {

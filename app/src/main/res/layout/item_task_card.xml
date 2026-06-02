@@ -32,7 +32,7 @@
             android:paddingStart="12dp"
             android:paddingTop="10dp"
             android:paddingEnd="12dp"
-            android:paddingBottom="10dp">
+            android:paddingBottom="0dp">
 
             <!-- Task title -->
             <TextView
@@ -46,7 +46,7 @@
                 android:textSize="14sp"
                 tools:text="Redesign login screen with glass cards" />
 
-            <!-- Status and priority chips row -->
+            <!-- Priority chip row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -55,24 +55,14 @@
                 android:orientation="horizontal">
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/statusChip"
-                    style="@style/Widget.MaterialComponents.Chip.Entry"
-                    android:layout_width="wrap_content"
-                    android:layout_height="28dp"
-                    android:layout_marginEnd="6dp"
-                    android:checkable="false"
-                    android:clickable="false"
-                    android:textSize="11sp"
-                    tools:text="In Progress" />
-
-                <com.google.android.material.chip.Chip
                     android:id="@+id/priorityChip"
-                    style="@style/Widget.MaterialComponents.Chip.Entry"
+                    style="@style/Widget.MaterialComponents.Chip.Action"
                     android:layout_width="wrap_content"
                     android:layout_height="28dp"
                     android:checkable="false"
                     android:clickable="false"
                     android:textSize="11sp"
+                    app:closeIconVisible="false"
                     tools:text="High" />
 
             </LinearLayout>
@@ -114,6 +104,26 @@
                 app:trackThickness="4dp" />
 
         </LinearLayout>
+
+        <!-- Change Status button — full width, clearly tappable -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/statusChip"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="12dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-medium"
+            app:strokeColor="@color/glass_border_strong"
+            app:cornerRadius="8dp"
+            android:textColor="@color/text_secondary"
+            tools:text="In Progress" />
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

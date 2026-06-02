@@ -38,7 +38,8 @@ class TaskCardAdapter(
         fun bind(task: Task, onTaskClick: (Task) -> Unit, onStatusChange: (Task) -> Unit) {
             val ctx = binding.root.context
             binding.taskTitleTextView.text = task.title
-            binding.statusChip.text = task.status.replace("_", " ").replaceFirstChar { it.uppercase() }
+            val statusLabel = task.status.replace("_", " ").replaceFirstChar { it.uppercase() }
+            binding.statusChip.text = statusLabel
             binding.priorityChip.text = task.priority.replaceFirstChar { it.uppercase() }
 
             val priorityColor = when (task.priority) {

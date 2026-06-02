@@ -1,7 +1,6 @@
 package edu.bluejack252.hwixel.ui.project.hub
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +14,6 @@ import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
 import edu.bluejack252.hwixel.data.model.Project
 import edu.bluejack252.hwixel.databinding.FragmentProjectHubBinding
-import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -52,20 +50,6 @@ class ProjectHubFragment : Fragment() {
         setupToolbar()
         setupViewPager()
         viewModel.uiState.observe(viewLifecycleOwner, ::render)
-        viewModel.createProjectResult.observe(viewLifecycleOwner) { result ->
-            result ?: return@observe
-            if (result.isSuccess) {
-                Snackbar.make(binding.root, R.string.project_created, Snackbar.LENGTH_SHORT).show()
-            } else {
-                Log.e(TAG, "Failed to create project", result.exceptionOrNull())
-                val message = result.exceptionOrNull()?.localizedMessage
-                    ?.takeIf { it.isNotBlank() }
-                    ?.let { getString(R.string.project_create_failed_format, it) }
-                    ?: getString(R.string.project_create_failed)
-                Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
-            }
-            viewModel.consumeCreateResult()
-        }
     }
 
     private fun setupToolbar() {
@@ -132,11 +116,11 @@ class ProjectHubFragment : Fragment() {
             binding.dueDateTextView.text = getString(R.string.hub_due_date_format, dateStr)
             if (project.dueDate < now) {
                 binding.dueDateTextView.setTextColor(
-                    requireContext().getColor(android.R.color.holo_red_light)
+                    requireContext().getColor(R.color.brand_rose)
                 )
             } else {
                 binding.dueDateTextView.setTextColor(
-                    requireContext().getColor(android.R.color.darker_gray)
+                    requireContext().getColor(R.color.text_secondary)
                 )
             }
         } else {

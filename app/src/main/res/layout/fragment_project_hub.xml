@@ -219,18 +219,6 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- FAB to create a new project -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/addProjectFab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="16dp"
-            android:contentDescription="@string/hub_add_project"
-            android:src="@drawable/ic_add"
-            app:backgroundTint="@color/brand_violet"
-            app:tint="@color/white" />
-
     </FrameLayout>
 
     <!-- ===== TAB LAYOUT ===== -->

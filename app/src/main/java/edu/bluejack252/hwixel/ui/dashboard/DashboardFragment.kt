@@ -1,13 +1,11 @@
 package edu.bluejack252.hwixel.ui.dashboard
 
-import android.app.DatePickerDialog
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -18,19 +16,13 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import edu.bluejack252.hwixel.R
 import edu.bluejack252.hwixel.data.ServiceLocator
-import edu.bluejack252.hwixel.databinding.DialogCreateProjectBinding
 import edu.bluejack252.hwixel.databinding.FragmentDashboardBinding
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 import kotlin.math.max
 
 class DashboardFragment : Fragment() {
     private var _binding: FragmentDashboardBinding? = null
     private val binding get() = _binding!!
 
-    private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
-    private var selectedDueDate: Long = 0L
     private var secondsTicker: CountDownTimer? = null
     private var activeDeadlineMillis: Long = 0L
 
@@ -64,7 +56,7 @@ class DashboardFragment : Fragment() {
             false
         )
         binding.deadlinesRecyclerView.adapter = deadlineAdapter
-        binding.addProjectFab.setOnClickListener { showCreateProjectDialog() }
+        binding.addProjectFab.setOnClickListener { showCreateProjectBottomSheet() }
 
         binding.profileAvatarButton.setOnClickListener {
             requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
@@ -76,6 +68,7 @@ class DashboardFragment : Fragment() {
         }
 
         setupGreeting()
+        observeNotificationBell()
         viewModel.uiState.observe(viewLifecycleOwner, ::render)
         viewModel.createProjectResult.observe(viewLifecycleOwner) { result ->
             result ?: return@observe
@@ -92,6 +85,19 @@ class DashboardFragment : Fragment() {
             viewModel.consumeCreateResult()
         }
         viewModel.loadDashboard(FirebaseAuth.getInstance().currentUser?.uid.orEmpty())
+    }
+
+    private fun observeNotificationBell() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        ServiceLocator.getNotificationRepository()
+            .observeNotifications(uid)
+            .observe(viewLifecycleOwner) { notifications ->
+                val unread = notifications.count { !it.isRead }
+                binding.bellUnreadBadge.isVisible = unread > 0
+                if (unread > 0) {
+                    binding.bellUnreadBadge.text = if (unread > 9) "9+" else unread.toString()
+                }
+            }
     }
 
     private fun setupGreeting() {
@@ -113,11 +119,7 @@ class DashboardFragment : Fragment() {
         projectAdapter.submitList(state.projects)
         deadlineAdapter.submitList(state.deadlines)
 
-        binding.pendingTasksTextView.text = resources.getQuantityString(
-            R.plurals.dashboard_pending_tasks,
-            state.pendingTaskCount,
-            state.pendingTaskCount
-        )
+        binding.pendingTasksTextView.text = state.pendingTaskCount.toString()
         binding.activeProjectsStatTextView.text = state.projects.size.toString()
         binding.completedTasksTextView.text = state.completedTaskCount.toString()
 
@@ -128,6 +130,7 @@ class DashboardFragment : Fragment() {
 
         binding.emptyProjectsTextView.isVisible = !state.isLoading && state.projects.isEmpty()
         binding.emptyDeadlinesTextView.isVisible = !state.isLoading && state.deadlines.isEmpty()
+        binding.deadlinesSeeAllButton.isVisible = state.deadlines.isNotEmpty()
 
         val nearest = state.deadlines.firstOrNull()
         binding.featuredDeadlineContainer.isVisible = nearest != null
@@ -161,45 +164,13 @@ class DashboardFragment : Fragment() {
         }.start()
     }
 
-    private fun showCreateProjectDialog() {
-        val dialogView = DialogCreateProjectBinding.inflate(layoutInflater)
-        selectedDueDate = 0L
-        dialogView.projectDeadlineButton.setOnClickListener {
-            val cal = Calendar.getInstance()
-            DatePickerDialog(
-                requireContext(),
-                { _, year, month, day ->
-                    cal.set(year, month, day, 0, 0, 0)
-                    selectedDueDate = cal.timeInMillis
-                    dialogView.projectDeadlineButton.text = dateFormat.format(cal.time)
-                },
-                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)
-            ).show()
+    private fun showCreateProjectBottomSheet() {
+        val sheet = CreateProjectBottomSheetFragment.newInstance()
+        sheet.onProjectCreate = { name, description, goals, dueDate ->
+            val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+            viewModel.createProject(name, description, goals, dueDate, uid)
         }
-
-        val dialog = AlertDialog.Builder(requireContext())
-            .setTitle(R.string.create_project_title)
-            .setView(dialogView.root)
-            .setPositiveButton(R.string.btn_create, null)
-            .setNegativeButton(R.string.btn_cancel, null)
-            .create()
-
-        dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val name = dialogView.projectNameInput.editText?.text?.toString().orEmpty().trim()
-                if (name.isBlank()) {
-                    dialogView.projectNameInput.error = getString(R.string.error_empty_project_name)
-                    return@setOnClickListener
-                }
-                dialogView.projectNameInput.error = null
-                val description = dialogView.projectDescriptionInput.editText?.text?.toString().orEmpty().trim()
-                val goals = dialogView.projectGoalsInput.editText?.text?.toString().orEmpty().trim()
-                val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-                viewModel.createProject(name, description, goals, selectedDueDate, uid)
-                dialog.dismiss()
-            }
-        }
-        dialog.show()
+        sheet.show(parentFragmentManager, CreateProjectBottomSheetFragment.TAG)
     }
 
     override fun onDestroyView() {

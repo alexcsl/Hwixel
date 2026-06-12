@@ -41,6 +41,8 @@
                 android:text="@string/eval_title"
                 android:textColor="@color/text_primary"
                 android:textSize="20sp"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:fontFamily="sans-serif-medium" />
         </LinearLayout>
 

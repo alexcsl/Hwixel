@@ -155,6 +155,7 @@ class TaskDetailViewModel(
     }
 
     fun toggleSubtask(subtaskId: String, isDone: Boolean) {
+        val subtaskTitle = currentTask?.subtasks?.get(subtaskId)?.title.orEmpty()
         currentTask?.let { task ->
             task.subtasks[subtaskId]?.let { subtask ->
                 currentTask = task.copy(
@@ -165,6 +166,11 @@ class TaskDetailViewModel(
         }
         viewModelScope.launch {
             taskRepository.updateSubtask(projectId, taskId, subtaskId, isDone)
+            if (currentUserId.isNotBlank()) {
+                val label = subtaskTitle.ifBlank { "a subtask" }
+                val action = if (isDone) "checked subtask: $label" else "unchecked subtask: $label"
+                taskRepository.addActivity(projectId, taskId, currentUserId, action)
+            }
         }
     }
 

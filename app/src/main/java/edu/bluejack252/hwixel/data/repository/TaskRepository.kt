@@ -45,6 +45,12 @@ interface TaskRepository {
         isDone: Boolean
     ): Result<Unit>
     suspend fun deleteTask(task: Task): Result<Unit>
+    suspend fun addActivity(
+        projectId: String,
+        taskId: String,
+        actorId: String,
+        action: String
+    ): Result<Unit> = Result.success(Unit)
 }
 
 class TaskRepositoryImpl(
@@ -222,6 +228,24 @@ class TaskRepositoryImpl(
         localDao.delete(task.toEntity())
         appContext?.let { DeadlineScheduler.cancel(it, task.id) }
         recomputeCompletionPercentage(task.projectId)
+    }
+
+    override suspend fun addActivity(
+        projectId: String,
+        taskId: String,
+        actorId: String,
+        action: String
+    ): Result<Unit> = runCatching {
+        if (actorId.isBlank() || action.isBlank()) return@runCatching
+        firebaseSource.addHistoryEntry(
+            projectId,
+            taskId,
+            HistoryEntry(
+                actorId = actorId,
+                action = action,
+                timestamp = System.currentTimeMillis()
+            )
+        )
     }
 
     private fun scheduleDeadline(task: Task) {

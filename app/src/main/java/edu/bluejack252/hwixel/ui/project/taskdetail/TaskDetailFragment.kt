@@ -35,6 +35,7 @@ class TaskDetailFragment : Fragment() {
 
     private val commentsAdapter = CommentsAdapter()
     private val historyAdapter = HistoryAdapter()
+    private var historyExpanded = false
     private val attachmentAdapter = AttachmentAdapter { attachment ->
         ImageAttachmentDialogFragment.newInstance(attachment.url)
             .show(childFragmentManager, "image_attachment")
@@ -78,6 +79,11 @@ class TaskDetailFragment : Fragment() {
         binding.subtasksRecyclerView.adapter = subtaskAdapter
         binding.commentsRecyclerView.adapter = commentsAdapter
         binding.historyRecyclerView.adapter = historyAdapter
+        binding.historyToggleButton.setOnClickListener {
+            historyExpanded = !historyExpanded
+            renderHistoryToggle()
+        }
+        renderHistoryToggle()
 
         binding.sendCommentButton.setOnClickListener {
             val text = binding.commentEditText.text?.toString().orEmpty().trim()
@@ -148,8 +154,17 @@ class TaskDetailFragment : Fragment() {
         subtaskAdapter.submitList(state.subtasks)
         commentsAdapter.submitList(state.comments)
         historyAdapter.submitList(state.history)
+        renderHistoryToggle(state.history.size)
         binding.editButton.isVisible = state.canEditTask
         binding.subtaskOverallProgress.isVisible = state.subtasks.isNotEmpty()
+    }
+
+    private fun renderHistoryToggle(count: Int = historyAdapter.itemCount) {
+        val label = getString(R.string.task_detail_history_label)
+        val countSuffix = if (count > 0) " ($count)" else ""
+        val arrow = if (historyExpanded) "  ▾" else "  ▸"
+        binding.historyToggleButton.text = label + countSuffix + arrow
+        binding.historyRecyclerView.isVisible = historyExpanded && count > 0
     }
 
     private fun renderTask(task: Task, assigneeNames: List<String>) {

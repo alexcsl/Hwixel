@@ -31,22 +31,21 @@ class AnalyticsViewModelTest {
     private val tasksLiveData = MutableLiveData<List<Task>>()
     private val usersLiveData = MutableLiveData<List<User>>()
     private val healthRepository = FakeTeamHealthRepository()
-    private lateinit var viewModel: AnalyticsViewModel
 
-    @Before
-    fun setUp() {
-        viewModel = AnalyticsViewModel(
+    private fun createViewModel(healthEnabled: Boolean = true): AnalyticsViewModel {
+        return AnalyticsViewModel(
             projectId = "p1",
             projectRepository = FakeProjectRepository(projectLiveData),
             taskRepository = FakeTaskRepository(tasksLiveData),
             userRepository = FakeUserRepository(usersLiveData),
-            teamHealthRepository = healthRepository
-        )
-        viewModel.uiState.observeForever { }
+            teamHealthRepository = healthRepository,
+            gptTeamHealthEnabled = healthEnabled
+        ).also { it.uiState.observeForever { } }
     }
 
     @Test
     fun buildsMemberStatsWithoutCallingDisabledHealthAnalysis() {
+        val viewModel = createViewModel(healthEnabled = false)
         healthRepository.result = Result.success(
             TeamHealthResult("Healthy", "Balanced work.", listOf("Keep rotating tasks"))
         )
@@ -75,6 +74,7 @@ class AnalyticsViewModelTest {
 
     @Test
     fun dateRangeFiltersCompletedTaskCounts() {
+        val viewModel = createViewModel()
         val inRange = 2_000L
         val outOfRange = 9_000L
         projectLiveData.value = Project(
@@ -106,6 +106,7 @@ class AnalyticsViewModelTest {
 
     @Test
     fun disabledHealthAnalysisDoesNotShowNetworkError() {
+        val viewModel = createViewModel(healthEnabled = false)
         healthRepository.result = Result.failure(IllegalStateException("network down"))
         projectLiveData.value = Project(
             id = "p1",
@@ -123,6 +124,7 @@ class AnalyticsViewModelTest {
 
     @Test
     fun unchangedAnalyticsFingerprintDoesNotRefireHealthCall() {
+        val viewModel = createViewModel()
         projectLiveData.value = Project(
             id = "p1",
             members = mapOf("u1" to ProjectMember(userId = "u1"))

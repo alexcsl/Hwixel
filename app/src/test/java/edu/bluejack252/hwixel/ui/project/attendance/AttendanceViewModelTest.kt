@@ -33,7 +33,7 @@ class AttendanceViewModelTest {
     }
 
     @Test
-    fun selectSessionMapsEveryProjectMemberWithMissingRecordsAsAbsent() {
+    fun selectSessionMapsEveryProjectMemberWithMissingRecordsAsUnmarked() {
         viewModel.setProjectMembers(
             members = listOf(
                 ProjectMember(userId = "u1", role = Constants.ROLE_TEAM_LEAD),
@@ -49,7 +49,7 @@ class AttendanceViewModelTest {
 
         val state = viewModel.uiState.value as AttendanceUiState.SessionSelected
         assertEquals(true, state.memberAttendance["u1"])
-        assertEquals(false, state.memberAttendance["u2"])
+        assertEquals(null, state.memberAttendance["u2"])
         assertEquals(mapOf("u1" to "Alice", "u2" to "Bob"), state.memberNames)
     }
 

@@ -20,7 +20,8 @@ class AnalyticsViewModel(
     private val projectRepository: ProjectRepository,
     private val taskRepository: TaskRepository,
     private val userRepository: UserRepository,
-    private val teamHealthRepository: TeamHealthRepository
+    private val teamHealthRepository: TeamHealthRepository,
+    private val gptTeamHealthEnabled: Boolean = GPT_TEAM_HEALTH_ENABLED
 ) : ViewModel() {
 
     private val _uiState = MediatorLiveData<AnalyticsUiState>()
@@ -95,7 +96,7 @@ class AnalyticsViewModel(
         fingerprint: HealthFingerprint,
         forceHealthRefresh: Boolean
     ): Boolean {
-        if (!GPT_TEAM_HEALTH_ENABLED) return false
+        if (!gptTeamHealthEnabled) return false
         if (members.isEmpty()) return false
         if (!projectLoaded || !tasksLoaded || !usersLoaded) return false
         return forceHealthRefresh || lastHealthFingerprint != fingerprint

@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -191,12 +192,13 @@ class ProfileFragment : Fragment() {
             Glide.with(this).load(user.avatarUrl).placeholder(R.drawable.circle_background)
                 .into(dialogBinding.avatarPreviewImageView)
         }
-        dialogBinding.changeAvatarButton.setOnClickListener {
-            avatarPicker.launch("image/*")
-        }
+        val launchAvatarPicker = View.OnClickListener { avatarPicker.launch("image/*") }
+        dialogBinding.changeAvatarButton.setOnClickListener(launchAvatarPicker)
+        dialogBinding.avatarContainer.setOnClickListener(launchAvatarPicker)
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.profile_edit_title)
             .setView(dialogBinding.root)
+            .setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.bg_dialog_auth))
             .setNegativeButton(R.string.btn_cancel, null)
             .setPositiveButton(R.string.btn_save, null)
             .create()

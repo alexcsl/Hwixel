@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rounded dialog background that mirrors the login screen (bg_auth_gradient). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Base surface -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bg_dark" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+    <!-- Diagonal violet wash from top-left -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:startColor="#2A1A1B7A"
+                android:centerColor="#130F0F5C"
+                android:endColor="#00000000"
+                android:type="linear" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+    <!-- Bottom-right accent -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:startColor="#00000000"
+                android:endColor="#166D5BFF"
+                android:type="linear" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+    <!-- Glass border -->
+    <item>
+        <shape android:shape="rectangle">
+            <stroke android:width="1dp" android:color="@color/glass_border_strong" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+</layer-list>

@@ -12,8 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_header_gradient"
-        android:paddingTop="48dp"
-        android:paddingBottom="20dp">
+        android:paddingTop="36dp"
+        android:paddingBottom="14dp">
 
         <!-- Back button top-left -->
         <ImageButton
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="48dp"
+            android:layout_marginTop="44dp"
             android:layout_marginEnd="16dp"
             app:cardBackgroundColor="@color/glass_fill"
             app:cardCornerRadius="20dp"
@@ -47,7 +47,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="16dp">
 
                 <!-- Project name -->
                 <TextView
@@ -58,7 +58,7 @@
                     android:fontFamily="sans-serif-medium"
                     android:maxLines="2"
                     android:textColor="@color/text_primary"
-                    android:textSize="20sp"
+                    android:textSize="18sp"
                     tools:text="Mobile App Redesign" />
 
                 <!-- Project goals -->
@@ -66,9 +66,9 @@
                     android:id="@+id/projectGoalsTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="4dp"
                     android:ellipsize="end"
-                    android:maxLines="2"
+                    android:maxLines="1"
                     android:textColor="@color/brand_violet_light"
                     android:textSize="13sp"
                     tools:text="Deliver a polished UI with full glass design system" />
@@ -80,7 +80,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:ellipsize="end"
-                    android:maxLines="3"
+                    android:maxLines="2"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp"
                     tools:text="Redesign all screens using the liquid glass design language on dark background." />
@@ -89,8 +89,8 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:background="@color/glass_border" />
 
                 <!-- Due date + completion % row -->
@@ -182,39 +182,6 @@
                         android:textSize="12sp" />
 
                 </LinearLayout>
-
-                <!-- Recent Activity -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="4dp"
-                    android:background="@color/glass_border" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="4dp"
-                    android:text="@string/hub_recent_activity"
-                    android:textAppearance="@style/TextAppearance.HWiXeL.SectionHeader" />
-
-                <TextView
-                    android:id="@+id/emptyActivityTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="@string/hub_no_activity"
-                    android:textColor="@color/text_hint"
-                    android:textSize="13sp"
-                    android:visibility="gone" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/activityRecyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:nestedScrollingEnabled="false" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>

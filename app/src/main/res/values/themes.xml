@@ -185,7 +185,7 @@
         <item name="colorOnSurface">@color/text_primary</item>
         <item name="colorOnSurfaceVariant">@color/text_secondary</item>
         <item name="colorPrimary">@color/brand_violet</item>
-        <item name="materialAlertDialogTitleTextStyle">@style/TextAppearance.HWiXeL.DialogTitle</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.HWiXeL.Title.Text</item>
         <item name="buttonBarPositiveButtonStyle">@style/Widget.HWiXeL.Dialog.Button</item>
         <item name="buttonBarNegativeButtonStyle">@style/Widget.HWiXeL.Dialog.Button</item>
         <item name="buttonBarNeutralButtonStyle">@style/Widget.HWiXeL.Dialog.Button</item>
@@ -210,6 +210,12 @@
     <style name="TextAppearance.HWiXeL.DialogTitle" parent="TextAppearance.MaterialComponents.Headline6">
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:fontFamily">sans-serif-black</item>
+    </style>
+
+    <!-- Title style for MaterialAlertDialog. Must extend the Material title style so it
+         carries layout_width/layout_height — a bare TextAppearance here crashes inflation. -->
+    <style name="MaterialAlertDialog.HWiXeL.Title.Text" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:textAppearance">@style/TextAppearance.HWiXeL.DialogTitle</item>
     </style>
 
     <style name="Widget.HWiXeL.Dialog.Button" parent="Widget.MaterialComponents.Button.TextButton.Dialog">

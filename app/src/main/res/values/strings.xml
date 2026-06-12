@@ -417,6 +417,8 @@
     <string name="file_delete_undo">Undo</string>
     <string name="file_error_empty_fields">Label and URL are required.</string>
     <string name="file_error_invalid_url">Enter a valid HTTP or HTTPS link.</string>
+    <string name="file_error_drive_url">For the Drive type, enter a Google Drive link (drive.google.com).</string>
+    <string name="file_error_github_url">For the GitHub type, enter a GitHub link (github.com).</string>
     <string name="file_add_fab_desc">Add shared link</string>
     <string name="file_type_icon_desc">File type</string>
     <string name="file_delete_desc">Delete link</string>

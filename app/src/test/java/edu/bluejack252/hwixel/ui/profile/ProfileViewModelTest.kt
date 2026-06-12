@@ -30,7 +30,7 @@ class ProfileViewModelTest {
         val observer = Observer<ProfileUiState> { }
         viewModel.uiState.observeForever(observer)
 
-        viewModel.saveProfile("  New Name  ", "  260200  ", "content://avatar")
+        viewModel.saveProfile("  New Name  ", "  260200  ", "", "content://avatar")
         advanceUntilIdle()
 
         assertEquals("New Name", repository.savedUser?.name)

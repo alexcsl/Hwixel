@@ -50,6 +50,14 @@ class AddLinkBottomSheet : BottomSheetDialogFragment() {
                 R.id.radioTypeGithub -> "github"
                 else -> "other"
             }
+            if (!FileUrlTypeValidator.matches(url, type)) {
+                urlLayout.error = when (type) {
+                    "drive" -> getString(R.string.file_error_drive_url)
+                    "github" -> getString(R.string.file_error_github_url)
+                    else -> getString(R.string.file_error_invalid_url)
+                }
+                return@setOnClickListener
+            }
             val notes = notesInput.text?.toString().orEmpty().trim()
             onAdd?.invoke(label, url, type, notes)
             dismiss()

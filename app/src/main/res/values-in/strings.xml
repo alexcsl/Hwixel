@@ -378,6 +378,8 @@
     <string name="file_delete_undo">Urungkan</string>
     <string name="file_error_empty_fields">Label dan URL wajib diisi.</string>
     <string name="file_error_invalid_url">Masukkan link HTTP atau HTTPS yang valid.</string>
+    <string name="file_error_drive_url">Untuk tipe Drive, masukkan link Google Drive (drive.google.com).</string>
+    <string name="file_error_github_url">Untuk tipe GitHub, masukkan link GitHub (github.com).</string>
     <string name="file_add_fab_desc">Tambah link bersama</string>
     <string name="file_type_icon_desc">Tipe file</string>
     <string name="file_delete_desc">Hapus link</string>

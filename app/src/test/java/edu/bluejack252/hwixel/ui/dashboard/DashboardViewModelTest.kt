@@ -218,6 +218,8 @@ class DashboardViewModelTest {
 
         override fun observeTasks(projectId: String): LiveData<List<Task>> = MutableLiveData(emptyList())
 
+        override fun observeTasksForProjects(projectIds: Set<String>): LiveData<List<Task>> = MutableLiveData(emptyList())
+
         override fun observeTask(projectId: String, taskId: String): LiveData<Task?> = MutableLiveData(null)
 
         override suspend fun createTask(task: Task): Result<Unit> = Result.success(Unit)

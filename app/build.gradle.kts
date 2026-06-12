@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         applicationId = "edu.bluejack252.hwixel"
-        minSdk = 35
+        minSdk = 33
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"

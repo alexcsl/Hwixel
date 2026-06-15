@@ -16,11 +16,11 @@ val localProperties = Properties().apply {
 }
 
 android {
-    namespace = "edu.bluejack252.hwixel"
+    namespace = "edu.bluejack25_2.hwixel"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "edu.bluejack252.hwixel"
+        applicationId = "edu.bluejack25_2.hwixel"
         minSdk = 33
         targetSdk = 35
         versionCode = 1
@@ -30,7 +30,7 @@ android {
         buildConfigField(
             "String",
             "GPT_API_KEY",
-            "\"${localProperties.getProperty("gpt.api.key", "")}\""
+            "\"${localProperties.etProperty("gpt.api.key", "")}\""
         )
         buildConfigField(
             "String",

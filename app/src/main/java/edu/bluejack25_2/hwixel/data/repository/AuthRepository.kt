@@ -1,0 +1,59 @@
+package edu.bluejack25_2.hwixel.data.repository
+
+import edu.bluejack25_2.hwixel.data.model.User
+import edu.bluejack25_2.hwixel.data.mapper.toEntity
+import edu.bluejack25_2.hwixel.data.source.local.UserDao
+import edu.bluejack25_2.hwixel.data.source.remote.AuthRemoteSource
+import edu.bluejack25_2.hwixel.data.source.remote.UserRemoteSource
+
+interface AuthRepository {
+    val currentUserId: String?
+    suspend fun login(email: String, password: String): Result<Unit>
+    suspend fun register(email: String, password: String, name: String, studentId: String): Result<User>
+    fun logout()
+}
+
+class AuthRepositoryImpl(
+    private val authFirebaseSource: AuthRemoteSource,
+    private val userFirebaseSource: UserRemoteSource,
+    private val userDao: UserDao
+) : AuthRepository {
+    override val currentUserId: String?
+        get() = authFirebaseSource.currentUserId
+
+    override suspend fun login(email: String, password: String): Result<Unit> = runCatching {
+        authFirebaseSource.login(email, password)
+        val uid = authFirebaseSource.currentUserId
+        if (uid != null) {
+            runCatching {
+                val user = userFirebaseSource.fetchUser(uid)
+                if (user != null) userDao.upsert(user.toEntity())
+            }
+        }
+    }
+
+    override suspend fun register(
+        email: String,
+        password: String,
+        name: String,
+        studentId: String
+    ): Result<User> = runCatching {
+        val userId = authFirebaseSource.register(email, password)
+        val user = User(
+            id = userId,
+            name = name,
+            studentId = studentId,
+            email = email,
+            phone = "",
+            avatarUrl = "",
+            badges = emptyList()
+        )
+        userFirebaseSource.upsertUser(user)
+        userDao.upsert(user.toEntity())
+        user
+    }
+
+    override fun logout() {
+        authFirebaseSource.logout()
+    }
+}

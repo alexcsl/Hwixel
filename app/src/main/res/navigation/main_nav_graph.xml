@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/dashboardFragment"
-        android:name="edu.bluejack252.hwixel.ui.dashboard.DashboardFragment"
+        android:name="edu.bluejack25_2.hwixel.ui.dashboard.DashboardFragment"
         android:label="@string/dashboard_title">
         <action
             android:id="@+id/action_dashboardFragment_to_projectHubFragment"
@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/notificationsFragment"
-        android:name="edu.bluejack252.hwixel.ui.notifications.NotificationsFragment"
+        android:name="edu.bluejack25_2.hwixel.ui.notifications.NotificationsFragment"
         android:label="@string/nav_notifications">
         <action
             android:id="@+id/action_notificationsFragment_to_taskDetailFragment"
@@ -31,12 +31,12 @@
 
     <fragment
         android:id="@+id/profileFragment"
-        android:name="edu.bluejack252.hwixel.ui.profile.ProfileFragment"
+        android:name="edu.bluejack25_2.hwixel.ui.profile.ProfileFragment"
         android:label="@string/nav_profile" />
 
     <fragment
         android:id="@+id/projectHubFragment"
-        android:name="edu.bluejack252.hwixel.ui.project.hub.ProjectHubFragment"
+        android:name="edu.bluejack25_2.hwixel.ui.project.hub.ProjectHubFragment"
         android:label="@string/project_hub_title">
         <argument
             android:name="projectId"
@@ -60,7 +60,7 @@
 
     <fragment
         android:id="@+id/attendanceFragment"
-        android:name="edu.bluejack252.hwixel.ui.project.attendance.AttendanceFragment"
+        android:name="edu.bluejack25_2.hwixel.ui.project.attendance.AttendanceFragment"
         android:label="@string/attendance_title">
         <argument
             android:name="projectId"
@@ -73,7 +73,7 @@
 
     <fragment
         android:id="@+id/peerEvalFragment"
-        android:name="edu.bluejack252.hwixel.ui.project.evaluation.PeerEvalFragment"
+        android:name="edu.bluejack25_2.hwixel.ui.project.evaluation.PeerEvalFragment"
         android:label="@string/eval_title">
         <argument
             android:name="projectId"
@@ -91,7 +91,7 @@
 
     <fragment
         android:id="@+id/fileRepoFragment"
-        android:name="edu.bluejack252.hwixel.ui.project.files.FileRepoFragment"
+        android:name="edu.bluejack25_2.hwixel.ui.project.files.FileRepoFragment"
         android:label="@string/file_repo_title">
         <argument
             android:name="projectId"
@@ -100,7 +100,7 @@
 
     <fragment
         android:id="@+id/taskDetailFragment"
-        android:name="edu.bluejack252.hwixel.ui.project.taskdetail.TaskDetailFragment"
+        android:name="edu.bluejack25_2.hwixel.ui.project.taskdetail.TaskDetailFragment"
         android:label="@string/task_detail_title">
         <argument
             android:name="projectId"
@@ -115,7 +115,7 @@
 
     <fragment
         android:id="@+id/createEditTaskFragment"
-        android:name="edu.bluejack252.hwixel.ui.project.taskedit.CreateEditTaskFragment"
+        android:name="edu.bluejack25_2.hwixel.ui.project.taskedit.CreateEditTaskFragment"
         android:label="@string/create_task_title">
         <argument
             android:name="projectId"

@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="edu.bluejack252.hwixel.ui.auth.login.LoginFragment"
+        android:name="edu.bluejack25_2.hwixel.ui.auth.login.LoginFragment"
         android:label="@string/login_title">
         <action
             android:id="@+id/action_loginFragment_to_registerFragment"
@@ -15,6 +15,6 @@
 
     <fragment
         android:id="@+id/registerFragment"
-        android:name="edu.bluejack252.hwixel.ui.auth.register.RegisterFragment"
+        android:name="edu.bluejack25_2.hwixel.ui.auth.register.RegisterFragment"
         android:label="@string/register_title" />
 </navigation>

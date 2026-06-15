@@ -30,7 +30,7 @@ android {
         buildConfigField(
             "String",
             "GPT_API_KEY",
-            "\"${localProperties.etProperty("gpt.api.key", "")}\""
+            "\"${localProperties.getProperty("gpt.api.key", "")}\""
         )
         buildConfigField(
             "String",
